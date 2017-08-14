@@ -15,7 +15,7 @@ endif
 
 # --------------------
 # library
-src = test.cc
+src = libtest.cc
 obj = $(addsuffix .o, $(basename ${src}))
 dep = $(addsuffix .d, $(basename ${src}))
 

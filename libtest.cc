@@ -3,7 +3,7 @@
 
 #include <omp.h>
 
-#include "test.hh"
+#include "libtest.hh"
 
 namespace libtest {
 
@@ -119,7 +119,7 @@ void flush_cache( size_t cache_size )
 {
     size_t len = 2 * cache_size * 1024 * 1024;
     unsigned char *buf = (unsigned char*) malloc( len );
-    
+
     int nthread = 1;
     #pragma omp parallel
     #pragma omp master
@@ -128,9 +128,9 @@ void flush_cache( size_t cache_size )
         nthread = omp_get_num_threads();
         #endif
     }
-    
+
     size_t per_core = len / nthread;
-    
+
     #pragma omp parallel
     {
         int tid = 0;
@@ -141,7 +141,7 @@ void flush_cache( size_t cache_size )
             buf[i] = i % 256;
         }
     }
-    
+
     free( buf );
 }
 
@@ -333,7 +333,7 @@ void ParamInt3::parse( const char *str )
             k_end   = n_end   = m_end;
             k_step  = n_step  = m_step;
         }
-        
+
         if (m_start == m_end && n_start == n_end && k_start == k_end) {
             // single size
             int3_t dim = { m_start, n_start, k_start };

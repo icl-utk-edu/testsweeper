@@ -1,5 +1,5 @@
-#ifndef TEST_HH
-#define TEST_HH
+#ifndef LIBTEST_HH
+#define LIBTEST_HH
 
 #include <string.h>
 #include <assert.h>
@@ -451,4 +451,4 @@ void usage(
 
 }  // namespace libtest
 
-#endif        //  #ifndef TEST_HH
+#endif        //  #ifndef LIBTEST_HH

@@ -1,16 +1,16 @@
 #ifndef EXAMPLE_HH
 #define EXAMPLE_HH
 
-#include "test.hh"
+#include "libtest.hh"
 
 // -----------------------------------------------------------------------------
 class Params: public libtest::ParamsBase
 {
 public:
     const double nan = std::numeric_limits<double>::quiet_NaN();
-    
+
     Params();
-    
+
     // Field members are explicitly public.
     // Order here determines output order.
     // ----- test framework parameters
@@ -20,22 +20,22 @@ public:
     libtest::ParamInt    repeat;
     libtest::ParamInt    verbose;
     libtest::ParamInt    cache;
-    
+
     // ----- routine parameters
     libtest::ParamEnum< libtest::DataType > datatype;
     libtest::ParamInt3   dim;
-    
+
     // ----- output parameters
     libtest::ParamScientific error;
     libtest::ParamScientific ortho;
     libtest::ParamDouble     time;
     libtest::ParamDouble     gflops;
-    
+
     libtest::ParamScientific ref_error;
     libtest::ParamScientific ref_ortho;
     libtest::ParamDouble     ref_time;
     libtest::ParamDouble     ref_gflops;
-    
+
     libtest::ParamOkay       okay;
 };
 

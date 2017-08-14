@@ -50,7 +50,7 @@ std::vector< libtest::routines_t > routines = {
     { "bar2",   test_bar,       Section::level2 },
     { "bar3",   test_bar,       Section::level2 },
     { "",       nullptr,        Section::newline },
-    
+
     { "bar4",   test_bar,       Section::level2 },
     { "bar5",   test_bar,       Section::level2 },
     { "bar6",   test_bar,       Section::level2 },
@@ -60,10 +60,10 @@ std::vector< libtest::routines_t > routines = {
     { "baz2",   test_baz,       Section::level3 },
     { "baz3",   test_baz,       Section::level3 },
     { "",       nullptr,        Section::newline },
-    
+
     { "baz4",   test_baz,       Section::level3 },
     { "baz5",   test_baz,       Section::level3 },
-};              
+};
 
 // -----------------------------------------------------------------------------
 // Params class
@@ -79,7 +79,7 @@ Params::Params():
     //         name,       w,    type,             def, valid, help
     check     ( "check",   0,    ParamType::Value, 'y', "ny",  "check the results" ),
     ref       ( "ref",     0,    ParamType::Value, 'n', "ny",  "run reference; sometimes check -> ref" ),
-              
+
     //          name,      w, p, type,             def, min,  max, help
     tol       ( "tol",     0, 0, ParamType::Value,  50,   1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
     repeat    ( "repeat",  0,    ParamType::Value,   1,   1, 1000, "times to repeat each test" ),
@@ -89,7 +89,7 @@ Params::Params():
     // ----- routine parameters
     //          name,      w,    type,            def,              char2enum,     enum2char,     enum2str,     help
     datatype  ( "type",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str, "s=single (float), d=double, c=complex-single, z=complex-double" ),
-              
+
     //          name,      w, p, type,            def,   min,     max, help
     dim       ( "dim",     6,    ParamType::List,          0, 1000000, "m x n x k dimensions" ),
 
@@ -100,7 +100,7 @@ Params::Params():
     ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, nan,   0,   0, "orthogonality error" ),
     time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, nan,   0,   0, "time to solution" ),
     gflops    ( "SLATE\nGflop/s",     11, 4, ParamType::Output, nan,   0,   0, "Gflop/s rate" ),
-     
+
     ref_error ( "Ref.\nerror",        11, 4, ParamType::Output, nan,   0,   0, "reference numerical error" ),
     ref_ortho ( "Ref.\north. error",  11, 4, ParamType::Output, nan,   0,   0, "reference orthogonality error" ),
     ref_time  ( "Ref.\ntime (s)",     11, 4, ParamType::Output, nan,   0,   0, "reference time to solution" ),
