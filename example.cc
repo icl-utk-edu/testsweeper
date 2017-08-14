@@ -274,6 +274,10 @@ void test_foo_work( Params &params, bool run )
 void test_foo( Params &params, bool run )
 {
     switch (params.datatype.value()) {
+        case libtest::DataType::Integer:
+            test_foo_work< float >( params, run );
+            break;
+
         case libtest::DataType::Single:
             test_foo_work< float >( params, run );
             break;

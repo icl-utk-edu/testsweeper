@@ -20,6 +20,7 @@ extern const char *ansi_normal;
 
 // -----------------------------------------------------------------------------
 enum class DataType {
+    Integer       = 'i',
     Single        = 's',
     Double        = 'd',
     SingleComplex = 'c',
@@ -30,7 +31,7 @@ enum class DataType {
 inline DataType char2datatype( char ch )
 {
     ch = tolower( ch );
-    if (ch != 's' && ch != 'd' && ch != 'c' && ch != 'z')
+    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z')
         throw std::runtime_error( "invalid value for datatype" );
     return DataType( ch );
 }
@@ -40,6 +41,7 @@ inline char datatype2char( DataType en ) { return char( en ); }
 inline const char* datatype2str( DataType en )
 {
     switch (en) {
+        case DataType::Integer:       return "i";
         case DataType::Single:        return "s";
         case DataType::Double:        return "d";
         case DataType::SingleComplex: return "c";
