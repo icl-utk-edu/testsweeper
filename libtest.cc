@@ -176,7 +176,7 @@ void ParamBase::header( int line ) const
 void ParamBase::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-10s %s\n", m_prefix.c_str(), m_help.c_str() );
+        printf( "    %-16s %s\n", m_prefix.c_str(), m_help.c_str() );
     }
 }
 
@@ -257,7 +257,7 @@ void ParamInt::print() const
 void ParamInt::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-10s %s; default %lld\n",
+        printf( "    %-16s %s; default %lld\n",
                 m_prefix.c_str(), m_help.c_str(), (long long) m_default_value );
     }
 }
@@ -513,7 +513,7 @@ void ParamDouble::print() const
 void ParamDouble::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-10s %s; default %.*f\n",
+        printf( "    %-16s %s; default %.*f\n",
                 m_prefix.c_str(), m_help.c_str(),
                 m_precision, m_default_value );
     }
@@ -537,7 +537,7 @@ void ParamScientific::print() const
 void ParamScientific::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-10s %s; default %.*e\n",
+        printf( "    %-16s %s; default %.*e\n",
                 m_prefix.c_str(), m_help.c_str(),
                 m_precision, m_default_value );
     }
@@ -597,7 +597,7 @@ void ParamChar::print() const
 void ParamChar::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-10s %s; default %c; valid: [%s]\n",
+        printf( "    %-16s %s; default %c; valid: [%s]\n",
                 m_prefix.c_str(), m_help.c_str(),
                 m_default_value, m_valid.c_str() );
     }
@@ -720,8 +720,8 @@ void ParamsBase::help( const char *routine )
         if ((*param)->m_used && (*param)->m_type == ParamType::Value)
             (*param)->help();
     }
-    printf( "\n%sList parameters for %s:%s\n",
-            ansi_bold, routine, ansi_normal );
+    printf( "\n%sParameters that take comma-separated list of values and may be repeated:%s\n",
+            ansi_bold, ansi_normal );
     for (auto param = ParamBase::s_params.begin();
          param != ParamBase::s_params.end(); ++param)
     {
@@ -774,7 +774,7 @@ void usage(
         else if (cnt % ncols == 0) {
             printf( "\n" );
         }
-        printf( "  %-10s", routines[i].name );
+        printf( "  %-18s", routines[i].name );
         cnt += 1;
     }
     printf( "\n" );

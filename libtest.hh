@@ -406,7 +406,7 @@ template< typename ENUM >
 void ParamEnum<ENUM>::help() const
 {
     if (this->m_type == ParamType::Value || this->m_type == ParamType::List) {
-        printf( "    %-10s %s; default %c\n",
+        printf( "    %-16s %s; default %c\n",
                 this->m_prefix.c_str(), this->m_help.c_str(),
                 this->m_out( this->m_default_value ));
     }
