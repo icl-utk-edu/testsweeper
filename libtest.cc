@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include <omp.h>
 
 #include "libtest.hh"
 
 namespace libtest {
+
+// numeric flag indicating no data; printed as "NA" instead of "nan"
+double no_data_flag = nan("1234");
 
 // -----------------------------------------------------------------------------
 // ANSI color codes
@@ -504,7 +508,13 @@ void ParamDouble::push_back( double val )
 void ParamDouble::print() const
 {
     if (m_used && m_width > 0) {
-        printf( "  %*.*f", m_width, m_precision, m_values[ m_index ] );
+        if (memcmp( &no_data_flag, &m_values[ m_index ],
+                    sizeof(no_data_flag) ) == 0) {
+            printf( "  %*s", m_width, "NA" );
+        }
+        else {
+            printf( "  %*.*f", m_width, m_precision, m_values[ m_index ] );
+        }
     }
 }
 
@@ -528,7 +538,13 @@ void ParamDouble::help() const
 void ParamScientific::print() const
 {
     if (m_used && m_width > 0) {
-        printf( "  %*.*e", m_width, m_precision, m_values[ m_index ] );
+        if (memcmp( &no_data_flag, &m_values[ m_index ],
+                    sizeof(no_data_flag) ) == 0) {
+            printf( "  %*s", m_width, "NA" );
+        }
+        else {
+            printf( "  %*.*e", m_width, m_precision, m_values[ m_index ] );
+        }
     }
 }
 

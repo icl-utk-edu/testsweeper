@@ -11,6 +11,8 @@
 
 namespace libtest {
 
+extern double no_data_flag;
+
 // -----------------------------------------------------------------------------
 // ANSI color codes
 extern const char *ansi_esc;
