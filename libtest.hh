@@ -86,6 +86,17 @@ enum class ParamType
 };
 
 // =============================================================================
+// class hierarchy
+// ParamBase
+//     TParamBase (template)
+//         ParamInt
+//             ParamOkay
+//         ParamInt3
+//         ParamDouble
+//             ParamScientific
+//         ParamChar
+//         ParamEnum (template)
+
 class ParamBase
 {
 public:
