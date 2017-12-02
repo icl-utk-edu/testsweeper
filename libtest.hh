@@ -110,6 +110,7 @@ public:
 
     virtual void parse( const char* str ) = 0;
     virtual void print() const = 0;
+    virtual void reset_output() = 0;
     virtual void header( int line ) const;
     virtual void help() const;
     virtual bool next();
@@ -156,6 +157,13 @@ public:
     {
         m_used = true;
         return m_values[ m_index ];
+    }
+
+    virtual void reset_output()
+    {
+        if (m_type == ParamType::Output) {
+            m_values[0] = m_default_value;
+        }
     }
 
     void push_back( T val );
@@ -424,6 +432,7 @@ public:
     bool next();
     void header();
     void print();
+    void reset_output();
     void help( const char* routine );
 };
 

@@ -722,6 +722,16 @@ void ParamsBase::print()
 }
 
 // -----------------------------------------------------------------------------
+void ParamsBase::reset_output()
+{
+    for (auto param = ParamBase::s_params.begin();
+         param != ParamBase::s_params.end(); ++param)
+    {
+        (*param)->reset_output();
+    }
+}
+
+// -----------------------------------------------------------------------------
 void ParamsBase::help( const char *routine )
 {
     printf( "%sUsage:%s test [-h|--help]\n"
