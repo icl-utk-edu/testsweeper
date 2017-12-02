@@ -56,3 +56,17 @@ clean:
 
 distclean: clean
 	-rm -f *.a *.so *.o *.d
+
+# ------------------------------------------------------------------------------
+# precompile headers to verify self-sufficiency
+headers     = ${wildcard *.hh}
+headers_gch = ${addprefix gch/, ${addsuffix .gch, ${headers}}}
+
+test_headers: ${headers_gch}
+
+gch/%.hh.gch: %.hh | gch
+	${CXX} ${CXXFLAGS} ${LAPACKPP_FLAGS} -c -o $@ $<
+
+# make directories
+gch:
+	mkdir $@
