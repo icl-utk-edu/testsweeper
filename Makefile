@@ -7,7 +7,9 @@ LIBS     = -L. -Wl,-rpath,${pwd} -ltest
 
 # --------------------
 # MacOS (darwin) needs shared library's path set
-ifneq ($(findstring darwin, ${OSTYPE}),)
+# $OSTYPE may not be exported from the shell, so echo it
+ostype = ${shell echo $${OSTYPE}}
+ifneq ($(findstring darwin, ${ostype}),)
    install_name = -install_name @rpath/$(notdir $@)
 else
    install_name =
