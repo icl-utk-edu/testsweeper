@@ -1,9 +1,16 @@
-pwd = $(shell pwd)
+# make.inc defines compiler & flags. Example:
+#
+# CXX      = g++
+# LDFLAGS  = -fPIC -fopenmp
+# CXXFLAGS = -fPIC -fopenmp -Wall -pedantic -std=c++11 -MMD
+#
+# OpenMP is optional; used only for timer.
 
-CXX      = g++
-CXXFLAGS = -fPIC -fopenmp -Wall -pedantic -std=c++11 -MMD
-LDFLAGS  = -fPIC -fopenmp
-LIBS     = -L. -Wl,-rpath,${pwd} -ltest
+include make.inc
+
+# for example.cc, set rpath to this directory
+pwd = ${shell pwd}
+LIBS = -L. -Wl,-rpath,${pwd} -ltest
 
 # --------------------
 # MacOS (darwin) needs shared library's path set

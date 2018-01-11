@@ -1,0 +1,6 @@
+# Using g++
+
+CXX       = g++
+
+LDFLAGS  = -fPIC -fopenmp
+CXXFLAGS = -fPIC -fopenmp -Wall -pedantic -std=c++11 -MMD

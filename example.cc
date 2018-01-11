@@ -4,8 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <omp.h>
-
 #include "example.hh"
 
 // -----------------------------------------------------------------------------
@@ -17,6 +15,7 @@ using libtest::datatype2str;
 using libtest::ansi_bold;
 using libtest::ansi_red;
 using libtest::ansi_normal;
+using libtest::get_wtime;
 
 // -----------------------------------------------------------------------------
 enum Section {
@@ -244,18 +243,18 @@ void test_foo_work( Params &params, bool run )
 
     // run test
     libtest::flush_cache( cache );
-    time = omp_get_wtime();
+    time = get_wtime();
     usleep( 100*n );  // placeholder; 0.0001 n sec
-    time = omp_get_wtime() - time;
+    time = get_wtime() - time;
     params.time.value()   = time * 1000;  // msec
     params.gflops.value() = gflop / time;
 
     if (ref) {
         // run LAPACK
         libtest::flush_cache( cache );
-        time = omp_get_wtime();
+        time = get_wtime();
         usleep( 200*n );  // placeholder; 0.0002 n sec
-        time = omp_get_wtime() - time;
+        time = get_wtime() - time;
         params.ref_time.value()   = time * 1000;  // msec
         params.ref_gflops.value() = gflop / time;
     }

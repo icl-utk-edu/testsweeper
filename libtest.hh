@@ -473,6 +473,8 @@ void usage(
     std::vector< routines_t >& routines,
     const char **section_names );
 
+double get_wtime();
+
 }  // namespace libtest
 
 #endif        //  #ifndef LIBTEST_HH

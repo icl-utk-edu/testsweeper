@@ -2,7 +2,12 @@
 #include <string.h>
 #include <math.h>
 
-#include <omp.h>
+// prefer OpenMP get_wtime; else use gettimeofday
+#ifdef _OPENMP
+    #include <omp.h>
+#else
+    #include <sys/time.h>
+#endif
 
 #include "libtest.hh"
 
@@ -804,6 +809,19 @@ void usage(
         cnt += 1;
     }
     printf( "\n" );
+}
+
+// -----------------------------------------------------------------------------
+// prefer OpenMP get_wtime; else use gettimeofday
+double get_wtime()
+{
+    #ifdef _OPENMP
+        return omp_get_wtime();
+    #else
+        struct timeval tv;
+        gettimeofday( &tv, nullptr );
+        return tv.tv_sec + tv.tv_usec*1e-6;
+    #endif
 }
 
 } // namespace libtest
