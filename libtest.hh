@@ -356,6 +356,26 @@ protected:
 };
 
 // =============================================================================
+class ParamString : public TParamBase< const char* >
+{
+public:
+    ParamString( const char* name, int width, ParamType type,
+               const char* default_value, const char* valid,
+               const char* help ):
+        TParamBase( name, width, type, default_value, help ),
+        m_valid( valid )
+    {}
+
+    virtual void parse( const char* str );
+    virtual void print() const;
+    virtual void help() const;
+    void push_back( const char* str );
+
+protected:
+    std::string m_valid;
+};
+
+// =============================================================================
 template< typename ENUM >
 class ParamEnum : public TParamBase< ENUM >
 {

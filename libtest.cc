@@ -565,6 +565,75 @@ void ParamScientific::help() const
 }
 
 // =============================================================================
+// ParamString class
+// Character parameters
+//
+// =============================================================================
+// virtual
+void ParamString::parse( const char *str )
+{
+    push_back( str );
+    // TODO Validation?
+    /*
+    while (true) {
+        char new_str [256];
+        //char val;
+        //int len;
+        int i = sscanf( str, "%s", new_str );
+        str += i;
+
+        if (i != 1) {
+            throw std::runtime_error( "invalid option, expect std::string" );
+        }
+        push_back( new_str );
+        if (*str == '\0') {
+            break;
+        }
+        if (*str != ',') {
+            throw std::runtime_error(
+                "invalid argument, expected comma delimiter" );
+        }
+        str += 1;
+    }
+    */
+}
+
+// -----------------------------------------------------------------------------
+void ParamString::push_back( const char* str )
+{
+    // TODO Validation?
+    /*
+    if (m_valid.find( str ) == std::string::npos) {  // not found
+        char msg[1000];
+        snprintf( msg, sizeof(msg), "invalid option, %s not in [%s]\n",
+                  str, m_valid.c_str() );
+        throw std::runtime_error( msg );
+    }
+    */
+    TParamBase<const char*>::push_back( str );
+}
+
+// -----------------------------------------------------------------------------
+// virtual
+void ParamString::print() const
+{
+    if (m_used && m_width > 0) {
+        printf( "  %*s", m_width, m_values[ m_index ] );
+    }
+}
+
+// -----------------------------------------------------------------------------
+// virtual
+void ParamString::help() const
+{
+    if (m_type == ParamType::Value || m_type == ParamType::List) {
+        printf( "    %-16s %s; default %s; valid: [%s]\n",
+                m_prefix.c_str(), m_help.c_str(),
+                m_default_value, m_valid.c_str() );
+    }
+}
+
+// =============================================================================
 // ParamChar class
 // Character parameters
 
