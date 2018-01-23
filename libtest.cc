@@ -572,7 +572,15 @@ void ParamScientific::help() const
 // virtual
 void ParamString::parse( const char *str )
 {
-    push_back( str );
+    char *pstr = strdup( str );
+    char *pchar;
+    pchar = strtok( pstr, "," );
+    while ( pchar != NULL ) {
+        push_back( pchar );
+        printf( "\n  found %s\n", pchar );
+	pchar = strtok( NULL, "," );
+    }
+    //push_back( str );
     // TODO Validation?
     /*
     while (true) {
