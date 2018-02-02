@@ -360,8 +360,8 @@ class ParamString : public TParamBase< const char* >
 {
 public:
     ParamString( const char* name, int width, ParamType type,
-               const char* default_value, const char* valid,
-               const char* help ):
+                 const char* default_value, const char* valid,
+                 const char* help ):
         TParamBase( name, width, type, default_value, help ),
         m_valid( valid )
     {}
@@ -370,9 +370,12 @@ public:
     virtual void print() const;
     virtual void help() const;
     void push_back( const char* str );
+    void set_type ( const std::string str );
+    int check ( std::string str );
 
 protected:
     std::string m_valid;
+    std::vector <std::string> m_default_types;
 };
 
 // =============================================================================

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <math.h>
 
 // prefer OpenMP get_wtime; else use gettimeofday
@@ -566,58 +567,44 @@ void ParamScientific::help() const
 
 // =============================================================================
 // ParamString class
-// Character parameters
-//
+// String parameters - only used for the matrix name currently
+
+// =============================================================================
+// Check to see if the submitted matrix name is in the default types list
+int ParamString::check (std::string str)
+{
+    for (auto iter=m_default_types.begin(); iter!=m_default_types.end(); iter++)
+    {
+	int res = (*iter).compare(0, (*iter).length(), str.c_str(), (*iter).length() );
+	if (res == 0) return true;
+    }
+    return false;
+}
+
 // =============================================================================
 // virtual
 void ParamString::parse( const char *str )
 {
     char *pstr = strdup( str );
     char *pchar;
+    std::string s;
+
     pchar = strtok( pstr, "," );
-    while ( pchar != NULL ) {
-        push_back( pchar );
-        printf( "\n  found %s\n", pchar );
+    while ( pchar != NULL ) 
+    {
+        s = pchar;
+	// Check to make sure the string is in the allowed/default types
+	if( check( s ) ){
+            push_back( pchar );
+	}
 	pchar = strtok( NULL, "," );
     }
-    //push_back( str );
-    // TODO Validation?
-    /*
-    while (true) {
-        char new_str [256];
-        //char val;
-        //int len;
-        int i = sscanf( str, "%s", new_str );
-        str += i;
-
-        if (i != 1) {
-            throw std::runtime_error( "invalid option, expect std::string" );
-        }
-        push_back( new_str );
-        if (*str == '\0') {
-            break;
-        }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
-        }
-        str += 1;
-    }
-    */
 }
 
 // -----------------------------------------------------------------------------
 void ParamString::push_back( const char* str )
 {
     // TODO Validation?
-    /*
-    if (m_valid.find( str ) == std::string::npos) {  // not found
-        char msg[1000];
-        snprintf( msg, sizeof(msg), "invalid option, %s not in [%s]\n",
-                  str, m_valid.c_str() );
-        throw std::runtime_error( msg );
-    }
-    */
     TParamBase<const char*>::push_back( str );
 }
 
@@ -639,6 +626,13 @@ void ParamString::help() const
                 m_prefix.c_str(), m_help.c_str(),
                 m_default_value, m_valid.c_str() );
     }
+}
+
+// =============================================================================
+// Set the allowed matrix names
+void ParamString::set_type (std::string type)
+{
+    m_default_types.push_back( type );
 }
 
 // =============================================================================
