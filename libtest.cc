@@ -573,6 +573,7 @@ void ParamScientific::help() const
 // Check to see if the submitted matrix name is in the default types list
 int ParamString::check (std::string str)
 {
+    if (m_default_types.size() == 0) return true;
     for (auto iter=m_default_types.begin(); iter!=m_default_types.end(); iter++)
     {
 	int res = (*iter).compare(0, (*iter).length(), str.c_str(), (*iter).length() );
