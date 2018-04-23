@@ -177,7 +177,7 @@ void ParamBase::header( int line ) const
                 ? ""
                 : m_name.c_str() );
         }
-        printf( "  %*s", m_width, str );
+        printf( "%*s  ", m_width, str );
     }
 }
 
@@ -258,7 +258,7 @@ void ParamInt::push_back( int64_t val )
 void ParamInt::print() const
 {
     if (m_used && m_width > 0) {
-        printf( "  %*lld", m_width, (long long) m_values[ m_index ] );
+        printf( "%*lld  ", m_width, (long long) m_values[ m_index ] );
     }
 }
 
@@ -287,7 +287,7 @@ void ParamOkay::print() const
             case  1: msg = "pass";     break;
             case -1: msg = "no check"; break;
         }
-        printf( "  %-*s", m_width, msg );
+        printf( "%-*s  ", m_width, msg );
     }
 }
 
@@ -430,13 +430,13 @@ void ParamInt3::print() const
 {
     if (m_width > 0) {
         if (m_used & m_mask) {
-            printf( "  %*lld", m_width, (long long) m_values[ m_index ].m );
+            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].m );
         }
         if (m_used & n_mask) {
-            printf( "  %*lld", m_width, (long long) m_values[ m_index ].n );
+            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].n );
         }
         if (m_used & k_mask) {
-            printf( "  %*lld", m_width, (long long) m_values[ m_index ].k );
+            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].k );
         }
     }
 }
@@ -449,13 +449,13 @@ void ParamInt3::header( int line ) const
 {
     if (m_width > 0) {
         if (m_used & m_mask) {
-            printf( "  %*s", m_width, (line == 0 ? "" : "m") );
+            printf( "%*s  ", m_width, (line == 0 ? "" : "m") );
         }
         if (m_used & n_mask) {
-            printf( "  %*s", m_width, (line == 0 ? "" : "n") );
+            printf( "%*s  ", m_width, (line == 0 ? "" : "n") );
         }
         if (m_used & k_mask) {
-            printf( "  %*s", m_width, (line == 0 ? "" : "k") );
+            printf( "%*s  ", m_width, (line == 0 ? "" : "k") );
         }
     }
 }
@@ -516,10 +516,10 @@ void ParamDouble::print() const
     if (m_used && m_width > 0) {
         if (memcmp( &no_data_flag, &m_values[ m_index ],
                     sizeof(no_data_flag) ) == 0) {
-            printf( "  %*s", m_width, "NA" );
+            printf( "%*s  ", m_width, "NA" );
         }
         else {
-            printf( "  %*.*f", m_width, m_precision, m_values[ m_index ] );
+            printf( "%*.*f  ", m_width, m_precision, m_values[ m_index ] );
         }
     }
 }
@@ -546,10 +546,10 @@ void ParamScientific::print() const
     if (m_used && m_width > 0) {
         if (memcmp( &no_data_flag, &m_values[ m_index ],
                     sizeof(no_data_flag) ) == 0) {
-            printf( "  %*s", m_width, "NA" );
+            printf( "%*s  ", m_width, "NA" );
         }
         else {
-            printf( "  %*.*e", m_width, m_precision, m_values[ m_index ] );
+            printf( "%*.*e  ", m_width, m_precision, m_values[ m_index ] );
         }
     }
 }
@@ -697,7 +697,7 @@ void ParamChar::push_back( char val )
 void ParamChar::print() const
 {
     if (m_used && m_width > 0) {
-        printf( "  %*c", m_width, m_values[ m_index ] );
+        printf( "%*c  ", m_width, m_values[ m_index ] );
     }
 }
 

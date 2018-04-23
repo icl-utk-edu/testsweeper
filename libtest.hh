@@ -438,7 +438,7 @@ template< typename ENUM >
 void ParamEnum<ENUM>::print() const
 {
     if (this->m_used && this->m_width > 0) {
-        printf( "  %*s", this->m_width,
+        printf( "%*s  ", this->m_width,
                 this->m_str( this->m_values[ this->m_index ] ));
     }
 }
