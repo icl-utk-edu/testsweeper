@@ -29,6 +29,14 @@ const char *ansi_normal = "\x1b[0m";
 std::vector< ParamBase* > ParamBase::s_params;
 
 // -----------------------------------------------------------------------------
+// Compare a == b, bitwise. Returns true if a and b are both the same NaN value,
+// unlike (a == b) which is false for NaNs.
+bool same( double a, double b )
+{
+    return (memcmp( &a, &b, sizeof(double) ) == 0);
+}
+
+// -----------------------------------------------------------------------------
 // @brief Scans string for single integer or range of integers (start:end:step).
 //        Advances the string to after the range or number.
 //
@@ -514,8 +522,7 @@ void ParamDouble::push_back( double val )
 void ParamDouble::print() const
 {
     if (m_used && m_width > 0) {
-        if (memcmp( &no_data_flag, &m_values[ m_index ],
-                    sizeof(no_data_flag) ) == 0) {
+        if (same( no_data_flag, m_values[ m_index ] )) {
             printf( "%*s  ", m_width, "NA" );
         }
         else {
@@ -529,9 +536,14 @@ void ParamDouble::print() const
 void ParamDouble::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-16s %s; default %.*f\n",
-                m_prefix.c_str(), m_help.c_str(),
-                m_precision, m_default_value );
+        printf( "    %-16s %s; default ",
+                m_prefix.c_str(), m_help.c_str() );
+        if (same( no_data_flag, m_default_value )) {
+            printf( "NA\n" );
+        }
+        else {
+            printf( "%.*f\n", m_precision, m_default_value );
+        }
     }
 }
 
@@ -544,8 +556,7 @@ void ParamDouble::help() const
 void ParamScientific::print() const
 {
     if (m_used && m_width > 0) {
-        if (memcmp( &no_data_flag, &m_values[ m_index ],
-                    sizeof(no_data_flag) ) == 0) {
+        if (same( no_data_flag, m_values[ m_index ] )) {
             printf( "%*s  ", m_width, "NA" );
         }
         else {
@@ -559,9 +570,14 @@ void ParamScientific::print() const
 void ParamScientific::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-16s %s; default %.*e\n",
-                m_prefix.c_str(), m_help.c_str(),
-                m_precision, m_default_value );
+        printf( "    %-16s %s; default ",
+                m_prefix.c_str(), m_help.c_str() );
+        if (same( no_data_flag, m_default_value )) {
+            printf( "NA\n" );
+        }
+        else {
+            printf( "%.*e\n", m_precision, m_default_value );
+        }
     }
 }
 
@@ -768,7 +784,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
         }
         catch( const std::exception& e ) {
             fprintf( stderr, "%s%sError: %s: %s%s\n\n",
-                     ansi_bold, ansi_red, e.what(), arg, ansi_normal );
+                     ansi_bold, ansi_red, arg, e.what(), ansi_normal );
             help( routine );
             exit(1);
         }
