@@ -356,26 +356,25 @@ protected:
 };
 
 // =============================================================================
-class ParamString : public TParamBase< const char* >
+class ParamString : public TParamBase< std::string >
 {
 public:
     ParamString( const char* name, int width, ParamType type,
-                 const char* default_value, const char* valid,
+                 const char* default_value,
                  const char* help ):
-        TParamBase( name, width, type, default_value, help ),
-        m_valid( valid )
+        TParamBase( name, width, type, default_value, help )
     {}
 
     virtual void parse( const char* str );
     virtual void print() const;
+    virtual void header( int line ) const;
     virtual void help() const;
     void push_back( const char* str );
-    void set_type ( const std::string str );
-    int check ( std::string str );
+    void add_valid( const char* str );
+    bool is_valid( const std::string& str );
 
 protected:
-    std::string m_valid;
-    std::vector <std::string> m_default_types;
+    std::vector< std::string > m_valid;
 };
 
 // =============================================================================

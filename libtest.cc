@@ -567,46 +567,44 @@ void ParamScientific::help() const
 
 // =============================================================================
 // ParamString class
-// String parameters - only used for the matrix name currently
+// String parameters
 
-// =============================================================================
-// Check to see if the submitted matrix name is in the default types list
-int ParamString::check (std::string str)
+// -----------------------------------------------------------------------------
+// Return true if str is in the list of valid strings.
+// If no valid strings are set, always returns true.
+bool ParamString::is_valid( const std::string& str )
 {
-    if (m_default_types.size() == 0) return true;
-    for (auto iter=m_default_types.begin(); iter!=m_default_types.end(); iter++)
-    {
-	int res = (*iter).compare(0, (*iter).length(), str.c_str(), (*iter).length() );
-	if (res == 0) return true;
+    if (m_valid.size() == 0)
+        return true;
+    for (auto iter = m_valid.begin(); iter != m_valid.end(); ++iter) {
+        if (str == *iter)
+            return true;
     }
     return false;
 }
 
-// =============================================================================
+// -----------------------------------------------------------------------------
 // virtual
 void ParamString::parse( const char *str )
 {
-    char *pstr = strdup( str );
-    char *pchar;
-    std::string s;
-
-    pchar = strtok( pstr, "," );
-    while ( pchar != NULL ) 
-    {
-        s = pchar;
-	// Check to make sure the string is in the allowed/default types
-	if( check( s ) ){
-            push_back( pchar );
-	}
-	pchar = strtok( NULL, "," );
+    char* copy = strdup( str );
+    char* token = strtok( copy, ", " );
+    while (token != nullptr) {
+        push_back( token );
+        token = strtok( nullptr, ", " );
     }
+    free( copy );
 }
 
 // -----------------------------------------------------------------------------
 void ParamString::push_back( const char* str )
 {
-    // TODO Validation?
-    TParamBase<const char*>::push_back( str );
+    if (! is_valid(str)) {
+        char msg[1000];
+        snprintf( msg, sizeof(msg), "invalid argument '%s'", str );
+        throw std::runtime_error( msg );
+    }
+    TParamBase< std::string >::push_back( str );
 }
 
 // -----------------------------------------------------------------------------
@@ -614,7 +612,7 @@ void ParamString::push_back( const char* str )
 void ParamString::print() const
 {
     if (m_used && m_width > 0) {
-        printf( "  %*s", m_width, m_values[ m_index ] );
+        printf( "%-*s  ", m_width, m_values[ m_index ].c_str() );
     }
 }
 
@@ -623,17 +621,35 @@ void ParamString::print() const
 void ParamString::help() const
 {
     if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-16s %s; default %s; valid: [%s]\n",
+        printf( "    %-16s %s; default %s",
                 m_prefix.c_str(), m_help.c_str(),
-                m_default_value, m_valid.c_str() );
+                m_default_value.c_str() );
+        if (m_valid.size() > 0) {
+            printf( "; valid: " );
+            for (auto iter = m_valid.begin(); iter != m_valid.end(); ++iter) {
+                printf( "%s ", iter->c_str() );
+            }
+        }
+        printf( "\n" );
     }
 }
 
-// =============================================================================
-// Set the allowed matrix names
-void ParamString::set_type (std::string type)
+// -----------------------------------------------------------------------------
+// Set the allowed strings
+void ParamString::add_valid( const char* str )
 {
-    m_default_types.push_back( type );
+    m_valid.push_back( str );
+}
+
+// -----------------------------------------------------------------------------
+// for line=0, print blanks
+// for line=1, print name (left aligned)
+// virtual
+void ParamString::header( int line ) const
+{
+    if (m_used && m_width > 0) {
+        printf( "%-*s  ", m_width, (line == 0 ? "" : m_name.c_str()) );
+    }
 }
 
 // =============================================================================
