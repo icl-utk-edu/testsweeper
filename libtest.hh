@@ -105,7 +105,7 @@ public:
     ParamBase( const char* name, int width, ParamType type,
                const char* help ):
         m_name   ( name ),
-        m_prefix ( std::string("--") + name ),
+        m_prefix ( "--" + m_name ),
         m_help   ( help ),
         m_index  ( 0 ),
         m_width  ( width ),
@@ -127,10 +127,17 @@ public:
     virtual bool next();
     virtual size_t size() const = 0;
 
+    bool used() const { return m_used; }
+    void used( bool in_used ) { m_used = in_used; }
+
     void name( const char* in_name )
     {
         m_name = in_name;
+        m_prefix = "--" + m_name;
     }
+
+    int  width() const { return m_width; }
+    void width( int w ) { m_width = w; }
 
 protected:
     // s_params is list of ParamBase objects, used by Params class
@@ -164,10 +171,29 @@ public:
         return m_values.size();
     }
 
+    T& operator ()()
+    {
+        m_used = true;
+        return m_values[ m_index ];
+    }
+
+    void operator ()( T const& value )
+    {
+        m_used = true;
+        m_values[ m_index ] = value;
+    }
+
     T& value()
     {
         m_used = true;
         return m_values[ m_index ];
+    }
+
+    void set_default( const T& default_value )
+    {
+        m_default_value = default_value;
+        m_values.clear();
+        m_values.push_back( default_value );
     }
 
     virtual void reset_output()
