@@ -289,7 +289,7 @@ void ParamInt::help() const
 void ParamOkay::print() const
 {
     if (m_used && m_width > 0) {
-        const char *msg;
+        const char *msg = "";
         switch (m_values[ m_index ]) {
             case  0: msg = "FAILED";   break;
             case  1: msg = "pass";     break;
