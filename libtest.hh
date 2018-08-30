@@ -21,6 +21,15 @@ extern const char *ansi_bold;
 extern const char *ansi_normal;
 
 // -----------------------------------------------------------------------------
+class QuitException: public std::exception
+{
+public:
+    explicit QuitException()
+        : std::exception()
+    {}
+};
+
+// -----------------------------------------------------------------------------
 enum class DataType {
     Integer       = 'i',
     Single        = 's',

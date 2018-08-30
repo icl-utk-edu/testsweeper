@@ -733,6 +733,8 @@ void ParamChar::help() const
 // List of parameters
 
 // -----------------------------------------------------------------------------
+/// Throws QuitException if --help is encountered.
+/// Throws std::runtime_error for errors.
 void ParamsBase::parse( const char *routine, int n, char **args )
 {
     // Usage: test command [params]
@@ -744,8 +746,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
             if (strncmp( arg, "-h", 2 ) == 0 ||
                 strncmp( arg, "--help", 6 ) == 0)
             {
-                help( routine );
-                exit(0);
+                throw QuitException();
             }
             for (auto param = ParamBase::s_params.begin();
                  param != ParamBase::s_params.end(); ++param)
@@ -778,15 +779,15 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                     break;
                 }
             }
-            if ( ! found) {
+            if (! found) {
                 throw std::runtime_error( "invalid parameter" );
             }
         }
-        catch( const std::exception& e ) {
-            fprintf( stderr, "%s%sError: %s: %s%s\n\n",
-                     ansi_bold, ansi_red, arg, e.what(), ansi_normal );
-            help( routine );
-            exit(1);
+        // QuitException is not a runtime_error,
+        // so it is caught at a higher level.
+        catch (const std::runtime_error& ex) {
+            // prepend arg to error message
+            throw std::runtime_error( std::string(arg) + ": " + ex.what() );
         }
     }
 }
