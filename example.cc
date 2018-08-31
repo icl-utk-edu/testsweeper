@@ -23,6 +23,7 @@ enum Section {
     level1,
     level2,
     level3,
+    num_sections,  // last
 };
 
 const char* section_names[] = {
@@ -128,6 +129,9 @@ Params::Params():
 int main( int argc, char** argv )
 {
     using libtest::QuitException;
+
+    // check that all sections have names
+    assert( sizeof(section_names)/sizeof(*section_names) == Section::num_sections );
 
     int status = 0;
     try {
