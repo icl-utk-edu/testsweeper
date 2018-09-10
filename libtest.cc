@@ -252,7 +252,7 @@ void ParamInt::push_back( int64_t val )
     if (val < m_min_value || val > m_max_value) {
         char msg[1000];
         snprintf( msg, sizeof(msg),
-                  "invalid argument, %lld outside [%lld, %lld]\n",
+                  "invalid argument, %lld outside [%lld, %lld]",
                   (long long) val,
                   (long long) m_min_value,
                   (long long) m_max_value );
@@ -421,7 +421,7 @@ void ParamInt3::push_back( int3_t val )
     {
         char msg[1000];
         snprintf( msg, sizeof(msg),
-                  "invalid value, %lld x %lld x %lld outside [%lld, %lld]\n",
+                  "invalid value, %lld x %lld x %lld outside [%lld, %lld]",
                   (long long) val.m,
                   (long long) val.n,
                   (long long) val.k,
@@ -508,7 +508,7 @@ void ParamDouble::push_back( double val )
     if (val < m_min_value || val > m_max_value) {
         char msg[1000];
         snprintf( msg, sizeof(msg),
-                  "invalid argument, %.*f outside [%.*f, %.*f]\n",
+                  "invalid argument, %.*f outside [%.*f, %.*f]",
                   m_precision, val,
                   m_precision, m_min_value,
                   m_precision, m_max_value );
@@ -701,7 +701,7 @@ void ParamChar::push_back( char val )
 {
     if (m_valid.find( val ) == std::string::npos) {  // not found
         char msg[1000];
-        snprintf( msg, sizeof(msg), "invalid option, %c not in [%s]\n",
+        snprintf( msg, sizeof(msg), "invalid option, %c not in [%s]",
                   val, m_valid.c_str() );
         throw std::runtime_error( msg );
     }
