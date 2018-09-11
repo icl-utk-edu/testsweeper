@@ -518,6 +518,11 @@ void ParamDouble::push_back( double val )
 }
 
 // -----------------------------------------------------------------------------
+/// If field has been used, prints the floating point value.
+/// If value is set to no_data_flag, it prints "NA".
+/// If value < 1, it prints with precision (p) significant digits (%.pg).
+/// Otherwise, it prints with precision (p) digits after the decimal point (%.pf).
+/// The output width and precision are set in the constructor.
 // virtual
 void ParamDouble::print() const
 {
@@ -526,7 +531,10 @@ void ParamDouble::print() const
             printf( "%*s  ", m_width, "NA" );
         }
         else {
-            printf( "%*.*f  ", m_width, m_precision, m_values[ m_index ] );
+            if (std::abs( m_values[ m_index ] ) < 1)
+                printf( "%#*.*g  ", m_width, m_precision, m_values[ m_index ] );
+            else
+                printf( "%*.*f  ", m_width, m_precision, m_values[ m_index ] );
         }
     }
 }
