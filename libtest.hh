@@ -139,10 +139,13 @@ public:
     bool used() const { return m_used; }
     void used( bool in_used ) { m_used = in_used; }
 
-    void name( const char* in_name )
+    void name( const char* in_name, const char* in_prefix=nullptr )
     {
         m_name = in_name;
-        m_prefix = "--" + m_name;
+        if (in_prefix)
+            m_prefix = "--" + std::string(in_prefix);
+        else
+            m_prefix = "--" + m_name;
     }
 
     int  width() const { return m_width; }
