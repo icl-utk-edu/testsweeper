@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#include <math.h>
+#include <cmath>
 
 // prefer OpenMP get_wtime; else use gettimeofday
 #ifdef _OPENMP
