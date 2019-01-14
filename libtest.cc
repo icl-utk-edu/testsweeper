@@ -18,11 +18,18 @@ namespace libtest {
 double no_data_flag = nan("1234");
 
 // -----------------------------------------------------------------------------
-// ANSI color codes
+// ANSI color codes - enabled by default
+#ifndef NO_COLOR
 const char *ansi_esc    = "\x1b[";
 const char *ansi_red    = "\x1b[31m";
 const char *ansi_bold   = "\x1b[1m";
 const char *ansi_normal = "\x1b[0m";
+#else
+const char *ansi_esc    = "";
+const char *ansi_red    = "";
+const char *ansi_bold   = "";
+const char *ansi_normal = "";
+#endif
 
 // -----------------------------------------------------------------------------
 // static class variables
