@@ -169,7 +169,7 @@ test/docs: docs
 #-------------------------------------------------------------------------------
 # general rules
 clean:
-	$(RM) *.o *.a *.so
+	$(RM) *.o *.a *.so example
 
 distclean: clean
 	$(RM) make.inc *.d
