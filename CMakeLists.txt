@@ -45,6 +45,12 @@ target_include_directories (libtest PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+if(NO_COLOR)
+    target_compile_definitions(libtest PUBLIC
+        NO_COLOR
+    )
+endif()
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/opt/slate"
         CACHE PATH
