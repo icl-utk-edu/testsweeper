@@ -8,6 +8,8 @@
 #include <string>
 #include <stdexcept>
 #include <limits>
+#include <algorithm>
+
 
 namespace libtest {
 
@@ -126,7 +128,11 @@ public:
     }
 
     virtual ~ParamBase()
-    {}
+    {
+        auto iter = std::find( s_params.begin(), s_params.end(), this );
+        if (iter != s_params.end())
+            s_params.erase( iter );
+    }
 
     virtual void parse( const char* str ) = 0;
     virtual void print() const = 0;
