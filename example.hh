@@ -22,6 +22,7 @@ public:
     libtest::ParamInt    cache;
 
     // ----- routine parameters
+    libtest::ParamEnum< libtest::DataType > datatype_old;
     libtest::ParamEnum< libtest::DataType > datatype;
     libtest::ParamInt3   dim;
 

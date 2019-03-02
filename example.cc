@@ -11,6 +11,7 @@ using libtest::ParamType;
 using libtest::DataType;
 using libtest::char2datatype;
 using libtest::datatype2char;
+using libtest::str2datatype;
 using libtest::datatype2str;
 using libtest::ansi_bold;
 using libtest::ansi_red;
@@ -76,26 +77,32 @@ Params::Params():
     // p = precision
     // def = default
     // ----- test framework parameters
-    //         name,       w,    type,             def, valid, help
+    //         name,       w,    type,         default, valid, help
     check     ( "check",   0,    ParamType::Value, 'y', "ny",  "check the results" ),
     ref       ( "ref",     0,    ParamType::Value, 'n', "ny",  "run reference; sometimes check -> ref" ),
 
-    //          name,      w, p, type,             def, min,  max, help
+    //          name,      w, p, type,         default, min,  max, help
     tol       ( "tol",     0, 0, ParamType::Value,  50,   1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
     repeat    ( "repeat",  0,    ParamType::Value,   1,   1, 1000, "times to repeat each test" ),
     verbose   ( "verbose", 0,    ParamType::Value,   0,   0,   10, "verbose level" ),
     cache     ( "cache",   0,    ParamType::Value,  20,   1, 1024, "total cache size, in MiB" ),
 
     // ----- routine parameters
-    //          name,      w,    type,            def,              char2enum,     enum2char,     enum2str,     help
-    datatype  ( "type",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str, "s=single (float), d=double, c=complex-single, z=complex-double" ),
+    //          name,      w, p, type,            default,          char2enum,     enum2char,     enum2str,     help
+    datatype_old
+              ( "type-old",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str,
+                "s=single (float), d=double, c=complex<float>, z=complex<double>, i=int" ),
 
-    //          name,      w, p, type,            def,   min,     max, help
-    dim       ( "dim",     6,    ParamType::List,          0, 1000000, "m x n x k dimensions" ),
+    //          name,      w, p, type,            default,          str2enum,     enum2char,    help
+    datatype  ( "type",    4,    ParamType::List, DataType::Double, str2datatype, datatype2str,
+                "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
+
+    //          name,      w,    type,            min,     max, help
+    dim       ( "dim",     6,    ParamType::List, 0,   1000000, "m x n x k dimensions" ),
 
     // ----- output parameters
     // min, max are ignored
-    //          name,                  w, p, type,              def, min, max, help
+    //          name,                  w, p, type,          default, min, max, help
     error     ( "SLATE\nerror",       11, 4, ParamType::Output, nan,   0,   0, "numerical error" ),
     ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, nan,   0,   0, "orthogonality error" ),
     time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, nan,   0,   0, "time to solution" ),

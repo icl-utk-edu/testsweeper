@@ -40,7 +40,9 @@ enum class DataType {
     DoubleComplex = 'z',
 };
 
-// Accepts: s (single/float), d (double), c (complex-single), z (complex-double)
+// ----------------------------------------
+// Accepts: s (single/float), d (double), c (complex-single), z (complex-double),
+//          i (int)
 inline DataType char2datatype( char ch )
 {
     ch = tolower( ch );
@@ -49,8 +51,47 @@ inline DataType char2datatype( char ch )
     return DataType( ch );
 }
 
-inline char datatype2char( DataType en ) { return char( en ); }
+// ----------------------------------------
+inline char datatype2char( DataType en )
+{
+    return char( en );
+}
 
+// ----------------------------------------
+/// Accepts a variety of inputs:
+/// { i, i32, int,   integer } => int
+/// { s, r32, float, single  } => float
+/// { d, r64, double         } => double
+/// { c, c32, complex<float>,  complex-float, complex-single } => complex<float>
+/// { z, c64, complex<double>, complex-double                } => complex<double>
+inline DataType str2datatype( const char* str )
+{
+    std::string str_ = str;
+    if      (str_ == "i"
+          || str_ == "i32"
+          || str_ == "int"
+          || str_ == "integer"       ) return DataType::Integer;
+    else if (str_ == "s"
+          || str_ == "r32"
+          || str_ == "float"
+          || str_ == "single"        ) return DataType::Single;
+    else if (str_ == "d"
+          || str_ == "r64"
+          || str_ == "double"        ) return DataType::Double;
+    else if (str_ == "c"
+          || str_ == "c32"
+          || str_ == "complex<float>"
+          || str_ == "complex-float"
+          || str_ == "complex-single") return DataType::SingleComplex;
+    else if (str_ == "z"
+          || str_ == "c64"
+          || str_ == "complex<double>"
+          || str_ == "complex-double") return DataType::DoubleComplex;
+    else
+        throw std::runtime_error( "invalid value for datatype" );
+}
+
+// ----------------------------------------
 inline const char* datatype2str( DataType en )
 {
     switch (en) {
@@ -297,6 +338,7 @@ public:
         k_mask = 0x4,
     };
 
+    /// default range 100 : 500 : 100
     ParamInt3( const char* name, int width, ParamType type,
                int64_t min_value, int64_t max_value,
                const char* help ):
@@ -309,6 +351,20 @@ public:
             int3_t tmp = { i, i, i };
             m_values.push_back( tmp );
         }
+    }
+
+    /// application gives default range as string
+    ParamInt3( const char* name, int width, ParamType type,
+               const char* default_value,
+               int64_t min_value, int64_t max_value,
+               const char* help ):
+        TParamBase<int3_t>( name, width, type, int3_t(), help ),
+        m_min_value( min_value ),
+        m_max_value( max_value )
+    {
+        m_values.clear();
+        parse( default_value );
+        m_is_default = true;
     }
 
     virtual void parse( const char* str );
@@ -428,15 +484,33 @@ class ParamEnum : public TParamBase< ENUM >
 public:
     typedef ENUM (*char2enum)( char ch );
     typedef char (*enum2char)( ENUM en );
+    typedef ENUM (*str2enum)( const char* str );
     typedef const char* (*enum2str)( ENUM en );
 
+    // deprecated
+    // Takes char2enum, enum2char, enum2str.
     ParamEnum( const char* name, int width, ParamType type,
-               ENUM default_value, char2enum in, enum2char out, enum2str str,
+               ENUM default_value,
+               char2enum in_char2enum, enum2char in_enum2char,
+               enum2str in_enum2str,
                const char* help ):
         TParamBase<ENUM>( name, width, type, default_value, help ),
-        m_in( in ),
-        m_out( out ),
-        m_str( str )
+        char2enum_( in_char2enum ),
+        enum2char_( in_enum2char ),
+        str2enum_( nullptr     ),
+        enum2str_( in_enum2str )
+    {}
+
+    // Takes str2enum, enum2str.
+    ParamEnum( const char* name, int width, ParamType type,
+               ENUM default_value,
+               str2enum str2enum, enum2str enum2str,
+               const char* help ):
+        TParamBase<ENUM>( name, width, type, default_value, help ),
+        char2enum_( nullptr ),
+        enum2char_( nullptr ),
+        str2enum_( str2enum ),
+        enum2str_( enum2str )
     {}
 
     virtual void parse( const char* str );
@@ -444,9 +518,10 @@ public:
     virtual void help() const;
 
 protected:
-    char2enum m_in;
-    enum2char m_out;
-    enum2str  m_str;
+    char2enum char2enum_;
+    enum2char enum2char_;
+    str2enum  str2enum_;
+    enum2str  enum2str_;
 };
 
 // -----------------------------------------------------------------------------
@@ -456,14 +531,21 @@ void ParamEnum<ENUM>::parse( const char *str )
 {
     char buf[81] = { 0 };
     while (true) {
+        // Read next word, up to 80 chars.
         int len;
-        int i = sscanf( str, " %80[a-zA-Z0-9_-] %n", buf, &len );
+        int i = sscanf( str, " %80[a-zA-Z0-9_<>-] %n", buf, &len );
         str += len;
         if (i != 1) {
             throw std::runtime_error( "invalid option, expected char" );
         }
-        // m_in throws errors
-        ENUM val = m_in( buf[0] );
+        // Parse word into enum. str2enum_ & char2enum_ throw errors.
+        ENUM val;
+        if (str2enum_) {
+            val = str2enum_( buf );
+        }
+        else {
+            val = char2enum_( buf[0] );
+        }
         this->push_back( val );
         if (*str == '\0') {
             break;
@@ -483,7 +565,7 @@ void ParamEnum<ENUM>::print() const
 {
     if (this->m_used && this->m_width > 0) {
         printf( "%*s  ", this->m_width,
-                this->m_str( this->m_values[ this->m_index ] ));
+                this->enum2str_( this->m_values[ this->m_index ] ));
     }
 }
 
@@ -493,9 +575,9 @@ template< typename ENUM >
 void ParamEnum<ENUM>::help() const
 {
     if (this->m_type == ParamType::Value || this->m_type == ParamType::List) {
-        printf( "    %-16s %s; default %c\n",
+        printf( "    %-16s %s; default %s\n",
                 this->m_prefix.c_str(), this->m_help.c_str(),
-                this->m_out( this->m_default_value ));
+                this->enum2str_( this->m_default_value ));
     }
 }
 
