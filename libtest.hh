@@ -156,14 +156,14 @@ public:
 
     ParamBase( const char* name, int width, ParamType type,
                const char* help ):
-        m_name   ( name ),
-        m_prefix ( "--" + m_name ),
-        m_help   ( help ),
-        m_index  ( 0 ),
-        m_width  ( width ),
-        m_type   ( type ),
-        m_is_default( true ),
-        m_used   ( false )
+        name_   ( name ),
+        prefix_ ( "--" + name_ ),
+        help_   ( help ),
+        index_  ( 0 ),
+        width_  ( width ),
+        type_   ( type ),
+        is_default_( true ),
+        used_   ( false )
     {
         s_params.push_back( this );
     }
@@ -183,33 +183,33 @@ public:
     virtual bool next();
     virtual size_t size() const = 0;
 
-    bool used() const { return m_used; }
-    void used( bool in_used ) { m_used = in_used; }
+    bool used() const { return used_; }
+    void used( bool in_used ) { used_ = in_used; }
 
     void name( const char* in_name, const char* in_prefix=nullptr )
     {
-        m_name = in_name;
+        name_ = in_name;
         if (in_prefix)
-            m_prefix = "--" + std::string(in_prefix);
+            prefix_ = "--" + std::string(in_prefix);
         else
-            m_prefix = "--" + m_name;
+            prefix_ = "--" + name_;
     }
 
-    int  width() const { return m_width; }
-    void width( int w ) { m_width = w; }
+    int  width() const { return width_; }
+    void width( int w ) { width_ = w; }
 
 protected:
     // s_params is list of ParamBase objects, used by Params class
     static std::vector< ParamBase* > s_params;
 
-    std::string m_name;
-    std::string m_prefix;
-    std::string m_help;
-    size_t      m_index;
-    int         m_width;
-    ParamType   m_type;
-    bool        m_is_default;
-    int         m_used;
+    std::string name_;
+    std::string prefix_;
+    std::string help_;
+    size_t      index_;
+    int         width_;
+    ParamType   type_;
+    bool        is_default_;
+    int         used_;
 };
 
 // =============================================================================
@@ -220,68 +220,68 @@ public:
     TParamBase( const char* name, int width, ParamType type, T default_value,
                 const char* help ):
         ParamBase( name, width, type, help ),
-        m_default_value( default_value )
+        default_value_( default_value )
     {
-        m_values.push_back( default_value );
+        values_.push_back( default_value );
     }
 
     virtual size_t size() const
     {
-        return m_values.size();
+        return values_.size();
     }
 
     T& operator ()()
     {
-        m_used = true;
-        return m_values[ m_index ];
+        used_ = true;
+        return values_[ index_ ];
     }
 
     void operator ()( T const& value )
     {
-        m_used = true;
-        m_values[ m_index ] = value;
+        used_ = true;
+        values_[ index_ ] = value;
     }
 
     T& value()
     {
-        m_used = true;
-        return m_values[ m_index ];
+        used_ = true;
+        return values_[ index_ ];
     }
 
     void set_default( const T& default_value )
     {
-        m_default_value = default_value;
-        m_values.clear();
-        m_values.push_back( default_value );
+        default_value_ = default_value;
+        values_.clear();
+        values_.push_back( default_value );
     }
 
     virtual void reset_output()
     {
-        if (m_type == ParamType::Output) {
-            m_values[0] = m_default_value;
+        if (type_ == ParamType::Output) {
+            values_[0] = default_value_;
         }
     }
 
     void push_back( T val );
 
 protected:
-    std::vector< T > m_values;
-    T m_default_value;
+    std::vector< T > values_;
+    T default_value_;
 };
 
 // -----------------------------------------------------------------------------
 template< typename T >
 void TParamBase<T>::push_back( T val )
 {
-    if (m_type == ParamType::List) {
-        if (m_is_default) {
-            m_values.clear();
-            m_is_default = false;
+    if (type_ == ParamType::List) {
+        if (is_default_) {
+            values_.clear();
+            is_default_ = false;
         }
-        m_values.push_back( val );
+        values_.push_back( val );
     }
     else {
-        m_values[0] = val;
+        values_[0] = val;
     }
 }
 
@@ -295,8 +295,8 @@ public:
               int64_t default_value, int64_t min_value, int64_t max_value,
               const char* help ):
         TParamBase( name, width, type, default_value, help ),
-        m_min_value( min_value ),
-        m_max_value( max_value )
+        min_value_( min_value ),
+        max_value_( max_value )
     {}
 
     virtual void parse( const char* str );
@@ -305,8 +305,8 @@ public:
     void push_back( int64_t val );
 
 protected:
-    int64_t m_min_value;
-    int64_t m_max_value;
+    int64_t min_value_;
+    int64_t max_value_;
 };
 
 // =============================================================================
@@ -343,13 +343,13 @@ public:
                int64_t min_value, int64_t max_value,
                const char* help ):
         TParamBase<int3_t>( name, width, type, int3_t(), help ),
-        m_min_value( min_value ),
-        m_max_value( max_value )
+        min_value_( min_value ),
+        max_value_( max_value )
     {
-        m_values.clear();
+        values_.clear();
         for (int64_t i = 100; i <= 500; i += 100) {
             int3_t tmp = { i, i, i };
-            m_values.push_back( tmp );
+            values_.push_back( tmp );
         }
     }
 
@@ -359,12 +359,12 @@ public:
                int64_t min_value, int64_t max_value,
                const char* help ):
         TParamBase<int3_t>( name, width, type, int3_t(), help ),
-        m_min_value( min_value ),
-        m_max_value( max_value )
+        min_value_( min_value ),
+        max_value_( max_value )
     {
-        m_values.clear();
+        values_.clear();
         parse( default_value );
-        m_is_default = true;
+        is_default_ = true;
     }
 
     virtual void parse( const char* str );
@@ -374,25 +374,25 @@ public:
 
     int64_t& m()
     {
-        m_used |= m_mask;
-        return m_values[ m_index ].m;
+        used_ |= m_mask;
+        return values_[ index_ ].m;
     }
 
     int64_t& n()
     {
-        m_used |= n_mask;
-        return m_values[ m_index ].n;
+        used_ |= n_mask;
+        return values_[ index_ ].n;
     }
 
     int64_t& k()
     {
-        m_used |= k_mask;
-        return m_values[ m_index ].k;
+        used_ |= k_mask;
+        return values_[ index_ ].k;
     }
 
 protected:
-    int64_t m_min_value;
-    int64_t m_max_value;
+    int64_t min_value_;
+    int64_t max_value_;
 };
 
 // =============================================================================
@@ -403,9 +403,9 @@ public:
                  double default_value, double min_value, double max_value,
                  const char* help ):
         TParamBase( name, width, type, default_value, help ),
-        m_precision( precision ),
-        m_min_value( min_value ),
-        m_max_value( max_value )
+        precision_( precision ),
+        min_value_( min_value ),
+        max_value_( max_value )
     {}
 
     virtual void parse( const char* str );
@@ -414,9 +414,9 @@ public:
     void push_back( double val );
 
 protected:
-    int m_precision;
-    double m_min_value;
-    double m_max_value;
+    int precision_;
+    double min_value_;
+    double max_value_;
 };
 
 // =============================================================================
@@ -443,7 +443,7 @@ public:
                char default_value, const char* valid,
                const char* help ):
         TParamBase( name, width, type, default_value, help ),
-        m_valid( valid )
+        valid_( valid )
     {}
 
     virtual void parse( const char* str );
@@ -452,7 +452,7 @@ public:
     void push_back( char val );
 
 protected:
-    std::string m_valid;
+    std::string valid_;
 };
 
 // =============================================================================
@@ -474,7 +474,7 @@ public:
     bool is_valid( const std::string& str );
 
 protected:
-    std::vector< std::string > m_valid;
+    std::vector< std::string > valid_;
 };
 
 // =============================================================================
@@ -563,9 +563,9 @@ void ParamEnum<ENUM>::parse( const char *str )
 template< typename ENUM >
 void ParamEnum<ENUM>::print() const
 {
-    if (this->m_used && this->m_width > 0) {
-        printf( "%*s  ", this->m_width,
-                this->enum2str_( this->m_values[ this->m_index ] ));
+    if (this->used_ && this->width_ > 0) {
+        printf( "%*s  ", this->width_,
+                this->enum2str_( this->values_[ this->index_ ] ));
     }
 }
 
@@ -574,10 +574,10 @@ void ParamEnum<ENUM>::print() const
 template< typename ENUM >
 void ParamEnum<ENUM>::help() const
 {
-    if (this->m_type == ParamType::Value || this->m_type == ParamType::List) {
+    if (this->type_ == ParamType::Value || this->type_ == ParamType::List) {
         printf( "    %-16s %s; default %s\n",
-                this->m_prefix.c_str(), this->m_help.c_str(),
-                this->enum2str_( this->m_default_value ));
+                this->prefix_.c_str(), this->help_.c_str(),
+                this->enum2str_( this->default_value_ ));
     }
 }
 

@@ -179,20 +179,20 @@ void flush_cache( size_t cache_size )
 // virtual
 void ParamBase::header( int line ) const
 {
-    if (m_used && m_width > 0) {
-        size_t i = m_name.find( '\n' );
+    if (used_ && width_ > 0) {
+        size_t i = name_.find( '\n' );
         const char *str = "";
         if (i != std::string::npos) {
             str = (line == 0
-                ? m_name.substr( 0, i ).c_str()
-                : m_name.substr( i+1 ).c_str() );
+                ? name_.substr( 0, i ).c_str()
+                : name_.substr( i+1 ).c_str() );
         }
         else {
             str = (line == 0
                 ? ""
-                : m_name.c_str() );
+                : name_.c_str() );
         }
-        printf( "%*s  ", m_width, str );
+        printf( "%*s  ", width_, str );
     }
 }
 
@@ -200,8 +200,8 @@ void ParamBase::header( int line ) const
 // virtual
 void ParamBase::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
-        printf( "    %-16s %s\n", m_prefix.c_str(), m_help.c_str() );
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
+        printf( "    %-16s %s\n", prefix_.c_str(), help_.c_str() );
     }
 }
 
@@ -209,13 +209,13 @@ void ParamBase::help() const
 // virtual
 bool ParamBase::next()
 {
-    assert( m_index >= 0 && m_index < size() );
-    if (m_index == size() - 1) {
-        m_index = 0;
+    assert( index_ >= 0 && index_ < size() );
+    if (index_ == size() - 1) {
+        index_ = 0;
         return false;
     }
     else {
-        m_index += 1;
+        index_ += 1;
         return true;
     }
 }
@@ -256,13 +256,13 @@ void ParamInt::parse( const char *str )
 // -----------------------------------------------------------------------------
 void ParamInt::push_back( int64_t val )
 {
-    if (val < m_min_value || val > m_max_value) {
+    if (val < min_value_ || val > max_value_) {
         char msg[1000];
         snprintf( msg, sizeof(msg),
                   "invalid argument, %lld outside [%lld, %lld]",
                   (long long) val,
-                  (long long) m_min_value,
-                  (long long) m_max_value );
+                  (long long) min_value_,
+                  (long long) max_value_ );
         throw std::runtime_error( msg );
     }
     TParamBase<int64_t>::push_back( val );
@@ -272,8 +272,8 @@ void ParamInt::push_back( int64_t val )
 // virtual
 void ParamInt::print() const
 {
-    if (m_used && m_width > 0) {
-        printf( "%*lld  ", m_width, (long long) m_values[ m_index ] );
+    if (used_ && width_ > 0) {
+        printf( "%*lld  ", width_, (long long) values_[ index_ ] );
     }
 }
 
@@ -281,9 +281,9 @@ void ParamInt::print() const
 // virtual
 void ParamInt::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %lld\n",
-                m_prefix.c_str(), m_help.c_str(), (long long) m_default_value );
+                prefix_.c_str(), help_.c_str(), (long long) default_value_ );
     }
 }
 
@@ -295,14 +295,14 @@ void ParamInt::help() const
 // virtual
 void ParamOkay::print() const
 {
-    if (m_used && m_width > 0) {
+    if (used_ && width_ > 0) {
         const char *msg = "";
-        switch (m_values[ m_index ]) {
+        switch (values_[ index_ ]) {
             case  0: msg = "FAILED";   break;
             case  1: msg = "pass";     break;
             case -1: msg = "no check"; break;
         }
-        printf( "%-*s  ", m_width, msg );
+        printf( "%-*s  ", width_, msg );
     }
 }
 
@@ -422,9 +422,9 @@ void ParamInt3::parse( const char *str )
 // -----------------------------------------------------------------------------
 void ParamInt3::push_back( int3_t val )
 {
-    if (val.m < m_min_value || val.m > m_max_value ||
-        val.n < m_min_value || val.n > m_max_value ||
-        val.k < m_min_value || val.k > m_max_value)
+    if (val.m < min_value_ || val.m > max_value_ ||
+        val.n < min_value_ || val.n > max_value_ ||
+        val.k < min_value_ || val.k > max_value_)
     {
         char msg[1000];
         snprintf( msg, sizeof(msg),
@@ -432,8 +432,8 @@ void ParamInt3::push_back( int3_t val )
                   (long long) val.m,
                   (long long) val.n,
                   (long long) val.k,
-                  (long long) m_min_value,
-                  (long long) m_max_value );
+                  (long long) min_value_,
+                  (long long) max_value_ );
         throw std::runtime_error( msg );
     }
     TParamBase<int3_t>::push_back( val );
@@ -443,15 +443,15 @@ void ParamInt3::push_back( int3_t val )
 // virtual
 void ParamInt3::print() const
 {
-    if (m_width > 0) {
-        if (m_used & m_mask) {
-            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].m );
+    if (width_ > 0) {
+        if (used_ & m_mask) {
+            printf( "%*lld  ", width_, (long long) values_[ index_ ].m );
         }
-        if (m_used & n_mask) {
-            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].n );
+        if (used_ & n_mask) {
+            printf( "%*lld  ", width_, (long long) values_[ index_ ].n );
         }
-        if (m_used & k_mask) {
-            printf( "%*lld  ", m_width, (long long) m_values[ m_index ].k );
+        if (used_ & k_mask) {
+            printf( "%*lld  ", width_, (long long) values_[ index_ ].k );
         }
     }
 }
@@ -462,15 +462,15 @@ void ParamInt3::print() const
 // virtual
 void ParamInt3::header( int line ) const
 {
-    if (m_width > 0) {
-        if (m_used & m_mask) {
-            printf( "%*s  ", m_width, (line == 0 ? "" : "m") );
+    if (width_ > 0) {
+        if (used_ & m_mask) {
+            printf( "%*s  ", width_, (line == 0 ? "" : "m") );
         }
-        if (m_used & n_mask) {
-            printf( "%*s  ", m_width, (line == 0 ? "" : "n") );
+        if (used_ & n_mask) {
+            printf( "%*s  ", width_, (line == 0 ? "" : "n") );
         }
-        if (m_used & k_mask) {
-            printf( "%*s  ", m_width, (line == 0 ? "" : "k") );
+        if (used_ & k_mask) {
+            printf( "%*s  ", width_, (line == 0 ? "" : "k") );
         }
     }
 }
@@ -512,13 +512,13 @@ void ParamDouble::parse( const char *str )
 // -----------------------------------------------------------------------------
 void ParamDouble::push_back( double val )
 {
-    if (val < m_min_value || val > m_max_value) {
+    if (val < min_value_ || val > max_value_) {
         char msg[1000];
         snprintf( msg, sizeof(msg),
                   "invalid argument, %.*f outside [%.*f, %.*f]",
-                  m_precision, val,
-                  m_precision, m_min_value,
-                  m_precision, m_max_value );
+                  precision_, val,
+                  precision_, min_value_,
+                  precision_, max_value_ );
         throw std::runtime_error( msg );
     }
     TParamBase<double>::push_back( val );
@@ -533,15 +533,15 @@ void ParamDouble::push_back( double val )
 // virtual
 void ParamDouble::print() const
 {
-    if (m_used && m_width > 0) {
-        if (same( no_data_flag, m_values[ m_index ] )) {
-            printf( "%*s  ", m_width, "NA" );
+    if (used_ && width_ > 0) {
+        if (same( no_data_flag, values_[ index_ ] )) {
+            printf( "%*s  ", width_, "NA" );
         }
         else {
-            if (std::abs( m_values[ m_index ] ) < 1)
-                printf( "%#*.*g  ", m_width, m_precision, m_values[ m_index ] );
+            if (std::abs( values_[ index_ ] ) < 1)
+                printf( "%#*.*g  ", width_, precision_, values_[ index_ ] );
             else
-                printf( "%*.*f  ", m_width, m_precision, m_values[ m_index ] );
+                printf( "%*.*f  ", width_, precision_, values_[ index_ ] );
         }
     }
 }
@@ -550,14 +550,14 @@ void ParamDouble::print() const
 // virtual
 void ParamDouble::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default ",
-                m_prefix.c_str(), m_help.c_str() );
-        if (same( no_data_flag, m_default_value )) {
+                prefix_.c_str(), help_.c_str() );
+        if (same( no_data_flag, default_value_ )) {
             printf( "NA\n" );
         }
         else {
-            printf( "%.*f\n", m_precision, m_default_value );
+            printf( "%.*f\n", precision_, default_value_ );
         }
     }
 }
@@ -570,12 +570,12 @@ void ParamDouble::help() const
 // virtual
 void ParamScientific::print() const
 {
-    if (m_used && m_width > 0) {
-        if (same( no_data_flag, m_values[ m_index ] )) {
-            printf( "%*s  ", m_width, "NA" );
+    if (used_ && width_ > 0) {
+        if (same( no_data_flag, values_[ index_ ] )) {
+            printf( "%*s  ", width_, "NA" );
         }
         else {
-            printf( "%*.*e  ", m_width, m_precision, m_values[ m_index ] );
+            printf( "%*.*e  ", width_, precision_, values_[ index_ ] );
         }
     }
 }
@@ -584,14 +584,14 @@ void ParamScientific::print() const
 // virtual
 void ParamScientific::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default ",
-                m_prefix.c_str(), m_help.c_str() );
-        if (same( no_data_flag, m_default_value )) {
+                prefix_.c_str(), help_.c_str() );
+        if (same( no_data_flag, default_value_ )) {
             printf( "NA\n" );
         }
         else {
-            printf( "%.*e\n", m_precision, m_default_value );
+            printf( "%.*e\n", precision_, default_value_ );
         }
     }
 }
@@ -605,9 +605,9 @@ void ParamScientific::help() const
 // If no valid strings are set, always returns true.
 bool ParamString::is_valid( const std::string& str )
 {
-    if (m_valid.size() == 0)
+    if (valid_.size() == 0)
         return true;
-    for (auto iter = m_valid.begin(); iter != m_valid.end(); ++iter) {
+    for (auto iter = valid_.begin(); iter != valid_.end(); ++iter) {
         if (str == *iter)
             return true;
     }
@@ -642,8 +642,8 @@ void ParamString::push_back( const char* str )
 // virtual
 void ParamString::print() const
 {
-    if (m_used && m_width > 0) {
-        printf( "%-*s  ", m_width, m_values[ m_index ].c_str() );
+    if (used_ && width_ > 0) {
+        printf( "%-*s  ", width_, values_[ index_ ].c_str() );
     }
 }
 
@@ -651,13 +651,13 @@ void ParamString::print() const
 // virtual
 void ParamString::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %s",
-                m_prefix.c_str(), m_help.c_str(),
-                m_default_value.c_str() );
-        if (m_valid.size() > 0) {
+                prefix_.c_str(), help_.c_str(),
+                default_value_.c_str() );
+        if (valid_.size() > 0) {
             printf( "; valid: " );
-            for (auto iter = m_valid.begin(); iter != m_valid.end(); ++iter) {
+            for (auto iter = valid_.begin(); iter != valid_.end(); ++iter) {
                 printf( "%s ", iter->c_str() );
             }
         }
@@ -669,7 +669,7 @@ void ParamString::help() const
 // Set the allowed strings
 void ParamString::add_valid( const char* str )
 {
-    m_valid.push_back( str );
+    valid_.push_back( str );
 }
 
 // -----------------------------------------------------------------------------
@@ -678,8 +678,8 @@ void ParamString::add_valid( const char* str )
 // virtual
 void ParamString::header( int line ) const
 {
-    if (m_used && m_width > 0) {
-        printf( "%-*s  ", m_width, (line == 0 ? "" : m_name.c_str()) );
+    if (used_ && width_ > 0) {
+        printf( "%-*s  ", width_, (line == 0 ? "" : name_.c_str()) );
     }
 }
 
@@ -714,10 +714,10 @@ void ParamChar::parse( const char *str )
 // -----------------------------------------------------------------------------
 void ParamChar::push_back( char val )
 {
-    if (m_valid.find( val ) == std::string::npos) {  // not found
+    if (valid_.find( val ) == std::string::npos) {  // not found
         char msg[1000];
         snprintf( msg, sizeof(msg), "invalid option, %c not in [%s]",
-                  val, m_valid.c_str() );
+                  val, valid_.c_str() );
         throw std::runtime_error( msg );
     }
     TParamBase<char>::push_back( val );
@@ -727,8 +727,8 @@ void ParamChar::push_back( char val )
 // virtual
 void ParamChar::print() const
 {
-    if (m_used && m_width > 0) {
-        printf( "%*c  ", m_width, m_values[ m_index ] );
+    if (used_ && width_ > 0) {
+        printf( "%*c  ", width_, values_[ index_ ] );
     }
 }
 
@@ -736,10 +736,10 @@ void ParamChar::print() const
 // virtual
 void ParamChar::help() const
 {
-    if (m_type == ParamType::Value || m_type == ParamType::List) {
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %c; valid: [%s]\n",
-                m_prefix.c_str(), m_help.c_str(),
-                m_default_value, m_valid.c_str() );
+                prefix_.c_str(), help_.c_str(),
+                default_value_, valid_.c_str() );
     }
 }
 
@@ -768,11 +768,11 @@ void ParamsBase::parse( const char *routine, int n, char **args )
             {
                 // handles both "--arg value" (two arg)
                 // and          "--arg=value" (one arg)
-                size_t plen = (*param)->m_prefix.size();
-                if (strncmp( arg, (*param)->m_prefix.c_str(), plen ) == 0
+                size_t plen = (*param)->prefix_.size();
+                if (strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0
                     && (len == plen || (len > plen && arg[plen] == '=')))
                 {
-                    if ( ! (*param)->m_used) {
+                    if ( ! (*param)->used_) {
                         char msg[1000];
                         snprintf( msg, sizeof(msg),
                                   "invalid parameter for routine '%s'",
@@ -787,7 +787,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                     }
                     else {
                         // --arg=value (one argument)
-                        value = arg + (*param)->m_prefix.size() + 1;
+                        value = arg + (*param)->prefix_.size() + 1;
                     }
                     (*param)->parse( value );
                     found = true;
@@ -868,7 +868,7 @@ void ParamsBase::help( const char *routine )
     for (auto param = ParamBase::s_params.begin();
          param != ParamBase::s_params.end(); ++param)
     {
-        if ((*param)->m_used && (*param)->m_type == ParamType::Value)
+        if ((*param)->used_ && (*param)->type_ == ParamType::Value)
             (*param)->help();
     }
     printf( "\n%sParameters that take comma-separated list of values and may be repeated:%s\n",
@@ -876,7 +876,7 @@ void ParamsBase::help( const char *routine )
     for (auto param = ParamBase::s_params.begin();
          param != ParamBase::s_params.end(); ++param)
     {
-        if ((*param)->m_used && (*param)->m_type == ParamType::List)
+        if ((*param)->used_ && (*param)->type_ == ParamType::List)
             (*param)->help();
     }
 }
