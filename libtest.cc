@@ -322,7 +322,6 @@ void ParamOkay::print() const
 // virtual
 void ParamInt3::parse( const char *str )
 {
-    bool outer = false;  // todo: add --dim-outer and pass it in somehow
     int64_t m_start, m_end, m_step;
     int64_t n_start, n_end, n_step;
     int64_t k_start, k_end, k_step;
@@ -333,18 +332,28 @@ void ParamInt3::parse( const char *str )
             throw_error( "invalid m dimension at '%s', "
                          "expected integer or range start:end:step", str );
         }
-        // if "x", scan N; else K = N = M
+        // if "*", use Cartesian product
+        // if "x", use "inner" product
+        // if "*" or "x", scan N; else K = N = M
         len = 0;
-        sscanf( str, " x %n", &len );
+        bool cartesian = false;
+        sscanf( str, " * %n", &len );
+        if (len > 0)
+            cartesian = true;
+        else
+            sscanf( str, " x %n", &len );
         if (len > 0) {
             str += len;
             if (scan_range( &str, &n_start, &n_end, &n_step ) != 0) {
                 throw_error( "invalid n dimension at '%s', "
                              "expected integer or range start:end:step", str );
             }
-            // if "x", scan K; else K = N
+            // if "*" or "x", scan K; else K = N
             len = 0;
-            sscanf( str, " x %n", &len );
+            if (cartesian)
+                sscanf( str, " * %n", &len );
+            else
+                sscanf( str, " x %n", &len );
             if (len > 0) {
                 str += len;
                 if (scan_range( &str, &k_start, &k_end, &k_step ) != 0) {
@@ -369,8 +378,8 @@ void ParamInt3::parse( const char *str )
             int3_t dim = { m_start, n_start, k_start };
             push_back( dim );
         }
-        else if (outer) {
-            // outer product of M x N x K
+        else if (cartesian) {
+            // Cartesian product of M x N x K
             // require non-zero step
             if (m_step == 0) m_step = 1;
             if (n_step == 0) n_step = 1;
@@ -801,7 +810,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
 // -----------------------------------------------------------------------------
 bool ParamsBase::next()
 {
-    // "outer product" iteration
+    // "Cartesian product" iteration
     // uses reverse order so in output, parameters on right cycle fastest
     for (auto param = ParamBase::s_params.rbegin();
          param != ParamBase::s_params.rend(); ++param)
