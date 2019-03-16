@@ -32,6 +32,9 @@ public:
 };
 
 // -----------------------------------------------------------------------------
+void throw_error( const char* format, ... );
+
+// -----------------------------------------------------------------------------
 enum class DataType {
     Integer       = 'i',
     Single        = 's',
@@ -46,8 +49,9 @@ enum class DataType {
 inline DataType char2datatype( char ch )
 {
     ch = tolower( ch );
-    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z')
-        throw std::runtime_error( "invalid value for datatype" );
+    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
+        throw_error( "invalid value '%c'", ch );
+    }
     return DataType( ch );
 }
 
@@ -87,8 +91,10 @@ inline DataType str2datatype( const char* str )
           || str_ == "c64"
           || str_ == "complex<double>"
           || str_ == "complex-double") return DataType::DoubleComplex;
-    else
-        throw std::runtime_error( "invalid value for datatype" );
+    else {
+        throw_error( "invalid value '%s'", str );
+        return DataType(0);
+    }
 }
 
 // ----------------------------------------
@@ -534,10 +540,10 @@ void ParamEnum<ENUM>::parse( const char *str )
         // Read next word, up to 80 chars.
         int len;
         int i = sscanf( str, " %80[a-zA-Z0-9_<>-] %n", buf, &len );
-        str += len;
         if (i != 1) {
-            throw std::runtime_error( "invalid option, expected char" );
+            throw_error( "invalid argument at '%s'", str );
         }
+        str += len;
         // Parse word into enum. str2enum_ & char2enum_ throw errors.
         ENUM val;
         if (str2enum_) {
@@ -550,9 +556,8 @@ void ParamEnum<ENUM>::parse( const char *str )
         if (*str == '\0') {
             break;
         }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
         }
         str += 1;
     }

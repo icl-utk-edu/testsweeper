@@ -44,6 +44,18 @@ bool same( double a, double b )
 }
 
 // -----------------------------------------------------------------------------
+/// Throws a std::runtime_error, using a printf-formatted message in format
+/// and subsequent arguments.
+void throw_error( const char* format, ... )
+{
+    char msg[1000];
+    va_list va;
+    va_start( va, format );
+    vsnprintf( msg, sizeof(msg), format, va );
+    throw std::runtime_error( msg );
+}
+
+// -----------------------------------------------------------------------------
 // @brief Scans string for single integer or range of integers (start:end:step).
 //        Advances the string to after the range or number.
 //
@@ -231,8 +243,8 @@ void ParamInt::parse( const char *str )
     while( true ) {
         int64_t start, end, step;
         if (scan_range( &str, &start, &end, &step ) != 0) {
-            throw std::runtime_error(
-                "invalid argument, expected integer or range start:end:step" );
+            throw_error( "invalid argument at '%s',"
+                         " expected integer or range start:end:step", str );
         }
         if (start == end) {
             push_back( start );
@@ -245,9 +257,8 @@ void ParamInt::parse( const char *str )
         if (*str == '\0') {
             break;
         }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
         }
         str += 1;
     }
@@ -257,13 +268,10 @@ void ParamInt::parse( const char *str )
 void ParamInt::push_back( int64_t val )
 {
     if (val < min_value_ || val > max_value_) {
-        char msg[1000];
-        snprintf( msg, sizeof(msg),
-                  "invalid argument, %lld outside [%lld, %lld]",
-                  (long long) val,
-                  (long long) min_value_,
-                  (long long) max_value_ );
-        throw std::runtime_error( msg );
+        throw_error( "invalid argument, %lld outside [%lld, %lld]",
+                     (long long) val,
+                     (long long) min_value_,
+                     (long long) max_value_ );
     }
     TParamBase<int64_t>::push_back( val );
 }
@@ -322,9 +330,8 @@ void ParamInt3::parse( const char *str )
     while (true) {
         // scan M
         if (scan_range( &str, &m_start, &m_end, &m_step ) != 0) {
-            throw std::runtime_error(
-                "invalid m argument, "
-                "expected integer or range start:end:step" );
+            throw_error( "invalid m dimension at '%s', "
+                         "expected integer or range start:end:step", str );
         }
         // if "x", scan N; else K = N = M
         len = 0;
@@ -332,9 +339,8 @@ void ParamInt3::parse( const char *str )
         if (len > 0) {
             str += len;
             if (scan_range( &str, &n_start, &n_end, &n_step ) != 0) {
-                throw std::runtime_error(
-                    "invalid n argument, "
-                    "expected integer or range start:end:step" );
+                throw_error( "invalid n dimension at '%s', "
+                             "expected integer or range start:end:step", str );
             }
             // if "x", scan K; else K = N
             len = 0;
@@ -342,9 +348,8 @@ void ParamInt3::parse( const char *str )
             if (len > 0) {
                 str += len;
                 if (scan_range( &str, &k_start, &k_end, &k_step ) != 0) {
-                    throw std::runtime_error(
-                        "invalid k argument, "
-                        "expected integer or range start:end:step" );
+                    throw_error( "invalid k dimension at '%s', "
+                                 "expected integer or range start:end:step", str );
                 }
             }
             else {
@@ -411,9 +416,8 @@ void ParamInt3::parse( const char *str )
         if (*str == '\0') {
             break;
         }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
         }
         str += 1;
     }
@@ -426,15 +430,12 @@ void ParamInt3::push_back( int3_t val )
         val.n < min_value_ || val.n > max_value_ ||
         val.k < min_value_ || val.k > max_value_)
     {
-        char msg[1000];
-        snprintf( msg, sizeof(msg),
-                  "invalid value, %lld x %lld x %lld outside [%lld, %lld]",
-                  (long long) val.m,
-                  (long long) val.n,
-                  (long long) val.k,
-                  (long long) min_value_,
-                  (long long) max_value_ );
-        throw std::runtime_error( msg );
+        throw_error( "invalid value, %lld x %lld x %lld outside [%lld, %lld]",
+                     (long long) val.m,
+                     (long long) val.n,
+                     (long long) val.k,
+                     (long long) min_value_,
+                     (long long) max_value_ );
     }
     TParamBase<int3_t>::push_back( val );
 }
@@ -486,8 +487,8 @@ void ParamDouble::parse( const char *str )
     double start, end, step;
     while (true) {
         if (scan_range( &str, &start, &end, &step ) != 0) {
-            throw std::runtime_error(
-                "invalid argument, expected float or range start:end:step" );
+            throw_error( "invalid argument at '%s', "
+                         "expected float or range start:end:step", str );
         }
         if (start == end) {
             push_back( start );
@@ -501,9 +502,8 @@ void ParamDouble::parse( const char *str )
         if (*str == '\0') {
             break;
         }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
         }
         str += 1;
     }
@@ -513,13 +513,10 @@ void ParamDouble::parse( const char *str )
 void ParamDouble::push_back( double val )
 {
     if (val < min_value_ || val > max_value_) {
-        char msg[1000];
-        snprintf( msg, sizeof(msg),
-                  "invalid argument, %.*f outside [%.*f, %.*f]",
-                  precision_, val,
-                  precision_, min_value_,
-                  precision_, max_value_ );
-        throw std::runtime_error( msg );
+        throw_error( "invalid argument, %.*f outside [%.*f, %.*f]",
+                     precision_, val,
+                     precision_, min_value_,
+                     precision_, max_value_ );
     }
     TParamBase<double>::push_back( val );
 }
@@ -631,9 +628,7 @@ void ParamString::parse( const char *str )
 void ParamString::push_back( const char* str )
 {
     if (! is_valid(str)) {
-        char msg[1000];
-        snprintf( msg, sizeof(msg), "invalid argument '%s'", str );
-        throw std::runtime_error( msg );
+        throw_error( "invalid argument '%s'", str );
     }
     TParamBase< std::string >::push_back( str );
 }
@@ -695,17 +690,16 @@ void ParamChar::parse( const char *str )
         char val;
         int len;
         int i = sscanf( str, "%c %n", &val, &len );
-        str += len;
         if (i != 1) {
-            throw std::runtime_error( "invalid option, expect char" );
+            throw_error( "invalid argument at '%s', expected one char", str );
         }
+        str += len;
         push_back( val );
         if (*str == '\0') {
             break;
         }
-        if (*str != ',') {
-            throw std::runtime_error(
-                "invalid argument, expected comma delimiter" );
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
         }
         str += 1;
     }
@@ -715,10 +709,7 @@ void ParamChar::parse( const char *str )
 void ParamChar::push_back( char val )
 {
     if (valid_.find( val ) == std::string::npos) {  // not found
-        char msg[1000];
-        snprintf( msg, sizeof(msg), "invalid option, %c not in [%s]",
-                  val, valid_.c_str() );
-        throw std::runtime_error( msg );
+        throw_error( "invalid option, %c not in [%s]", val, valid_.c_str() );
     }
     TParamBase<char>::push_back( val );
 }
@@ -795,7 +786,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                 }
             }
             if (! found) {
-                throw std::runtime_error( "invalid parameter" );
+                throw_error( "invalid parameter" );
             }
         }
         // QuitException is not a runtime_error,

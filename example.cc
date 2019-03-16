@@ -145,7 +145,13 @@ int main( int argc, char** argv )
         // print input so running `test [input] > out.txt` documents input
         printf( "input: %s", argv[0] );
         for (int i = 1; i < argc; ++i) {
-            printf( " %s", argv[i] );
+            // quote arg if necessary
+            std::string arg( argv[i] );
+            const char* wordchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-=";
+            if (arg.find_first_not_of( wordchars ) != std::string::npos)
+                printf( " '%s'", argv[i] );
+            else
+                printf( " %s", argv[i] );
         }
         printf( "\n" );
 
@@ -258,7 +264,9 @@ void test_foo_work( Params &params, bool run )
     typedef typename traits<T>::norm_t norm_t;
 
     // get & mark input and non-standard output values
+    int64_t m = params.dim.m();
     int64_t n = params.dim.n();
+    int64_t k = params.dim.k();
     int64_t cache = params.cache.value();
     bool check = (params.check.value() == 'y');
     bool ref = (params.ref.value() == 'y');
@@ -277,7 +285,7 @@ void test_foo_work( Params &params, bool run )
     // ----------
     // setup
     double time;
-    double gflop = 2*n;
+    double gflop = 2*m*n*k * 1e-9;
 
     // run test
     libtest::flush_cache( cache );
@@ -329,6 +337,10 @@ void test_foo( Params &params, bool run )
 
         case libtest::DataType::DoubleComplex:
             test_foo_work< std::complex<double> >( params, run );
+            break;
+
+        default:
+            throw std::runtime_error( "unknown datatype" );
             break;
     }
 }
