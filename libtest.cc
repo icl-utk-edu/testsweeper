@@ -769,15 +769,10 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                 // handles both "--arg value" (two arg)
                 // and          "--arg=value" (one arg)
                 size_t plen = (*param)->prefix_.size();
-                if (strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0
-                    && (len == plen || (len > plen && arg[plen] == '=')))
-                {
+                if (strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0) {
                     if ( ! (*param)->used_) {
-                        char msg[1000];
-                        snprintf( msg, sizeof(msg),
-                                  "invalid parameter for routine '%s'",
-                                  routine );
-                        throw std::runtime_error( msg );
+                        throw_error( "invalid parameter for routine '%s'",
+                                     routine );
                     }
                     const char *value;
                     if (len == plen && i+1 < n) {
@@ -785,9 +780,12 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                         i += 1;
                         value = args[i];
                     }
-                    else {
+                    else if (len > plen+1 && arg[plen] == '=') {
                         // --arg=value (one argument)
                         value = arg + (*param)->prefix_.size() + 1;
+                    }
+                    else {
+                        throw_error( "requires an argument" );
                     }
                     (*param)->parse( value );
                     found = true;
