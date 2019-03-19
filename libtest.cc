@@ -770,8 +770,10 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                 // handles both "--arg value" (two arg)
                 // and          "--arg=value" (one arg)
                 size_t plen = (*param)->prefix_.size();
-                if (strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0) {
-                    if ( ! (*param)->used_) {
+                if ((len == plen || (len >= plen && arg[plen] == '=')) &&
+                    strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0)
+                {
+                    if (! (*param)->used()) {
                         throw_error( "invalid parameter for routine '%s'",
                                      routine );
                     }
