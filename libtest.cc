@@ -777,7 +777,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                         throw_error( "invalid parameter for routine '%s'",
                                      routine );
                     }
-                    const char *value;
+                    const char *value = nullptr;
                     if (len == plen && i+1 < n) {
                         // --arg value (two arguments)
                         i += 1;
