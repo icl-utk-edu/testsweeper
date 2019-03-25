@@ -84,8 +84,8 @@ dep     += $(addsuffix .d, $(basename $(test_src)))
 
 test     = example
 
-lib_a  = ./testsweeper.a
-lib_so = ./testsweeper.so
+lib_a  = ./libtestsweeper.a
+lib_so = ./libtestsweeper.so
 
 ifeq ($(static),1)
 	lib = $(lib_a)
@@ -98,7 +98,7 @@ endif
 
 # additional flags and libraries for testers
 TEST_LDFLAGS += -L. -Wl,-rpath,$(abspath .)
-TEST_LIBS    += -ltest
+TEST_LIBS    += -ltestsweeper
 
 #-------------------------------------------------------------------------------
 # Rules
