@@ -7,16 +7,16 @@
 #include "example.hh"
 
 // -----------------------------------------------------------------------------
-using libtest::ParamType;
-using libtest::DataType;
-using libtest::char2datatype;
-using libtest::datatype2char;
-using libtest::str2datatype;
-using libtest::datatype2str;
-using libtest::ansi_bold;
-using libtest::ansi_red;
-using libtest::ansi_normal;
-using libtest::get_wtime;
+using testsweeper::ParamType;
+using testsweeper::DataType;
+using testsweeper::char2datatype;
+using testsweeper::datatype2char;
+using testsweeper::str2datatype;
+using testsweeper::datatype2str;
+using testsweeper::ansi_bold;
+using testsweeper::ansi_red;
+using testsweeper::ansi_normal;
+using testsweeper::get_wtime;
 
 // -----------------------------------------------------------------------------
 enum Section {
@@ -35,7 +35,7 @@ const char* section_names[] = {
 };
 
 // { "", nullptr, Section::newline } entries force newline in help
-std::vector< libtest::routines_t > routines = {
+std::vector< testsweeper::routines_t > routines = {
     // Level 1
     { "foo",    test_foo,       Section::level1 },
     { "foo2",   test_foo,       Section::level1 },
@@ -135,7 +135,7 @@ Params::Params():
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    using libtest::QuitException;
+    using testsweeper::QuitException;
 
     // check that all sections have names
     assert( sizeof(section_names)/sizeof(*section_names) == Section::num_sections );
@@ -166,7 +166,7 @@ int main( int argc, char** argv )
 
         // find routine to test
         const char* routine = argv[1];
-        libtest::test_func_ptr test_routine = find_tester( routine, routines );
+        testsweeper::test_func_ptr test_routine = find_tester( routine, routines );
         if (test_routine == nullptr) {
             usage( argc, argv, routines, section_names );
             throw std::runtime_error(
@@ -188,7 +188,7 @@ int main( int argc, char** argv )
 
         // run tests
         int repeat = params.repeat.value();
-        libtest::DataType last = params.datatype.value();
+        testsweeper::DataType last = params.datatype.value();
         params.header();
         do {
             if (params.datatype.value() != last) {
@@ -288,7 +288,7 @@ void test_foo_work( Params &params, bool run )
     double gflop = 2*m*n*k * 1e-9;
 
     // run test
-    libtest::flush_cache( cache );
+    testsweeper::flush_cache( cache );
     time = get_wtime();
     usleep( 100*n );  // placeholder; 0.0001 n sec
     time = get_wtime() - time;
@@ -297,7 +297,7 @@ void test_foo_work( Params &params, bool run )
 
     if (ref) {
         // run LAPACK
-        libtest::flush_cache( cache );
+        testsweeper::flush_cache( cache );
         time = get_wtime();
         usleep( 200*n );  // placeholder; 0.0002 n sec
         time = get_wtime() - time;
@@ -319,23 +319,23 @@ void test_foo_work( Params &params, bool run )
 void test_foo( Params &params, bool run )
 {
     switch (params.datatype.value()) {
-        case libtest::DataType::Integer:
+        case testsweeper::DataType::Integer:
             test_foo_work< float >( params, run );
             break;
 
-        case libtest::DataType::Single:
+        case testsweeper::DataType::Single:
             test_foo_work< float >( params, run );
             break;
 
-        case libtest::DataType::Double:
+        case testsweeper::DataType::Double:
             test_foo_work< double >( params, run );
             break;
 
-        case libtest::DataType::SingleComplex:
+        case testsweeper::DataType::SingleComplex:
             test_foo_work< std::complex<float> >( params, run );
             break;
 
-        case libtest::DataType::DoubleComplex:
+        case testsweeper::DataType::DoubleComplex:
             test_foo_work< std::complex<double> >( params, run );
             break;
 

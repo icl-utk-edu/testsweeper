@@ -11,9 +11,9 @@
     #include <sys/time.h>
 #endif
 
-#include "libtest.hh"
+#include "testsweeper.hh"
 
-namespace libtest {
+namespace testsweeper {
 
 // numeric flag indicating no data; printed as "NA" instead of "nan"
 double no_data_flag = nan("1234");
@@ -901,7 +901,7 @@ void usage(
     std::vector< routines_t >& routines,
     const char **section_names )
 {
-    using namespace libtest;
+    using namespace testsweeper;
     int ncols = 4;
     printf( "%sUsage:%s %s [-h|--help]\n"
             "       %s routine [-h|--help]\n"
@@ -945,4 +945,4 @@ double get_wtime()
     #endif
 }
 
-} // namespace libtest
+} // namespace testsweeper

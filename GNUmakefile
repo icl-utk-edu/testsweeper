@@ -1,11 +1,11 @@
 # Usage:
 # make by default:
 #    - Runs configure.py to create make.inc, if it doesn't exist.
-#    - Compiles libtest.so, or libtest.a (if static=1).
+#    - Compiles testsweeper.so, or testsweeper.a (if static=1).
 #    - Compiles the tester, example.
 #
 # make config    - Runs configure.py to create make.inc.
-# make lib       - Compiles libtest.so, or libtest.a (if static=1).
+# make lib       - Compiles testsweeper.so, or testsweeper.a (if static=1).
 # make clean     - Deletes all objects, libraries, and the tester.
 # make distclean - Also deletes make.inc and dependency files (*.d).
 
@@ -15,7 +15,7 @@
 #   CXX, CXXFLAGS   -- C compiler and flags
 #   LDFLAGS, LIBS   -- Linker options, library paths, and libraries
 #   AR, RANLIB      -- Archiver, ranlib updates library TOC
-#   prefix          -- where to install libtest
+#   prefix          -- where to install testsweeper
 #
 # OpenMP is optional; used only for timer and flushing caches.
 
@@ -74,7 +74,7 @@ endif
 #-------------------------------------------------------------------------------
 # Files
 
-lib_src  = libtest.cc
+lib_src  = testsweeper.cc
 lib_obj  = $(addsuffix .o, $(basename $(lib_src)))
 dep      = $(addsuffix .d, $(basename $(lib_src)))
 
@@ -84,8 +84,8 @@ dep     += $(addsuffix .d, $(basename $(test_src)))
 
 test     = example
 
-lib_a  = ./libtest.a
-lib_so = ./libtest.so
+lib_a  = ./testsweeper.a
+lib_so = ./testsweeper.so
 
 ifeq ($(static),1)
 	lib = $(lib_a)
@@ -94,7 +94,7 @@ else
 endif
 
 #-------------------------------------------------------------------------------
-# libtest specific flags and libraries
+# testsweeper specific flags and libraries
 
 # additional flags and libraries for testers
 TEST_LDFLAGS += -L. -Wl,-rpath,$(abspath .)
@@ -113,14 +113,14 @@ install: lib
 	mkdir -p $(DESTDIR)$(prefix)/include
 	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 	cp *.{hh} $(DESTDIR)$(prefix)/include
-	cp libtest.* $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
+	cp testsweeper.* $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 
 uninstall:
 	$(RM) $(addprefix $(DESTDIR)$(prefix), $(headers))
-	$(RM) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/libtest.*
+	$(RM) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/testsweeper.*
 
 #-------------------------------------------------------------------------------
-# libtest library
+# testsweeper library
 $(lib_so): $(lib_obj)
 	mkdir -p lib
 	$(CXX) $(LDFLAGS) -shared $(install_name) $(lib_obj) $(LIBS) -o $@
@@ -179,14 +179,14 @@ distclean: clean
 
 # preprocess source
 %.i: %.cc
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(libtest_dir) -E $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -E $< -o $@
 
 # precompile header to check for errors
 %.h.gch: %.h
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(libtest_dir) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -c $< -o $@
 
 %.hh.gch: %.hh
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(libtest_dir) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -c $< -o $@
 
 -include $(dep)
 

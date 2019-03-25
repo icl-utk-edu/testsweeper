@@ -14,7 +14,7 @@ from   config import Error
 # header
 
 print( '-'*80 + '\n' +
-ansi_bold + ansi_red + '                              Welcome to libtest.' +
+ansi_bold + ansi_red + '                              Welcome to testsweeper.' +
 ansi_normal + '''
 
 By default, configure will automatically choose the first valid value it finds
@@ -28,7 +28,7 @@ setting CXX, as the automated search may prefer a different compiler.
 
 #-------------------------------------------------------------------------------
 def main():
-    config.init( prefix='/usr/local/libtest' )
+    config.init( prefix='/usr/local/testsweeper' )
     config.prog_cxx()
     config.prog_cxx_flags([
         '-O2', '-std=c++11', '-MMD',
@@ -53,4 +53,4 @@ try:
     main()
 except Error as err:
     print( ansi_bold + ansi_red + 'A fatal error occurred. ' + str(err) + '\n'
-           'libtest could not be configured.' + ansi_normal )
+           'testsweeper could not be configured.' + ansi_normal )

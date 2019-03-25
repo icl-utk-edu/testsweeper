@@ -11,7 +11,7 @@
 #include <algorithm>
 
 
-namespace libtest {
+namespace testsweeper {
 
 extern double no_data_flag;
 
@@ -600,14 +600,14 @@ public:
     void help( const char* routine );
 };
 
-}  // namespace libtest
+}  // namespace testsweeper
 
 // =============================================================================
-// main must define Params class (which is not in libtest namespace),
+// main must define Params class (which is not in testsweeper namespace),
 // as a subclass of ParamsBase
 class Params;
 
-namespace libtest {
+namespace testsweeper {
 
 typedef void (*test_func_ptr)( Params& params, bool run );
 
@@ -628,6 +628,6 @@ void usage(
 
 double get_wtime();
 
-}  // namespace libtest
+}  // namespace testweeper
 
 #endif        //  #ifndef LIBTEST_HH
