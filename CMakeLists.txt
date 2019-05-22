@@ -61,9 +61,9 @@ endif()
 message("cmake install prefix: " ${CMAKE_INSTALL_PREFIX})
 install (TARGETS testsweeper
     EXPORT testsweeperTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/test/lib
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/test/lib
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/test/include
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/lib
+    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/include
 )
 
 install(
