@@ -19,6 +19,13 @@ extern double no_data_flag;
 // ANSI color codes
 extern const char *ansi_esc;
 extern const char *ansi_red;
+extern const char *ansi_green;
+extern const char *ansi_blue;
+extern const char *ansi_cyan;
+extern const char *ansi_magenta;
+extern const char *ansi_yellow;
+extern const char *ansi_white;
+extern const char *ansi_gray;
 extern const char *ansi_bold;
 extern const char *ansi_normal;
 
