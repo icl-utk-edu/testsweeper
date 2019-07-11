@@ -1,4 +1,4 @@
-# CMake script for libtest framerwork
+# CMake script for libtest framework
 # needed to build BLASPP/test, LAPACK/test, SLATE/test
 # repo: http://bitbucket.org/icl/libtest
 
@@ -30,19 +30,13 @@ add_library (libtest
 )
 
 target_include_directories (libtest PUBLIC
-    #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    #$<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 set_target_properties (libtest PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
-)
-
-target_include_directories (libtest PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 if(NO_COLOR)
@@ -58,7 +52,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         FORCE
         )
 endif()
-message("cmake install prefix: " ${CMAKE_INSTALL_PREFIX})
+
 install (TARGETS libtest
     EXPORT libtestTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/test/lib
@@ -72,18 +66,29 @@ install(
 )
 
 export(EXPORT libtestTargets
-    FILE ${CMAKE_INSTALL_PREFIX}/test/libtestTargets.cmake
+    FILE libtestTargets.cmake
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtestConfig.cmake.in
-    ${CMAKE_INSTALL_PREFIX}/test/libtestConfig.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/libtestConfig.cmake
     COPYONLY
 )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtestConfig.cmake.in
-    ${CMAKE_INSTALL_PREFIX}/test/libtestConfig.cmake
-    COPYONLY
-    )
+install (
+    EXPORT
+        libtestTargets
+    FILE
+        libtestTargets.cmake
+    DESTINATION
+        ${CMAKE_INSTALL_PREFIX}/test
+)
+
+install (
+    FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/libtestConfig.cmake
+    DESTINATION
+        ${CMAKE_INSTALL_PREFIX}/test
+)
 
 if(BUILD_TESTS)
     add_executable(testExample example.cc)
