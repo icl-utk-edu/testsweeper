@@ -55,14 +55,14 @@ endif()
 
 install (TARGETS libtest
     EXPORT libtestTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/test/lib
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/test/lib
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/test/include
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
 
 install(
     FILES libtest.hh
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/test/include
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 )
 
 export(EXPORT libtestTargets
@@ -80,14 +80,14 @@ install (
     FILE
         libtestTargets.cmake
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/test
+        ${CMAKE_INSTALL_PREFIX}
 )
 
 install (
     FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/libtestConfig.cmake
     DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/test
+        ${CMAKE_INSTALL_PREFIX}
 )
 
 if(BUILD_TESTS)
