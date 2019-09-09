@@ -76,7 +76,7 @@ configure_file(libtestConfig.cmake.in
 )
 
 install (
-    FILES libtestConfig.cmake
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/libtestConfig.cmake
     DESTINATION lib/libtest
 )
 
