@@ -56,6 +56,7 @@ endif()
 install (TARGETS libtest
     EXPORT libtestTargets
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
     INCLUDES DESTINATION include
 )
 
