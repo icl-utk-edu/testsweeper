@@ -30,9 +30,7 @@ add_library (testsweeper
 )
 
 target_include_directories (testsweeper PUBLIC
-    #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    #$<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 set_target_properties (testsweeper PROPERTIES
@@ -58,26 +56,38 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         FORCE
         )
 endif()
-message("cmake install prefix: " ${CMAKE_INSTALL_PREFIX})
+
+#message("cmake install prefix: " ${CMAKE_INSTALL_PREFIX})
 install (TARGETS testsweeper
     EXPORT testsweeperTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/lib
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/lib
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/include
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
+)
+
+install (
+    EXPORT testsweeperTargets
+    DESTINATION lib/testsweeper
 )
 
 install(
     FILES testsweeper.hh
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/testsweeper/include
+    DESTINATION include
 )
 
-export(EXPORT testsweeperTargets
-    FILE ${CMAKE_INSTALL_PREFIX}/testsweeper/testsweeperTargets.cmake
-)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testsweeperConfig.cmake.in
-    ${CMAKE_INSTALL_PREFIX}/testsweeper/testsweeperConfig.cmake
+configure_file(testsweeperConfig.cmake.in
+    testsweeperConfig.cmake
     COPYONLY
+)
+
+install (
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfig.cmake
+    DESTINATION lib/testsweeper
+)
+
+export (
+    EXPORT testsweeperTargets
+    FILE testsweeperTargets.cmake
 )
 
 if(BUILD_TESTS)
