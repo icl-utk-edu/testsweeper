@@ -39,10 +39,6 @@ set_target_properties (testsweeper PROPERTIES
     CXX_EXTENSIONS NO
 )
 
-target_include_directories (testsweeper PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 if(NO_COLOR)
     target_compile_definitions(testsweeper PUBLIC
         NO_COLOR
