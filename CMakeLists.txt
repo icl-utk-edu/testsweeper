@@ -115,5 +115,5 @@ if(BUILD_TESTS)
         PROPERTIES
             PASS_REGULAR_EXPRESSION
                 "(All tests passed)"
-    )
+        )
 endif(BUILD_TESTS)

@@ -19,6 +19,13 @@ extern double no_data_flag;
 // ANSI color codes
 extern const char *ansi_esc;
 extern const char *ansi_red;
+extern const char *ansi_green;
+extern const char *ansi_blue;
+extern const char *ansi_cyan;
+extern const char *ansi_magenta;
+extern const char *ansi_yellow;
+extern const char *ansi_white;
+extern const char *ansi_gray;
 extern const char *ansi_bold;
 extern const char *ansi_normal;
 
@@ -510,13 +517,13 @@ public:
     // Takes str2enum, enum2str.
     ParamEnum( const char* name, int width, ParamType type,
                ENUM default_value,
-               str2enum str2enum, enum2str enum2str,
+               str2enum in_str2enum, enum2str in_enum2str,
                const char* help ):
         TParamBase<ENUM>( name, width, type, default_value, help ),
         char2enum_( nullptr ),
         enum2char_( nullptr ),
-        str2enum_( str2enum ),
-        enum2str_( enum2str )
+        str2enum_( in_str2enum ),
+        enum2str_( in_enum2str )
     {}
 
     virtual void parse( const char* str );

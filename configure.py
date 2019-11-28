@@ -54,3 +54,4 @@ try:
 except Error as err:
     print( ansi_bold + ansi_red + 'A fatal error occurred. ' + str(err) + '\n'
            'testsweeper could not be configured.' + ansi_normal )
+    exit(1)
