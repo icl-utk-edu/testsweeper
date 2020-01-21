@@ -1,13 +1,17 @@
 # Usage:
-# make by default:
+# `make` by default does:
 #    - Runs configure.py to create make.inc, if it doesn't exist.
-#    - Compiles testsweeper.so, or testsweeper.a (if static=1).
-#    - Compiles the tester, example.
+#    - make lib
+#    - make tester
 #
 # make config    - Runs configure.py to create make.inc.
-# make lib       - Compiles testsweeper.so, or testsweeper.a (if static=1).
+# make lib       - Compiles libtestsweeper.so.
+# make tester    - Compiles example.
+# make install   - Installs the library and headers to $prefix.
+# make uninstall - Remove installed library and headers from $prefix.
 # make clean     - Deletes all objects, libraries, and the tester.
 # make distclean - Also deletes make.inc and dependency files (*.d).
+# If static=1, makes .a instead of .so library.
 
 #-------------------------------------------------------------------------------
 # Configuration
@@ -19,56 +23,52 @@
 #
 # OpenMP is optional; used only for timer and flushing caches.
 
-include make.inc
+ifeq ($(MAKECMDGOALS),config)
+    # For `make config`, don't include make.inc with previous config;
+    # force re-creating make.inc.
+    .PHONY: config
+    config: make.inc
 
-# Existence of .make.inc.$${PPID} is used so 'make config' doesn't run
-# configure.py twice when make.inc doesn't exist initially.
+    make.inc: force
+
+    force: ;
+else ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
+    # For `make clean` or `make distclean`, don't include make.inc,
+    # which could generate it. Otherwise, include make.inc.
+    include make.inc
+endif
+
 make.inc:
 	python configure.py
-	touch .make.inc.$${PPID}
 
-.PHONY: config
-config:
-	if [ ! -e .make.inc.$${PPID} ]; then \
-		python configure.py; \
-	fi
-
-# defaults if not given in make.inc
-CXXFLAGS ?= -O3 -std=c++11 -MMD \
-            -Wall -pedantic \
-            -Wshadow \
-            -Wno-unused-local-typedefs \
-            -Wno-unused-function \
-
-#CXXFLAGS += -Wmissing-declarations
-#CXXFLAGS += -Wconversion
-#CXXFLAGS += -Werror
-
-# GNU make doesn't have defaults for these
+# Defaults if not given in make.inc. GNU make doesn't have defaults for these.
 RANLIB   ?= ranlib
-prefix   ?= /usr/local/lapackpp
+prefix   ?= /usr/local/testsweeper
 
 # auto-detect OS
 # $OSTYPE may not be exported from the shell, so echo it
 ostype = $(shell echo $${OSTYPE})
 ifneq ($(findstring darwin, $(ostype)),)
-	# MacOS is darwin
-	macos = 1
+    # MacOS is darwin
+    macos = 1
 endif
 
 #-------------------------------------------------------------------------------
 # if shared
 ifneq ($(static),1)
-	CXXFLAGS += -fPIC
-	LDFLAGS  += -fPIC
+    CXXFLAGS += -fPIC
+    LDFLAGS  += -fPIC
+    lib_ext = so
+else
+    lib_ext = a
 endif
 
 #-------------------------------------------------------------------------------
 # MacOS needs shared library's path set
 ifeq ($(macos),1)
-	install_name = -install_name @rpath/$(notdir $@)
+    install_name = -install_name @rpath/$(notdir $@)
 else
-	install_name =
+    install_name =
 endif
 
 #-------------------------------------------------------------------------------
@@ -76,22 +76,13 @@ endif
 
 lib_src  = testsweeper.cc
 lib_obj  = $(addsuffix .o, $(basename $(lib_src)))
-dep      = $(addsuffix .d, $(basename $(lib_src)))
+dep     += $(addsuffix .d, $(basename $(lib_src)))
 
-test_src = example.cc
-test_obj = $(addsuffix .o, $(basename $(test_src)))
-dep     += $(addsuffix .d, $(basename $(test_src)))
+tester_src = example.cc
+tester_obj = $(addsuffix .o, $(basename $(tester_src)))
+dep       += $(addsuffix .d, $(basename $(tester_src)))
 
-test     = example
-
-lib_a  = ./libtestsweeper.a
-lib_so = ./libtestsweeper.so
-
-ifeq ($(static),1)
-	lib = $(lib_a)
-else
-	lib = $(lib_so)
-endif
+tester = example
 
 #-------------------------------------------------------------------------------
 # testsweeper specific flags and libraries
@@ -104,29 +95,35 @@ TEST_LIBS    += -ltestsweeper
 # Rules
 .DELETE_ON_ERROR:
 .SUFFIXES:
-.PHONY: all lib src test headers include docs clean distclean
+.PHONY: all lib src test tester headers include docs clean distclean
 .DEFAULT_GOAL = all
 
-all: lib test
+all: lib tester
 
 install: lib
 	mkdir -p $(DESTDIR)$(prefix)/include
 	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
-	cp *.{hh} $(DESTDIR)$(prefix)/include
-	cp testsweeper.* $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
+	cp $(headers) $(DESTDIR)$(prefix)/include
+	cp $(lib) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 
 uninstall:
-	$(RM) $(addprefix $(DESTDIR)$(prefix), $(headers))
-	$(RM) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/testsweeper.*
+	$(RM) $(addprefix $(DESTDIR)$(prefix)/include/, $(headers))
+	$(RM) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/libtestsweeper.*
+
+#-------------------------------------------------------------------------------
+# if re-configured, recompile everything
+$(lib_obj) $(tester_obj): make.inc
 
 #-------------------------------------------------------------------------------
 # testsweeper library
+lib_a  = libtestsweeper.a
+lib_so = libtestsweeper.so
+lib    = libtestsweeper.$(lib_ext)
+
 $(lib_so): $(lib_obj)
-	mkdir -p lib
 	$(CXX) $(LDFLAGS) -shared $(install_name) $(lib_obj) $(LIBS) -o $@
 
 $(lib_a): $(lib_obj)
-	mkdir -p lib
 	$(RM) $@
 	$(AR) cr $@ $(lib_obj)
 	$(RANLIB) $@
@@ -135,22 +132,24 @@ lib: $(lib)
 
 #-------------------------------------------------------------------------------
 # tester
-$(test): $(test_obj) $(lib)
-	$(CXX) $(TEST_LDFLAGS) $(LDFLAGS) $(test_obj) \
+$(tester): $(tester_obj) $(lib)
+	$(CXX) $(TEST_LDFLAGS) $(LDFLAGS) $(tester_obj) \
 		$(TEST_LIBS) $(LIBS) -o $@
 
-test: $(test)
+# sub-directory rules
+test: $(tester)
+tester: $(tester)
 
 #-------------------------------------------------------------------------------
 # headers
 # precompile headers to verify self-sufficiency
-headers     = $(wildcard include/*.hh)
-headers_gch = $(addsuffix .gch, $(headers))
+headers     = testsweeper.hh
+headers_gch = $(addsuffix .gch, $(basename $(headers)))
 
 headers: $(headers_gch)
 
 headers/clean:
-	$(RM) *.hh.gch
+	$(RM) $(headers_gch)
 
 #-------------------------------------------------------------------------------
 # documentation
@@ -162,31 +161,27 @@ docs:
 	@echo "Documentation available in docs/html/index.html"
 	@echo ========================================
 
-# sub-directory redirects
-src/docs: docs
-test/docs: docs
-
 #-------------------------------------------------------------------------------
 # general rules
 clean:
-	$(RM) *.o *.a *.so example
+	$(RM) *.o *.a *.so *.gch $(tester)
 
 distclean: clean
-	$(RM) make.inc *.d
+	$(RM) make.inc $(dep)
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # preprocess source
 %.i: %.cc
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -E $< -o $@
+	$(CXX) $(CXXFLAGS) -E $< -o $@
 
 # precompile header to check for errors
-%.h.gch: %.h
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -c $< -o $@
+%.gch: %.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.hh.gch: %.hh
-	$(CXX) $(CXXFLAGS) -I$(blaspp_dir)/test -I$(testsweeper_dir) -c $< -o $@
+%.gch: %.hh
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 -include $(dep)
 
@@ -203,11 +198,11 @@ echo:
 	@echo
 	@echo "lib_obj       = $(lib_obj)"
 	@echo
-	@echo "test_src      = $(test_src)"
+	@echo "tester_src    = $(tester_src)"
 	@echo
-	@echo "test_obj      = $(test_obj)"
+	@echo "tester_obj    = $(tester_obj)"
 	@echo
-	@echo "test          = $(test)"
+	@echo "tester        = $(tester)"
 	@echo
 	@echo "dep           = $(dep)"
 	@echo
