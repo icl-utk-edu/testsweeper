@@ -25,7 +25,7 @@ if (CMAKE_HOST_APPLE)
     set (CMAKE_MACOSX_RPATH 1)
 endif()
 
-add_library (testsweeper
+add_library (testsweeper SHARED
     testsweeper.cc
 )
 
