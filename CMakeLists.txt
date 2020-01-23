@@ -87,21 +87,21 @@ export (
 )
 
 if(BUILD_TESTS)
-    add_executable(testExample example.cc)
-    set_target_properties (testExample PROPERTIES
+    add_executable(example example.cc)
+    set_target_properties (example PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
     )
-    target_include_directories(testExample PUBLIC
+    target_include_directories(example PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
-    target_link_libraries(testExample testsweeper)
+    target_link_libraries(example testsweeper)
 
     enable_testing()
 
     add_test(NAME run_test
-        COMMAND "testExample"
+        COMMAND "example"
     )
     set_tests_properties(run_test
         PROPERTIES
@@ -109,7 +109,7 @@ if(BUILD_TESTS)
                 "(Usage:)"
     )
     add_test(NAME run_test_foo
-        COMMAND "testExample" "foo"
+        COMMAND "example" "foo"
     )
     set_tests_properties(run_test_foo
         PROPERTIES
