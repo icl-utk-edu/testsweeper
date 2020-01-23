@@ -14,7 +14,7 @@ from   config import Error
 # header
 
 print( '-'*80 + '\n' +
-ansi_bold + ansi_red + '                              Welcome to testsweeper.' +
+ansi_bold + ansi_red + '                              Welcome to TestSweeper.' +
 ansi_normal + '''
 
 By default, configure will automatically choose the first valid value it finds
@@ -24,6 +24,8 @@ give you a choice:
 
 If you have multiple compilers, we suggest specifying your desired compiler by
 setting CXX, as the automated search may prefer a different compiler.
+
+See INSTALL.txt for more details.
 ''' + '-'*80 )
 
 #-------------------------------------------------------------------------------
@@ -54,5 +56,5 @@ try:
     main()
 except Error as ex:
     print( ansi_bold + ansi_red + 'A fatal error occurred. ' + str(ex) + '\n'
-           'testsweeper could not be configured. Log in config/log.txt' + ansi_normal )
+           'TestSweeper could not be configured. Log in config/log.txt' + ansi_normal )
     exit(1)

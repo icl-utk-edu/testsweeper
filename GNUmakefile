@@ -1,17 +1,4 @@
-# Usage:
-# `make` by default does:
-#    - Runs configure.py to create make.inc, if it doesn't exist.
-#    - make lib
-#    - make tester
-#
-# make config    - Runs configure.py to create make.inc.
-# make lib       - Compiles libtestsweeper.so.
-# make tester    - Compiles example.
-# make install   - Installs the library and headers to $prefix.
-# make uninstall - Remove installed library and headers from $prefix.
-# make clean     - Deletes all objects, libraries, and the tester.
-# make distclean - Also deletes make.inc and dependency files (*.d).
-# If static=1, makes .a instead of .so library.
+# See INSTALL.txt for usage.
 
 #-------------------------------------------------------------------------------
 # Configuration
@@ -19,7 +6,7 @@
 #   CXX, CXXFLAGS   -- C compiler and flags
 #   LDFLAGS, LIBS   -- Linker options, library paths, and libraries
 #   AR, RANLIB      -- Archiver, ranlib updates library TOC
-#   prefix          -- where to install testsweeper
+#   prefix          -- where to install TestSweeper
 #
 # OpenMP is optional; used only for timer and flushing caches.
 
@@ -85,7 +72,7 @@ dep       += $(addsuffix .d, $(basename $(tester_src)))
 tester = example
 
 #-------------------------------------------------------------------------------
-# testsweeper specific flags and libraries
+# TestSweeper specific flags and libraries
 
 # additional flags and libraries for testers
 TEST_LDFLAGS += -L. -Wl,-rpath,$(abspath .)
@@ -115,7 +102,7 @@ uninstall:
 $(lib_obj) $(tester_obj): make.inc
 
 #-------------------------------------------------------------------------------
-# testsweeper library
+# TestSweeper library
 lib_a  = libtestsweeper.a
 lib_so = libtestsweeper.so
 lib    = libtestsweeper.$(lib_ext)
