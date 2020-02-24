@@ -767,7 +767,7 @@ void ParamChar::help() const
 /// Throws std::runtime_error for errors.
 void ParamsBase::parse( const char *routine, int n, char **args )
 {
-    // Usage: test command [params]
+    // Usage: test [params] command
     for (int i = 0; i < n; ++i) {
         const char *arg = args[i];
         size_t len = strlen( arg );
@@ -874,9 +874,10 @@ void ParamsBase::reset_output()
 // -----------------------------------------------------------------------------
 void ParamsBase::help( const char *routine )
 {
+    // todo: pass in argv[0] instead of assuming test.
     printf( "%sUsage:%s test [-h|--help]\n"
-            "       test routine [-h|--help]\n"
-            "       test routine [parameters]\n\n"
+            "       test [-h|--help] routine\n"
+            "       test [parameters] routine\n\n"
             "%sParameters for %s:%s\n",
             ansi_bold, ansi_normal,
             ansi_bold, routine, ansi_normal );
@@ -918,8 +919,8 @@ void usage(
     using namespace testsweeper;
     int ncols = 4;
     printf( "%sUsage:%s %s [-h|--help]\n"
-            "       %s routine [-h|--help]\n"
-            "       %s routine [parameters]\n\n"
+            "       %s [-h|--help] routine\n"
+            "       %s [parameters] routine\n\n"
             "%sAvailable routines:%s",
             ansi_bold, ansi_normal,
             argv[0], argv[0], argv[0],

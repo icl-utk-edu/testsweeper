@@ -93,7 +93,7 @@ Params::Params():
               ( "type-old",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str,
                 "s=single (float), d=double, c=complex<float>, z=complex<double>, i=int" ),
 
-    //          name,      w, p, type,            default,          str2enum,     enum2char,    help
+    //          name,      w, p, type,            default,          str2enum,     enum2str,    help
     datatype  ( "type",    4,    ParamType::List, DataType::Double, str2datatype, datatype2str,
                 "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
 
@@ -155,17 +155,17 @@ int main( int argc, char** argv )
         }
         printf( "\n" );
 
-        // Usage: test routine [params]
-        if (argc < 2 ||
-            strcmp( argv[1], "-h" ) == 0 ||
-            strcmp( argv[1], "--help" ) == 0)
+        // Usage: test [params] routine
+        if (argc < 2
+            || strcmp( argv[argc-1], "-h" ) == 0
+            || strcmp( argv[argc-1], "--help" ) == 0)
         {
             usage( argc, argv, routines, section_names );
             throw QuitException();
         }
 
         // find routine to test
-        const char* routine = argv[1];
+        const char* routine = argv[ argc-1 ];
         testsweeper::test_func_ptr test_routine = find_tester( routine, routines );
         if (test_routine == nullptr) {
             usage( argc, argv, routines, section_names );
@@ -177,9 +177,9 @@ int main( int argc, char** argv )
         Params params;
         test_routine( params, false );
 
-        // parse parameters after routine name
+        // parse parameters up to routine name
         try {
-            params.parse( routine, argc-2, argv+2 );
+            params.parse( routine, argc-2, argv+1 );
         }
         catch (const std::exception& ex) {
             params.help( routine );
@@ -290,16 +290,16 @@ void test_foo_work( Params &params, bool run )
     // run test
     testsweeper::flush_cache( cache );
     time = get_wtime();
-    usleep( 100*n );  // placeholder; 0.0001 n sec
+    usleep( 10*n );  // placeholder; 10n microseconds
     time = get_wtime() - time;
     params.time.value()   = time * 1000;  // msec
     params.gflops.value() = gflop / time;
 
     if (ref) {
-        // run LAPACK
+        // run reference
         testsweeper::flush_cache( cache );
         time = get_wtime();
-        usleep( 200*n );  // placeholder; 0.0002 n sec
+        usleep( 20*n );  // placeholder; 20n microseconds
         time = get_wtime() - time;
         params.ref_time.value()   = time * 1000;  // msec
         params.ref_gflops.value() = gflop / time;
@@ -307,7 +307,7 @@ void test_foo_work( Params &params, bool run )
 
     // check error
     if (check) {
-        norm_t error = 1.23456e-17 * n;  // placeholder
+        norm_t error = 1.23456e-17 * n;  // placeholder; fails for n >= 900
         norm_t eps = std::numeric_limits< norm_t >::epsilon();
         norm_t tol = params.tol.value() * eps;
         params.error.value() = error;
@@ -319,10 +319,6 @@ void test_foo_work( Params &params, bool run )
 void test_foo( Params &params, bool run )
 {
     switch (params.datatype.value()) {
-        case testsweeper::DataType::Integer:
-            test_foo_work< float >( params, run );
-            break;
-
         case testsweeper::DataType::Single:
             test_foo_work< float >( params, run );
             break;
