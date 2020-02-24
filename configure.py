@@ -7,20 +7,19 @@ from __future__ import print_function
 import sys
 import re
 import config
-from   config import ansi_bold, ansi_red, ansi_blue, ansi_normal
-from   config import Error
+from   config import Error, font
 
 #-------------------------------------------------------------------------------
 # header
 
 print( '-'*80 + '\n' +
-ansi_bold + ansi_red + '                              Welcome to TestSweeper.' +
-ansi_normal + '''
+font.bold( font.blue( '                              Welcome to TestSweeper.' ) ) +
+'''
 
 By default, configure will automatically choose the first valid value it finds
 for each option. You can set it to interactive to find all possible values and
 give you a choice:
-    ''' + ansi_blue + 'make config interactive=1' + ansi_normal + '''
+    ''' + font.blue( 'make config interactive=1' ) + '''
 
 If you have multiple compilers, we suggest specifying your desired compiler by
 setting CXX, as the automated search may prefer a different compiler.
@@ -45,6 +44,9 @@ def main():
     ])
     config.openmp()
 
+    if (config.environ['color'] in ('n', 'no', 'never')):
+        config.environ.append( 'CXXFLAGS', '-DNO_COLOR' )
+
     config.output_files( 'make.inc' )
     print( 'log in config/log.txt' )
 
@@ -55,6 +57,6 @@ def main():
 try:
     main()
 except Error as ex:
-    print( ansi_bold + ansi_red + 'A fatal error occurred. ' + str(ex) + '\n'
-           'TestSweeper could not be configured. Log in config/log.txt' + ansi_normal )
+    print( font.bold( font.red( 'A fatal error occurred. ' + str(ex) + '\n'
+           'TestSweeper could not be configured. Log in config/log.txt' ) ) )
     exit(1)
