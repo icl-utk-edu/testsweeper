@@ -1,0 +1,9 @@
+input: ../example --check n foo5
+                                    SLATE        SLATE        SLATE         Ref.         Ref.          
+type       m       n       k        error    time (ms)      Gflop/s    time (ms)      Gflop/s  status  
+   d     100     100     100          nan  -----------  -----------  -----------  -----------  no check  
+   d     200     200     200          nan  -----------  -----------  -----------  -----------  no check  
+   d     300     300     300          nan  -----------  -----------  -----------  -----------  no check  
+   d     400     400     400          nan  -----------  -----------  -----------  -----------  no check  
+   d     500     500     500          nan  -----------  -----------  -----------  -----------  no check  
+All tests passed.

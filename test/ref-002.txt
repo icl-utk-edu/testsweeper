@@ -1,0 +1,18 @@
+input: ../example --help
+Usage: ../example [-h|--help]
+       ../example [-h|--help] routine
+       ../example [parameters] routine
+
+Available routines:
+
+Level 1
+  foo                 foo2                foo3                foo4              
+  foo5                foo6                foo7                foo8              
+
+Level 2
+  bar                 bar2                bar3              
+  bar4                bar5                bar6              
+
+Level 3
+  baz                 baz2                baz3              
+  baz4                baz5              
