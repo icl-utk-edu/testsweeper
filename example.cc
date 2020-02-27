@@ -19,6 +19,7 @@ using testsweeper::ansi_normal;
 using testsweeper::get_wtime;
 
 // -----------------------------------------------------------------------------
+// each section must have a corresponding entry in section_names
 enum Section {
     newline = 0,  // zero flag forces newline
     level1,
@@ -117,17 +118,17 @@ Params::Params():
     okay      ( "status",              6,    ParamType::Output,  -1,   0,   0, "success indicator" )
 {
     // mark standard set of output fields as used
-    okay  .value();
-    error .value();
-    time  .value();
-    gflops.value();
+    okay();
+    error();
+    time();
+    gflops();
 
     // mark framework parameters as used, so they will be accepted on the command line
-    check  .value();
-    tol    .value();
-    repeat .value();
-    verbose.value();
-    cache  .value();
+    check();
+    tol();
+    repeat();
+    verbose();
+    cache();
 
     // routine's parameters are marked by the test routine; see main
 }
@@ -187,12 +188,12 @@ int main( int argc, char** argv )
         }
 
         // run tests
-        int repeat = params.repeat.value();
-        testsweeper::DataType last = params.datatype.value();
+        int repeat = params.repeat();
+        testsweeper::DataType last = params.datatype();
         params.header();
         do {
-            if (params.datatype.value() != last) {
-                last = params.datatype.value();
+            if (params.datatype() != last) {
+                last = params.datatype();
                 printf( "\n" );
             }
             for (int iter = 0; iter < repeat; ++iter) {
@@ -202,11 +203,11 @@ int main( int argc, char** argv )
                 catch (const std::exception& ex) {
                     fprintf( stderr, "%s%sError: %s%s\n",
                              ansi_bold, ansi_red, ex.what(), ansi_normal );
-                    params.okay.value() = false;
+                    params.okay() = false;
                 }
 
                 params.print();
-                status += ! params.okay.value();
+                status += ! params.okay();
                 params.reset_output();
             }
             if (repeat > 1) {
@@ -267,13 +268,13 @@ void test_foo_work( Params &params, bool run )
     int64_t m = params.dim.m();
     int64_t n = params.dim.n();
     int64_t k = params.dim.k();
-    int64_t cache = params.cache.value();
-    bool check = (params.check.value() == 'y');
-    bool ref = (params.ref.value() == 'y');
+    int64_t cache = params.cache();
+    bool check = (params.check() == 'y');
+    bool ref = (params.ref() == 'y');
 
     // mark non-standard output values
-    params.ref_time.value();
-    params.ref_gflops.value();
+    params.ref_time();
+    params.ref_gflops();
 
     // adjust header to msec
     params.time.name( "SLATE\ntime (ms)" );
@@ -292,8 +293,8 @@ void test_foo_work( Params &params, bool run )
     time = get_wtime();
     usleep( 10*n );  // placeholder; 10n microseconds
     time = get_wtime() - time;
-    params.time.value()   = time * 1000;  // msec
-    params.gflops.value() = gflop / time;
+    params.time()   = time * 1000;  // msec
+    params.gflops() = gflop / time;
 
     if (ref) {
         // run reference
@@ -301,24 +302,24 @@ void test_foo_work( Params &params, bool run )
         time = get_wtime();
         usleep( 20*n );  // placeholder; 20n microseconds
         time = get_wtime() - time;
-        params.ref_time.value()   = time * 1000;  // msec
-        params.ref_gflops.value() = gflop / time;
+        params.ref_time()   = time * 1000;  // msec
+        params.ref_gflops() = gflop / time;
     }
 
     // check error
     if (check) {
         norm_t error = 1.23456e-17 * n;  // placeholder; fails for n >= 900
         norm_t eps = std::numeric_limits< norm_t >::epsilon();
-        norm_t tol = params.tol.value() * eps;
-        params.error.value() = error;
-        params.okay.value()  = (error < tol);
+        norm_t tol = params.tol() * eps;
+        params.error() = error;
+        params.okay()  = (error < tol);
     }
 }
 
 // -----------------------------------------------------------------------------
 void test_foo( Params &params, bool run )
 {
-    switch (params.datatype.value()) {
+    switch (params.datatype()) {
         case testsweeper::DataType::Single:
             test_foo_work< float >( params, run );
             break;

@@ -7,7 +7,7 @@ from __future__ import print_function
 import sys
 import re
 import config
-from   config import Error, font
+from   config import Error, font, print_warn
 
 #-------------------------------------------------------------------------------
 # header
@@ -23,6 +23,8 @@ give you a choice:
 
 If you have multiple compilers, we suggest specifying your desired compiler by
 setting CXX, as the automated search may prefer a different compiler.
+
+For ANSI colors, set color=auto (when output is TTY), color=yes, or color=no.
 
 See INSTALL.txt for more details.
 ''' + '-'*80 )
@@ -57,6 +59,6 @@ def main():
 try:
     main()
 except Error as ex:
-    print( font.bold( font.red( 'A fatal error occurred. ' + str(ex) + '\n'
-           'TestSweeper could not be configured. Log in config/log.txt' ) ) )
+    print_warn( 'A fatal error occurred. ' + str(ex) +
+                '\nTestSweeper could not be configured. Log in config/log.txt' )
     exit(1)
