@@ -72,6 +72,15 @@ dep       += $(addsuffix .d, $(basename $(tester_src)))
 tester = example
 
 #-------------------------------------------------------------------------------
+# Get Mercurial id
+
+dothg = $(wildcard .hg)
+ifneq ($(dothg),)
+    hg_id = $(shell hg id -i)
+    CXXFLAGS += -DTESTSWEEPER_ID='"$(hg_id)"'
+endif
+
+#-------------------------------------------------------------------------------
 # TestSweeper specific flags and libraries
 
 # additional flags and libraries for testers
@@ -141,6 +150,9 @@ headers/clean:
 #-------------------------------------------------------------------------------
 # documentation
 docs:
+	@echo "Doxygen not yet implemented."
+
+docs-todo:
 	doxygen docs/doxygen/doxyfile.conf
 	@echo ========================================
 	cat docs/doxygen/errors.txt

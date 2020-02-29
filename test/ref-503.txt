@@ -1,3 +1,4 @@
+TestSweeper version NA, id NA
 input: ../example --ref n foo5
                                     SLATE        SLATE        SLATE         Ref.         Ref.          
 type       m       n       k        error    time (ms)      Gflop/s    time (ms)      Gflop/s  status  

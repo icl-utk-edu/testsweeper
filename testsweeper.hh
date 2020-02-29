@@ -10,8 +10,14 @@
 #include <limits>
 #include <algorithm>
 
+// Version is updated by make_release.py; DO NOT EDIT.
+// Version 0000.00.00
+#define TESTSWEEPER_VERSION 00000000
 
 namespace testsweeper {
+
+int version();
+const char* id();
 
 extern double no_data_flag;
 

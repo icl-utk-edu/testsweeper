@@ -19,7 +19,7 @@ opts = parser.parse_args()
 opts.tests = list( map( int, opts.tests ) )
 
 #-------------------------------------------------------------------------------
-# 4 tuple: [ index, command, strip=True, expected exit code=0 ]
+# 4 tuple: [ index, command, strip_time=True, expected exit code=0 ]
 cmds = [
     #----------
     # Basics
@@ -138,7 +138,7 @@ def print_tee( *args ):
 #-------------------------------------------------------------------------------
 # Runs cmd. Returns exit code and output (stdout and stderr merged).
 #
-def run_test( num, cmd, strip, expected_err=0 ):
+def run_test( num, cmd, strip_time, expected_err=0 ):
     print_tee( str(num) + ': ' + cmd )
     output = ''
     p = subprocess.Popen( cmd.split(), stdout=subprocess.PIPE,
@@ -165,14 +165,16 @@ def run_test( num, cmd, strip, expected_err=0 ):
     outfile = 'tst-%03d.txt' % (num)
     print( 'Saving to', outfile )
     try:
-        # Always strip out ANSI codes.
+        # Always strip out ANSI codes and version numbers.
         output2 = re.sub( r'\x1B\[\d+m', r'', output )
-        if (strip):
+        output2 = re.sub( r'version \d+, id \w+',
+                          r'version NA, id NA', output2 )
+        if (strip_time):
             # Usually, strip out 4 time and gflops columns.
             # This messes up some output like `example -h foo`.
             output2 = re.sub( r'^((?: +\S+){5})((?: +\S+){4})(.*)',
                               r'\1  -----------  -----------  -----------  -----------\3',
-                              output, 0, re.M )
+                              output2, 0, re.M )
         out = open( outfile, 'w' )
         out.write( output2 )
         out.close()
@@ -228,9 +230,9 @@ for tst in cmds:
     num = tst[0]
     cmd = tst[1]
 
-    strip = True
+    strip_time = True
     if (len( tst ) > 2):
-        strip = tst[2]
+        strip_time = tst[2]
 
     expected_err = 0
     if (len( tst ) > 3):
@@ -238,7 +240,7 @@ for tst in cmds:
 
     if (run_all or tst[0] in opts.tests):
         seen.add( tst[0] )
-        (err, output) = run_test( num, cmd, strip, expected_err )
+        (err, output) = run_test( num, cmd, strip_time, expected_err )
         if (err != expected_err):
             failed_tests.append( (cmd, err, output) )
         else:

@@ -1,5 +1,6 @@
 
 Error: --type: invalid value 'x'
+TestSweeper version NA, id NA
 input: ../example --type 's,x,d' foo
 Usage: test [-h|--help]
        test [-h|--help] routine

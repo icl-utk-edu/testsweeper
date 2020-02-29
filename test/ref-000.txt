@@ -1,3 +1,4 @@
+TestSweeper version NA, id NA
 input: ../example
 Usage: ../example [-h|--help]
        ../example [-h|--help] routine
