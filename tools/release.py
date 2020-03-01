@@ -1,3 +1,8 @@
+# Copyright (c) 2017-2020, University of Tennessee. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
+
 '''
 Tags project with version based on current date, and creates tar file.
 Tag is yyyy.mm.rr, where yyyy.mm is current year and month,
