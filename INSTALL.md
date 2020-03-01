@@ -1,15 +1,20 @@
-Welcome to TestSweeper.
+TestSweeper Installation Notes
+================================================================================
 
-#-------------------------------------------------------------------------------
-Synopsis:
+[TOC]
+
+Synopsis
+--------------------------------------------------------------------------------
 
     make && make install
 
 will configure and compile the TestSweeper library and its example,
 then install the headers and library.
 
-#-------------------------------------------------------------------------------
-Overview:
+There is a CMake option as well.
+
+Overview
+--------------------------------------------------------------------------------
 
     make           - configures (if make.inc is missing),
                      then compiles the library and tester.
@@ -23,19 +28,19 @@ Overview:
     make distclean - also deletes make.inc and dependency files (*.d).
     If static=1, makes .a instead of .so library.
 
-#-------------------------------------------------------------------------------
-Details:
+Details
+--------------------------------------------------------------------------------
 
     make config [options]
 
-Runs configure.py script to detect your compiler and library properties,
+Runs the `configure.py` script to detect your compiler and library properties,
 then creates a make.inc configuration file. You can also manually edit the
 make.inc file. Options are name=value pairs to set variables. The configure.py
 script can be invoked directly:
 
     python configure.py [options]
 
-Running configure.py -h will print a help message with the current options.
+Running `configure.py -h` will print a help message with the current options.
 Variables that affect configure.py include:
 
     CXX                C++ compiler
@@ -56,7 +61,9 @@ These can be set in your environment or on the command line, e.g.,
 TestSweeper does not rely on any libraries, other than optionally OpenMP,
 so setting LDFLAGS, CPATH, LIBRARY_PATH, etc. is not generally needed.
 
-#------------------------------
+Manual configuration
+--------------------------------------------------------------------------------
+
 If you have a specific configuration that you want, set CXX, CXXFLAGS, LDFLAGS,
 and LIBS, e.g.:
 

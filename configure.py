@@ -31,7 +31,7 @@ setting CXX, as the automated search may prefer a different compiler.
 
 For ANSI colors, set color=auto (when output is TTY), color=yes, or color=no.
 
-See INSTALL.txt for more details.
+See INSTALL.md for more details.
 ''' + '-'*80 )
 
 #-------------------------------------------------------------------------------
