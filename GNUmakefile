@@ -17,13 +17,13 @@ ifeq ($(MAKECMDGOALS),config)
     config: make.inc
 
     make.inc: force
-
-    force: ;
 else ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
     # For `make clean` or `make distclean`, don't include make.inc,
     # which could generate it. Otherwise, include make.inc.
     include make.inc
 endif
+
+force: ;
 
 make.inc:
 	python configure.py
@@ -61,7 +61,7 @@ endif
 #-------------------------------------------------------------------------------
 # Files
 
-lib_src  = testsweeper.cc
+lib_src  = testsweeper.cc version.cc
 lib_obj  = $(addsuffix .o, $(basename $(lib_src)))
 dep     += $(addsuffix .d, $(basename $(lib_src)))
 
@@ -72,13 +72,22 @@ dep       += $(addsuffix .d, $(basename $(tester_src)))
 tester = example
 
 #-------------------------------------------------------------------------------
-# Get Mercurial id
+# Get Mercurial id, and make version.o depend on it via .id file.
 
-dothg = $(wildcard .hg)
-ifneq ($(dothg),)
-    hg_id = $(shell hg id -i)
-    CXXFLAGS += -DTESTSWEEPER_ID='"$(hg_id)"'
+ifneq ($(wildcard .hg),)
+    id = $(shell hg id -i)
+    version.o: CXXFLAGS += -DTESTSWEEPER_ID='"$(id)"'
 endif
+
+last_id := $(shell [ -e .id ] && cat .id || echo 'NA')
+ifneq ($(id),$(last_id))
+    .id: force
+endif
+
+.id:
+	echo $(id) > .id
+
+version.o: .id
 
 #-------------------------------------------------------------------------------
 # TestSweeper specific flags and libraries

@@ -16,31 +16,6 @@
 namespace testsweeper {
 
 //------------------------------------------------------------------------------
-/// @return TestSweeper version.
-/// Version is integer of form yyyymmrr, where yyyy is year, mm is month,
-/// and rr is release counter within month, starting at 00.
-///
-int version()
-{
-    return TESTSWEEPER_VERSION;
-}
-
-// TESTSWEEPER_ID is the Mercurial or git commit hash ID, either
-// defined by `hg id` or `git rev-parse --short HEAD` in Makefile,
-// or defined here by make_release.py for release tar files. DO NOT EDIT.
-#ifndef TESTSWEEPER_ID
-#define TESTSWEEPER_ID "unknown"
-#endif
-
-//------------------------------------------------------------------------------
-/// @return TestSweeper Mercurial or git commit hash ID.
-///
-const char* id()
-{
-    return TESTSWEEPER_ID;
-}
-
-//------------------------------------------------------------------------------
 // Global constants
 
 // numeric flag indicating no data; printed as "NA" instead of "nan"
