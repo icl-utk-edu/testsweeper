@@ -27,10 +27,18 @@ endif()
 
 add_library (testsweeper SHARED
     testsweeper.cc
+    version.cc
 )
 
 target_include_directories (testsweeper PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
+execute_process (COMMAND hg id -i OUTPUT_VARIABLE testsweeper_id)
+string (STRIP ${testsweeper_id} testsweeper_id)
+
+target_compile_definitions(testsweeper PUBLIC
+    TESTSWEEPER_ID="${testsweeper_id}"
 )
 
 set_target_properties (testsweeper PROPERTIES
