@@ -125,3 +125,10 @@ if(BUILD_TESTS)
                 "(All tests passed)"
         )
 endif(BUILD_TESTS)
+
+# Move test script to build directory
+add_custom_command(TARGET testsweeper POST_BUILD
+    COMMAND
+    cp -a ${CMAKE_CURRENT_SOURCE_DIR}/test/.
+    ${CMAKE_CURRENT_BINARY_DIR}/test
+)
