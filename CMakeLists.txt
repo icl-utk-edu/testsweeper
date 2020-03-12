@@ -34,7 +34,7 @@ target_include_directories (testsweeper PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-execute_process (COMMAND hg id -i OUTPUT_VARIABLE testsweeper_id)
+execute_process (COMMAND hg id -i ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE testsweeper_id)
 string (STRIP ${testsweeper_id} testsweeper_id)
 
 target_compile_definitions(testsweeper PUBLIC
