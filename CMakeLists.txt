@@ -34,16 +34,14 @@ target_include_directories (testsweeper PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
+# TODO: ensure that hg command exists as well
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.hg)
     execute_process (COMMAND hg id -i ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE testsweeper_id)
     string (STRIP ${testsweeper_id} testsweeper_id)
-else()
-    set (testsweeper_id "")
+    target_compile_definitions(testsweeper PUBLIC
+        TESTSWEEPER_ID="${testsweeper_id}"
+    )
 endif()
-
-target_compile_definitions(testsweeper PUBLIC
-    TESTSWEEPER_ID="${testsweeper_id}"
-)
 
 set_target_properties (testsweeper PROPERTIES
     CXX_STANDARD 11
