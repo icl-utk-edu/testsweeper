@@ -172,7 +172,7 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
     try:
         # Always strip out ANSI codes and version numbers.
         output2 = re.sub( r'\x1B\[\d+m', r'', output )
-        output2 = re.sub( r'version \d+, id \w+',
+        output2 = re.sub( r'version \S+, id \S+',
                           r'version NA, id NA', output2 )
         if (strip_time):
             # Usually, strip out 4 time and gflops columns.

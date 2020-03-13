@@ -148,8 +148,10 @@ int main( int argc, char** argv )
 
     int status = 0;
     try {
-        printf( "TestSweeper version %d, id %s\n",
-                testsweeper::version(), testsweeper::id() );
+        int version = testsweeper::version();
+        printf( "TestSweeper version %d.%02d.%02d, id %s\n",
+                version / 10000, (version % 10000) / 100, version % 100,
+                testsweeper::id() );
 
         // print input so running `test [input] > out.txt` documents input
         printf( "input: %s", argv[0] );

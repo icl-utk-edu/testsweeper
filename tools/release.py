@@ -154,12 +154,12 @@ def make( project, version_h, version_c ):
     # Prepare tar file.
     dir = project +'-'+ tag
     print( '\n>> Preparing files in', dir )
-    myrun( 'hg archive '+ dir )
+    myrun( 'hg archive -r '+ tag +' '+ dir )
 
     os.chdir( dir )
 
     # Update hash ID in version_c.
-    id = myrun( 'hg id -i', stdout=PIPE, text=True ).strip()
+    id = myrun( 'hg id -i -r '+ tag, stdout=PIPE, text=True ).strip()
     print( '\n>> Setting ID in:', version_c )
     file_sub( version_c,
               r'^(#define \w+_ID) "unknown"',
