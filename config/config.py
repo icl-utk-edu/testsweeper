@@ -14,7 +14,6 @@ import sys
 import time
 import re
 import tarfile
-import urllib
 import argparse
 
 # This relative import syntax works in both python2 and 3.
@@ -31,9 +30,10 @@ def urlretrieve( url, filename ):
     Works for both Python 2 and 3, which differ in where urlretrieve is located.
     '''
     if (sys.version_info.major >= 3):
-        urllib.requests.urlretrieve( url, filename )
+        import urllib.request as urllib_request
     else:
-        urllib.urlretrieve( url, filename )
+        import urllib as urllib_request
+    urllib_request.urlretrieve( url, filename )
 # end
 
 #-------------------------------------------------------------------------------
@@ -583,6 +583,25 @@ def openmp( flags=['-fopenmp', '-qopenmp', '-openmp', '-omp', ''] ):
 # end
 
 #-------------------------------------------------------------------------------
+def cublas_library():
+    '''
+    Tests for linking CUDA and cuBLAS libraries.
+    Does not actually run the resulting exe, to allow compiling with CUDA on a
+    machine without GPUs.
+    '''
+    libs = '-lcudart -lcublas'
+    print_header( 'CUDA and cuBLAS libraries' )
+    print_test( libs )
+    env = {'LIBS': libs, 'CXXFLAGS': '-DHAVE_CUBLAS'}
+    (rc, out, err) = compile_exe( 'config/cublas.cc', env )
+    print_result( libs, rc )
+    if (rc == 0):
+        environ.merge( env )
+    else:
+        raise Error( 'cuBLAS not found' )
+# end
+
+#-------------------------------------------------------------------------------
 def get_package( name, directories, repo_url, tar_url, tar_filename ):
     '''
     Searches for a package, generally used for internal packages.
@@ -796,7 +815,7 @@ def parse_args():
     if (environ['color']):
         opts.color = environ['color']
     font.set_enabled( opts.color )
-    
+
     if (environ['interactive']):
         opts.interactive = environ['interactive']
     if (opts.interactive):
