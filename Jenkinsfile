@@ -29,7 +29,9 @@ pipeline {
 
                   if [ "${configurator}" = "make" ]; then
                     echo "make!!"
-                    make config color=no
+                    make config color=no && make
+                    cd test && ./run_tests.py --xml report.xml
+                    cp report.xml ../report_make.xml
                   fi
                   if [ "${configurator}" = "cmake" ]; then
                     echo "cmake!!"
@@ -37,22 +39,15 @@ pipeline {
                     mkdir -p build
                     cd build
                     cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
+                    make
+                    cd test && ./run_tests.py --xml report.xml
+                    cp report.xml ../../report_cmake.xml
                   fi
-                  make
-
-                  cd test
-                  pwd
-                  ./run_tests.py --xml report.xml
                 '''
             } //steps
             post {
               always {
-                junit '*/*.xml'
-              }
-              success {
-                slackSend channel: '#ci_test',
-                  color: 'good',
-                  message: "Caffeine: ${configurator} - ${currentBuild.fullDisplayName} completed successfully."
+                junit '*.xml'
               }
               unstable {
                 slackSend channel: '#ci_test',
@@ -82,28 +77,24 @@ pipeline {
 
                 if [ "${configurator}" = "make" ]; then
                   make config color=no
+                  make config color=no && make
+                  cd test && ./run_tests.py --xml report.xml
+                  cp report.xml ../report_make.xml
                 fi
                 if [ "${configurator}" = "cmake" ]; then
                   spack load cmake
                   mkdir -p build
                   cd build
                   cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
+                  make
+                  cd test && ./run_tests.py --xml report.xml
+                  cp report.xml ../../report_cmake.xml
                 fi
-                make
-
-                cd test
-                pwd
-                ./run_tests.py --xml report.xml
               '''
             } //steps
             post {
               always {
-                junit '*/*.xml'
-              }
-              success {
-                slackSend channel: '#ci_test',
-                  color: 'good',
-                  message: "Lips: ${configurator} - ${currentBuild.fullDisplayName} completed successfully."
+                junit '*.xml'
               }
               unstable {
                 slackSend channel: '#ci_test',
