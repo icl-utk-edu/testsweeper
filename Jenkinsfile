@@ -34,7 +34,8 @@ pipeline {
                   if [ "${configurator}" = "cmake" ]; then
                     echo "cmake!!"
                     spack load cmake
-                    mkdir build && cd build
+                    mkdir -p build
+                    cd build
                     cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
                   fi
                   make
@@ -83,7 +84,8 @@ pipeline {
                 fi
                 if [ "${configurator}" = "cmake" ]; then
                   spack load cmake
-                  mkdir build && cd build
+                  mkdir -p build
+                  cd build
                   cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
                 fi
                 make
