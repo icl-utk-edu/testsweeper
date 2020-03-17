@@ -40,7 +40,7 @@ pipeline {
                   make
 
                   cd test
-                  ./run_tests.py
+                  ./run_tests.py --xml report.xml
                 '''
             } //steps
             post {
@@ -89,7 +89,7 @@ pipeline {
                 make
 
                 cd test
-                ./run_tests.py
+                ./run_tests.py --xml report.xml
               '''
             } //steps
             post {
