@@ -41,6 +41,7 @@ pipeline {
                   make
 
                   cd test
+                  pwd
                   ./run_tests.py --xml report.xml
                 '''
             } //steps
@@ -91,6 +92,7 @@ pipeline {
                 make
 
                 cd test
+                pwd
                 ./run_tests.py --xml report.xml
               '''
             } //steps
