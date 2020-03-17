@@ -50,15 +50,15 @@ pipeline {
                 junit '*.xml'
               }
               unstable {
-                slackSend channel: '#ci_test',
+                slackSend channel: '#slate_ci',
                   color: 'warning',
                   message: "Caffeine: ${configurator} - ${currentBuild.fullDisplayName} completed, but has failing tests (<${env.BUILD_URL}|Open>)"
               }
               failure {
-                slackSend channel: '#ci_test',
+                slackSend channel: '#slate_ci',
                   color: 'danger',
                   message: "Caffeine: ${configurator} - ${currentBuild.fullDisplayName} failed.(<${env.BUILD_URL}|Open>)"
-                mail to: 'jmfinney@icl.utk.edu',
+                mail to: 'slate-dev@icl.utk.edu',
                   subject: "Failure: ${currentBuild.fullDisplayName}",
                   body: "Caffeine: ${configurator} - See more at ${env.BUILD_URL}"
               }
@@ -97,15 +97,15 @@ pipeline {
                 junit '*.xml'
               }
               unstable {
-                slackSend channel: '#ci_test',
+                slackSend channel: '#slate_ci',
                   color: 'warning',
                   message: "Lips: ${configurator} - ${currentBuild.fullDisplayName} completed, but has failing tests (<${env.BUILD_URL}|Open>)"
               }
               failure {
-                slackSend channel: '#ci_test',
+                slackSend channel: '#slate_ci',
                   color: 'danger',
                   message: "Lips: ${configurator} - ${currentBuild.fullDisplayName} failed.(<${env.BUILD_URL}|Open>)"
-                mail to: 'jmfinney@icl.utk.edu',
+                mail to: 'slate-dev@icl.utk.edu',
                   subject: "Failure: Lips: ${configurator} - ${currentBuild.fullDisplayName}",
                   body: "See more at ${env.BUILD_URL}"
               }
