@@ -38,9 +38,15 @@ pipeline {
                     cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
                   fi
                   make
+
+                  cd test
+                  ./run_tests.py
                 '''
             } //steps
             post {
+              always {
+                junit '*/*.xml'
+              }
               success {
                 slackSend channel: '#ci_test',
                   color: 'good',
@@ -81,9 +87,15 @@ pipeline {
                   cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
                 fi
                 make
+
+                cd test
+                ./run_tests.py
               '''
             } //steps
             post {
+              always {
+                junit '*/*.xml'
+              }
               success {
                 slackSend channel: '#ci_test',
                   color: 'good',
