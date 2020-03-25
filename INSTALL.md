@@ -94,8 +94,10 @@ this is to create a build directory off the Testsweeper root directory:
     cd /my/testsweeper/dir
     mkdir build && cd build
 
-By default Testsweeper is set to install into `/opt/slate/`.  If you wish to change this, CMake needs to be told where to install the Testsweeper library.  You can do this
-by defining CMAKE_INSTALL_PREFIX variable in via the CMake command line:
+By default Testsweeper is set to install into `/opt/slate/`.  If you wish to
+change this, CMake needs to be told where to install the Testsweeper library.
+You can do this by defining CMAKE_INSTALL_PREFIX variable in via the CMake
+command line:
 
     # Assuming the working dir is still /my/testsweeper/dir/build
     cmake -DCMAKE_INSTALL_PREFIX=/path/to/my/dir ..
