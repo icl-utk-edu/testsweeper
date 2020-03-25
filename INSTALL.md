@@ -11,7 +11,7 @@ Synopsis
 will configure and compile the TestSweeper library and its example,
 then install the headers and library.
 
-There is a CMake option as well.
+There is a CMake option as well.  See below.
 
 Overview
 --------------------------------------------------------------------------------
@@ -84,3 +84,25 @@ If you experience unexpected problems, please see config/log.txt to diagnose the
 issue. The log shows the option being tested, the exact command run, the
 command's standard output (stdout), error output (stderr), and exit status. All
 test files are in the config directory.
+
+CMake Installation
+--------------------------------------------------------------------------------
+
+The CMake script enforces an out of source build.  The simplest way to accomplish
+this is to create a build directory off the Testsweeper root directory:
+
+    cd /my/testsweeper/dir
+    mkdir build && cd build
+
+CMake need to be told where to install the Testsweeper library.  You can do this
+by defining CMAKE_INSTALL_PREFIX variable in via the CMake command line:
+
+    # Assuming the working dir is still /my/testsweeper/dir/build
+    cmake -DCMAKE_INSTALL_PREFIX=/path/to/my/dir ..
+
+This generates the required makefiles and can build built and installed as normal:
+
+    # Assuming the working dir is still /my/testsweeper/dir/build
+    make
+    make install
+
