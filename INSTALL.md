@@ -102,7 +102,7 @@ command line:
     # Assuming the working dir is still /my/testsweeper/dir/build
     cmake -DCMAKE_INSTALL_PREFIX=/path/to/my/dir ..
 
-This generates the required makefiles and can build built and installed as normal:
+This generates the required makefiles and can built and installed as normal:
 
     # Assuming the working dir is still /my/testsweeper/dir/build
     make
