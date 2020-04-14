@@ -6,14 +6,20 @@ TestSweeper Installation Notes
 Synopsis
 --------------------------------------------------------------------------------
 
-    make && make install
-
-will configure and compile the TestSweeper library and its example,
+Configure and compile the TestSweeper library and its example,
 then install the headers and library.
 
-There is a CMake option as well.  See below.
+Option 1: Makefile
 
-Overview
+    make && make install
+
+Option 2: CMake
+
+    mkdir build && cd build
+    cmake ..
+    make && make install
+
+Makefile Installation
 --------------------------------------------------------------------------------
 
     make           - configures (if make.inc is missing),
@@ -28,8 +34,8 @@ Overview
     make distclean - also deletes make.inc and dependency files (*.d).
     If static=1, makes .a instead of .so library.
 
-Details
---------------------------------------------------------------------------------
+
+### Details
 
     make config [options]
 
@@ -61,8 +67,8 @@ These can be set in your environment or on the command line, e.g.,
 TestSweeper does not rely on any libraries, other than optionally OpenMP,
 so setting LDFLAGS, CPATH, LIBRARY_PATH, etc. is not generally needed.
 
-Manual configuration
---------------------------------------------------------------------------------
+
+### Manual configuration
 
 If you have a specific configuration that you want, set CXX, CXXFLAGS, LDFLAGS,
 and LIBS, e.g.:
@@ -88,23 +94,22 @@ test files are in the config directory.
 CMake Installation
 --------------------------------------------------------------------------------
 
-The CMake script enforces an out of source build.  The simplest way to accomplish
-this is to create a build directory off the Testsweeper root directory:
+The CMake script enforces an out of source build. The simplest way to accomplish
+this is to create a build directory off the TestSweeper root directory:
 
     cd /my/testsweeper/dir
     mkdir build && cd build
 
-By default Testsweeper is set to install into `/opt/slate/`.  If you wish to
-change this, CMake needs to be told where to install the Testsweeper library.
+By default TestSweeper is set to install into `/opt/slate/`. If you wish to
+change this, CMake needs to be told where to install the TestSweeper library.
 You can do this by defining CMAKE_INSTALL_PREFIX variable via the CMake
 command line:
 
     # Assuming the working dir is still /my/testsweeper/dir/build
     cmake -DCMAKE_INSTALL_PREFIX=/path/to/my/dir ..
 
-This generates the required makefiles and can built and installed as normal:
+This generates the required makefiles and can be built and installed as normal:
 
     # Assuming the working dir is still /my/testsweeper/dir/build
     make
     make install
-
