@@ -2,7 +2,6 @@ pipeline {
   agent none
   triggers {
     cron ('H H(0-2) * * *')
-    pollSCM('H/10 * * * *')
   }
   stages {
     stage('Parallel Build') {
