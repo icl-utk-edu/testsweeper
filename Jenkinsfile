@@ -29,7 +29,7 @@ pipeline {
 
                   if [ "${configurator}" = "make" ]; then
                     echo "make!!"
-                    make config color=no && make
+                    make config color=no && make CXXFLAGS='-Werror'
                     cd test && ./run_tests.py --xml report.xml
                     cp report.xml ../report_make.xml
                   fi
@@ -39,7 +39,7 @@ pipeline {
                     mkdir -p build
                     cd build
                     cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
-                    make
+                    make CXXFLAGS='-Werror'
                     cd test && ./run_tests.py --xml report.xml
                     cp report.xml ../../report_cmake.xml
                   fi
@@ -77,7 +77,7 @@ pipeline {
 
                 if [ "${configurator}" = "make" ]; then
                   make config color=no
-                  make config color=no && make
+                  make config color=no && make CXXFLAGS='-Werror'
                   cd test && ./run_tests.py --xml report.xml
                   cp report.xml ../report_make.xml
                 fi
@@ -86,7 +86,7 @@ pipeline {
                   mkdir -p build
                   cd build
                   cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
-                  make
+                  make CXXFLAGS='-Werror'
                   cd test && ./run_tests.py --xml report.xml
                   cp report.xml ../../report_cmake.xml
                 fi
