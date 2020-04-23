@@ -39,7 +39,7 @@ pipeline {
                     cd build
                     cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw \
                       -DNO_COLOR=TRUE \
-                      -DCXXFLAGS="-Werror" ..
+                      -DCMAKE_CXX_FLAGS="-Werror" ..
                     make
                     cd test && ./run_tests.py --xml report.xml
                     cp report.xml ../../report_cmake.xml
@@ -88,7 +88,7 @@ pipeline {
                   cd build
                   cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw \
                       -DNO_COLOR=TRUE \
-                      -DCXXFLAGS="-Werror" ..
+                      -DCMAKE_CXX_FLAGS="-Werror" ..
                   make
                   cd test && ./run_tests.py --xml report.xml
                   cp report.xml ../../report_cmake.xml
