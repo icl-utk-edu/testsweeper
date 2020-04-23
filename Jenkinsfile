@@ -28,7 +28,7 @@ pipeline {
 
                   if [ "${configurator}" = "make" ]; then
                     echo "make!!"
-                    make config color=no && make CXXFLAGS='-Werror'
+                    make config color=no CXXFLAGS="-Werror" && make
                     cd test && ./run_tests.py --xml report.xml
                     cp report.xml ../report_make.xml
                   fi
@@ -37,8 +37,10 @@ pipeline {
                     spack load cmake
                     mkdir -p build
                     cd build
-                    cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
-                    make CXXFLAGS='-Werror'
+                    cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw \
+                      -DNO_COLOR=TRUE \
+                      -DCXXFLAGS="-Werror" ..
+                    make
                     cd test && ./run_tests.py --xml report.xml
                     cp report.xml ../../report_cmake.xml
                   fi
@@ -76,7 +78,7 @@ pipeline {
 
                 if [ "${configurator}" = "make" ]; then
                   make config color=no
-                  make config color=no && make CXXFLAGS='-Werror'
+                  make config color=no CXXFLAGS='-Werror'&& make 
                   cd test && ./run_tests.py --xml report.xml
                   cp report.xml ../report_make.xml
                 fi
@@ -84,8 +86,10 @@ pipeline {
                   spack load cmake
                   mkdir -p build
                   cd build
-                  cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw -DNO_COLOR=TRUE ..
-                  make CXXFLAGS='-Werror'
+                  cmake -DCMAKE_INSTALL_PREFIX=/var/lib/jenkins/workspace/jmfinney/testsweeper/sw \
+                      -DNO_COLOR=TRUE \
+                      -DCXXFLAGS="-Werror" ..
+                  make
                   cd test && ./run_tests.py --xml report.xml
                   cp report.xml ../../report_cmake.xml
                 fi
