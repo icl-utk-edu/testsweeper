@@ -35,9 +35,9 @@ pipeline {
                         fi
                         if [ "${maker}" = "cmake" ]; then
                             spack load cmake
-                            mkdir -p build
+                            mkdir build
                             cd build
-                            cmake -DNO_COLOR=TRUE -DCMAKE_CXX_FLAGS="-Werror" ..
+                            cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
                             make -j8
                             ldd example
                             cd test
@@ -88,10 +88,11 @@ pipeline {
                         fi
                         if [ "${maker}" = "cmake" ]; then
                             spack load cmake
-                            mkdir -p build
+                            mkdir build
                             cd build
-                            cmake -DNO_COLOR=TRUE -DCMAKE_CXX_FLAGS="-Werror" ..
-                            make
+                            cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
+                            make -j8
+                            ldd example
                             cd test
                             ./run_tests.py --xml ../../report_cmake.xml
                         fi

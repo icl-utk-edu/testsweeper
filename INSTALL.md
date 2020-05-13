@@ -17,7 +17,7 @@ Option 2: CMake
 
     mkdir build && cd build
     cmake ..
-    make && make install
+    make && make test && make install
 
 Makefile Installation
 --------------------------------------------------------------------------------
@@ -94,22 +94,21 @@ test files are in the config directory.
 CMake Installation
 --------------------------------------------------------------------------------
 
-The CMake script enforces an out of source build. The simplest way to accomplish
-this is to create a build directory off the TestSweeper root directory:
+The CMake script enforces an out of source build. Create a build
+directory under the TestSweeper root directory:
 
-    cd /my/testsweeper/dir
+    cd /my/testsweeper
     mkdir build && cd build
-
-By default TestSweeper is set to install into `/opt/slate/`. If you wish to
-change this, CMake needs to be told where to install the TestSweeper library.
-You can do this by defining CMAKE_INSTALL_PREFIX variable via the CMake
-command line:
-
-    # Assuming the working dir is still /my/testsweeper/dir/build
-    cmake -DCMAKE_INSTALL_PREFIX=/path/to/my/dir ..
-
-This generates the required makefiles and can be built and installed as normal:
-
-    # Assuming the working dir is still /my/testsweeper/dir/build
+    cmake ..
     make
+    make test
     make install
+
+By default TestSweeper installs into `/opt/slate`. To change this,
+set `CMAKE_INSTALL_PREFIX`:
+
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+
+To debug the build, set `VERBOSE`:
+
+    make VERBOSE=1

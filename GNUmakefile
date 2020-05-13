@@ -30,7 +30,7 @@ make.inc:
 
 # Defaults if not given in make.inc. GNU make doesn't have defaults for these.
 RANLIB   ?= ranlib
-prefix   ?= /usr/local/testsweeper
+prefix   ?= /opt/slate
 
 # auto-detect OS
 # $OSTYPE may not be exported from the shell, so echo it

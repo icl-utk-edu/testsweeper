@@ -36,7 +36,7 @@ See INSTALL.md for more details.
 
 #-------------------------------------------------------------------------------
 def main():
-    config.init( prefix='/usr/local/testsweeper' )
+    config.init( prefix='/opt/slate' )
     config.prog_cxx()
     config.prog_cxx_flags([
         '-O2', '-std=c++11', '-MMD',
