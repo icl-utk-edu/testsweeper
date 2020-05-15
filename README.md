@@ -10,6 +10,8 @@
 
 **University of Tennessee**
 
+* * *
+
 [TOC]
 
 * * *
@@ -17,10 +19,10 @@
 About
 --------------------------------------------------------------------------------
 
-TestSweeper is a testing framework that handles parsing command line options,
-iterating over the test space, and printing results. This simplifies test
-functions by allowing them to concentrate on setting up and solving one problem
-at a time.
+TestSweeper is a C++ testing framework for parameter sweeps. It handles
+parsing command line options, iterating over the test space, and
+printing results. This simplifies test functions by allowing them to
+concentrate on setting up and solving one problem at a time.
 
 TestSweeper is part of the SLATE project
 ([Software for Linear Algebra Targeting Exascale](http://icl.utk.edu/slate/)),
