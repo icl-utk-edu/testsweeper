@@ -51,14 +51,14 @@ pipeline {
                         unstable {
                             slackSend channel: '#slate_ci',
                                 color: 'warning',
-                                message: "${currentBuild.fullDisplayName} Caffeine build ${maker} completed, but has failing tests (<${env.BUILD_URL}|Open>)"
+                                message: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} unstable (<${env.BUILD_URL}|Open>)"
                         }
                         failure {
                             slackSend channel: '#slate_ci',
                                 color: 'danger',
-                                message: "${currentBuild.fullDisplayName} Caffeine build ${maker} failed (<${env.BUILD_URL}|Open>)"
+                                message: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} failed (<${env.BUILD_URL}|Open>)"
                             mail to: 'slate-dev@icl.utk.edu',
-                                subject: "${currentBuild.fullDisplayName} Caffeine build ${maker} failed",
+                                subject: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} failed",
                                 body: "See more at ${env.BUILD_URL}"
                         }
                         always {
@@ -106,14 +106,14 @@ pipeline {
                         unstable {
                             slackSend channel: '#slate_ci',
                                 color: 'warning',
-                                message: "${currentBuild.fullDisplayName} Lips build ${maker} completed, but has failing tests (<${env.BUILD_URL}|Open>)"
+                                message: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} unstable (<${env.BUILD_URL}|Open>)"
                         }
                         failure {
                             slackSend channel: '#slate_ci',
                                 color: 'danger',
-                                message: "${currentBuild.fullDisplayName} Lips build ${maker} failed (<${env.BUILD_URL}|Open>)"
+                                message: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} failed (<${env.BUILD_URL}|Open>)"
                             mail to: 'slate-dev@icl.utk.edu',
-                                subject: "${currentBuild.fullDisplayName} Lips build ${maker} failed",
+                                subject: "${currentBuild.fullDisplayName} >> ${STAGE_NAME} >> ${maker} failed",
                                 body: "See more at ${env.BUILD_URL}"
                         }
                         always {
