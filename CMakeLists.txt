@@ -19,6 +19,7 @@ project(
 option( BUILD_SHARED_LIBS "Build shared libraries" true )
 option( BUILD_TESTS "Build and run tests" true )
 option( COLOR "Use ANSI color output" true )
+option( USE_OPENMP "Use OpenMP, if available, to clean caches" true )
 
 # Default prefix=/opt/slate
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -65,6 +66,16 @@ target_include_directories(
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
         "$<INSTALL_INTERFACE:include>"
 )
+
+# OpenMP support.
+if (NOT USE_OPENMP)
+    message( STATUS "User has requested to NOT use OpenMP" )
+else()
+    find_package( OpenMP )
+    if (OpenMP_CXX_FOUND)
+        target_link_libraries( testsweeper PUBLIC OpenMP::OpenMP_CXX )
+    endif()
+endif()
 
 # Get hg id.
 # todo: replace with `git rev-parse --short HEAD`.
