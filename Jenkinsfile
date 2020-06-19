@@ -27,6 +27,7 @@ pipeline {
                         echo "maker ${maker}"
                         if [ "${maker}" = "make" ]; then
                             export color=no
+                            make distclean
                             make config CXXFLAGS="-Werror"
                             make -j8
                             ldd example
@@ -35,6 +36,7 @@ pipeline {
                         fi
                         if [ "${maker}" = "cmake" ]; then
                             spack load cmake
+                            rm -rf build
                             mkdir build
                             cd build
                             cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
@@ -80,6 +82,7 @@ pipeline {
                         echo "maker ${maker}"
                         if [ "${maker}" = "make" ]; then
                             export color=no
+                            make distclean
                             make config CXXFLAGS="-Werror"
                             make -j8
                             ldd example
@@ -88,6 +91,7 @@ pipeline {
                         fi
                         if [ "${maker}" = "cmake" ]; then
                             spack load cmake
+                            rm -rf build
                             mkdir build
                             cd build
                             cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
