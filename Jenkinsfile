@@ -1,24 +1,26 @@
 pipeline {
-    agent none
-    triggers { cron ('H H(0-2) * * *') }
-    stages {
-        //======================================================================
-        stage('Parallel Build') {
-            matrix {
-                axes {
-                    axis {
-                        name 'maker'
-                        values 'make', 'cmake'
-                    }
-                    axis {
-                        name 'host'
-                        values 'caffeine', 'lips'
-                    }
-                } // axes
-                stages {
-                //--------------------------------------------------------------
+
+agent none
+triggers { cron ('H H(0-2) * * *') }
+stages {
+    //======================================================================
+    stage('Parallel Build') {
+        matrix {
+            axes {
+                axis {
+                    name 'maker'
+                    values 'make', 'cmake'
+                }
+                axis {
+                    name 'host'
+                    values 'caffeine', 'lips'
+                }
+            } // axes
+            stages {
                 stage('Build') {
                     agent { node "${host}.icl.utk.edu" }
+
+                    //----------------------------------------------------------
                     steps {
                         sh '''
                         #!/bin/sh +x
@@ -51,6 +53,8 @@ pipeline {
                         fi
                         '''
                     } // steps
+
+                    //----------------------------------------------------------
                     post {
                         changed {
                             slackSend channel: '#slate_ci',
@@ -74,9 +78,11 @@ pipeline {
                             junit '*.xml'
                         }
                     } // post
+
                 } // stage(Build)
-                } // stages
-            } // matrix
-        } // stage(Parallel Build)
-    } // stages
+            } // stages
+        } // matrix
+    } // stage(Parallel Build)
+} // stages
+
 } // pipeline
