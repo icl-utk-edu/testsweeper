@@ -148,18 +148,29 @@ def make( project, version_h, version_c ):
         exit(1)
 
     myrun( ['git', 'commit', '-m', 'Version '+ tag, '.'] )
-    myrun( ['git', 'tag', tag] )
+    myrun( ['git', 'tag', tag, '-a', '-m', 'Version '+ tag] )
 
     #--------------------
     # Prepare tar file.
     dir = project +'-'+ tag
     print( '\n>> Preparing files in', dir )
+
+    # Move any existing dir to dir-#; maximum # is 100.
+    if (os.path.exists( dir )):
+        for index in range( 1, 100 ):
+            backup = '%s-%d' % (dir, index)
+            if (not os.path.exists( backup )):
+                os.rename( dir, backup )
+                print( 'backing up', dir, 'to', backup )
+                break
+    # end
+
     os.mkdir( dir )
     subprocess.run( 'git archive ' + tag + ' | tar -x -C ' + dir, shell=True )
     os.chdir( dir )
 
     # Update hash ID in version_c.
-    id = myrun( 'git rev-parse --short '+ tag, stdout=PIPE, text=True ).strip()
+    id = myrun( 'git rev-parse --short HEAD', stdout=PIPE, text=True ).strip()
     print( '\n>> Setting ID in:', version_c )
     file_sub( version_c,
               r'^(#define \w+_ID) "unknown"',
