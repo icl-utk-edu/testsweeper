@@ -77,10 +77,9 @@ else()
     endif()
 endif()
 
-# Get hg id.
-# todo: replace with `git rev-parse --short HEAD`.
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.hg")
-    execute_process( COMMAND hg id -i ${CMAKE_CURRENT_SOURCE_DIR}
+# Get git commit id.
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+    execute_process( COMMAND git rev-parse --short HEAD
                      OUTPUT_VARIABLE testsweeper_id )
     string( STRIP "${testsweeper_id}" testsweeper_id )
     message( STATUS "testsweeper_id = ${testsweeper_id}" )
