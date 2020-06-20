@@ -19,23 +19,43 @@ Option 2: CMake
     cmake ..
     make && make test && make install
 
+
+Environment variables (Makefile and CMake)
+--------------------------------------------------------------------------------
+
+Standard environment variables affect both Makefile (configure.py) and CMake.
+These include:
+
+    CXX                 C++ compiler
+    CXXFLAGS            C++ compiler flags
+    LDFLAGS             linker flags
+    CPATH               compiler include search path
+    LIBRARY_PATH        compile-time library search path
+    LD_LIBRARY_PATH     runtime library search path
+    DYLD_LIBRARY_PATH   runtime library search path on macOS
+
+TestSweeper does not rely on any libraries, other than optionally OpenMP,
+so setting LDFLAGS, CPATH, LIBRARY_PATH, etc. is not generally needed.
+
+
 Makefile Installation
 --------------------------------------------------------------------------------
 
+Available targets:
+
     make           - configures (if make.inc is missing),
-                     then compiles the library and tester.
-    make config    - configures TestSweeper, creating a make.inc file.
-    make lib       - compiles the library (lib/libtestsweeper.so).
-    make tester    - compiles the tester (example).
+                     then compiles the library and tester
+    make config    - configures TestSweeper, creating a make.inc file
+    make lib       - compiles the library (lib/libtestsweeper.so)
+    make tester    - compiles the tester (example)
     make docs      - todo: generates documentation in docs/html/index.html
-    make install   - installs the library and headers to ${prefix}.
-    make uninstall - remove installed library and headers from ${prefix}.
-    make clean     - deletes object (*.o) and library (*.a, *.so) files.
-    make distclean - also deletes make.inc and dependency files (*.d).
-    If static=1, makes .a instead of .so library.
+    make install   - installs the library and headers to ${prefix}
+    make uninstall - remove installed library and headers from ${prefix}
+    make clean     - deletes object (*.o) and library (*.a, *.so) files
+    make distclean - also deletes make.inc and dependency files (*.d)
 
 
-### Details
+### Options
 
     make config [options]
 
@@ -47,25 +67,18 @@ script can be invoked directly:
     python configure.py [options]
 
 Running `configure.py -h` will print a help message with the current options.
-Variables that affect configure.py include:
+In addition to those listed in the Environment variables section above,
+options include:
 
-    CXX                C++ compiler
-    CXXFLAGS           C++ compiler flags
-    LDFLAGS            linker flags
-    CPATH              compiler include search path
-    LIBRARY_PATH       compile time library search path
-    LD_LIBRARY_PATH    runtime library search path
-    DYLD_LIBRARY_PATH  runtime library search path on macOS
-    prefix             where to install:
-                       headers go   in ${prefix}/include,
-                       library goes in ${prefix}/lib${LIB_SUFFIX}
+    color={auto,yes,no} use ANSI colors in TestSweeper output
+    static={0,1}        build as shared (default) or static library
+    prefix              where to install, default /opt/slate.
+                        headers go   in ${prefix}/include,
+                        library goes in ${prefix}/lib${LIB_SUFFIX}
 
 These can be set in your environment or on the command line, e.g.,
 
     python configure.py CXX=g++ prefix=/usr/local
-
-TestSweeper does not rely on any libraries, other than optionally OpenMP,
-so setting LDFLAGS, CPATH, LIBRARY_PATH, etc. is not generally needed.
 
 
 ### Manual configuration
@@ -91,24 +104,51 @@ issue. The log shows the option being tested, the exact command run, the
 command's standard output (stdout), error output (stderr), and exit status. All
 test files are in the config directory.
 
+
 CMake Installation
 --------------------------------------------------------------------------------
 
-The CMake script enforces an out of source build. Create a build
+The CMake script enforces an out-of-source build. Create a build
 directory under the TestSweeper root directory:
 
-    cd /my/testsweeper
+    cd /path/to/testsweeper
     mkdir build && cd build
-    cmake ..
+    cmake [options] ..
     make
     make test
     make install
 
-By default TestSweeper installs into `/opt/slate`. To change this,
-set `CMAKE_INSTALL_PREFIX`:
 
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+### Options
+
+CMake uses the settings in the Environment variables section above.
+Additionally, options include:
+
+    COLOR={on,off}              use ANSI colors in TestSweeper output
+    USE_OPENMP={on,off}         use OpenMP, if available, to purge caches
+    BUILD_TESTS={on,off}        build test executable (example)
+    BUILD_SHARED_LIBS={on,off}  build as shared (default) or static library
+    CMAKE_INSTALL_PREFIX        where to install, default /opt/slate
+
+These options are defined on the command line using `-D`, e.g.,
+
+    # in build directory
+    cmake -DCOLOR=off -DCMAKE_INSTALL_PREFIX=/usr/local ..
+
+Alternatively, use the `ccmake` text-based interface or the CMake app GUI.
+
+    # in build directory
+    ccmake ..
+    Type 'c' to configure, then 'g' to generate Makefile
+
+To re-configure CMake, you may need to delete CMake's cache:
+
+    # in build directory
+    rm CMakeCache.txt
+    # or
+    rm -rf *
 
 To debug the build, set `VERBOSE`:
 
+    # in build directory, after running cmake
     make VERBOSE=1
