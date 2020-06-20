@@ -74,8 +74,8 @@ tester = example
 #-------------------------------------------------------------------------------
 # Get Mercurial id, and make version.o depend on it via .id file.
 
-ifneq ($(wildcard .hg),)
-    id := $(shell hg id -i)
+ifneq ($(wildcard .git),)
+    id := $(shell git rev-parse --short HEAD)
     version.o: CXXFLAGS += -DTESTSWEEPER_ID='"$(id)"'
 endif
 
