@@ -24,21 +24,18 @@ stages {
                     steps {
                         sh '''
                         #!/bin/sh +x
-                        echo "TestSweeper Building"
                         hostname && pwd
 
                         source /home/jmfinney/spack/share/spack/setup-env.sh
                         spack load gcc@6.4.0
 
+                        echo "========================================"
                         echo "maker ${maker}"
                         if [ "${maker}" = "make" ]; then
                             export color=no
                             make distclean
                             make config CXXFLAGS="-Werror"
-                            make -j8
-                            ldd example
-                            cd test
-                            ./run_tests.py --xml ../report_make.xml
+                            export top=..
                         fi
                         if [ "${maker}" = "cmake" ]; then
                             spack load cmake
@@ -46,11 +43,18 @@ stages {
                             mkdir build
                             cd build
                             cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
-                            make -j8
-                            ldd example
-                            cd test
-                            ./run_tests.py --xml ../../report_cmake.xml
+                            export top=..
                         fi
+
+                        echo "========================================"
+                        make -j8
+
+                        echo "========================================"
+                        ldd example
+
+                        echo "========================================"
+                        cd test
+                        ./run_tests.py --xml ${top}/report-${maker}.xml
                         '''
                     } // steps
 
