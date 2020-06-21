@@ -43,7 +43,7 @@ stages {
                             mkdir build
                             cd build
                             cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
-                            export top=..
+                            export top=../..
                         fi
 
                         echo "========================================"
