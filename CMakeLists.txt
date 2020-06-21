@@ -1,6 +1,6 @@
-# CMake script for TestSweeper framework
-# needed to build BLASPP/test, LAPACKPP/test, SLATE/test
+# CMake script for TestSweeper library
 # repo: http://bitbucket.org/icl/testsweeper
+# needed to build blaspp/test, lapackpp/test, slate/test
 
 cmake_minimum_required( VERSION 3.8 )
 # 3.1  target_compile_features
@@ -10,16 +10,16 @@ cmake_minimum_required( VERSION 3.8 )
 
 project(
     testsweeper
-    VERSION 2020.06.0
+    VERSION 2020.06.00
     LANGUAGES CXX
 )
 
 #-------------------------------------------------------------------------------
 # Options
 option( BUILD_SHARED_LIBS "Build shared libraries" true )
-option( BUILD_TESTS "Build and run tests" true )
-option( COLOR "Use ANSI color output" true )
-option( USE_OPENMP "Use OpenMP, if available, to clean caches" true )
+option( build_tests "Build test suite" true )
+option( color "Use ANSI color output" true )
+option( use_openmp "Use OpenMP, if available" true )
 
 # Default prefix=/opt/slate
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -29,6 +29,8 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
          FORCE
     )
     message( STATUS "Setting CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
+    # Append the new CMAKE_INSTALL_PREFIX, since CMake appended the old value.
+    list( APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_INSTALL_PREFIX} )
 endif()
 
 # Provide menu of options. (Why doesn't CMake do this?)
@@ -36,18 +38,17 @@ set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
               None Debug Release RelWithDebInfo MinSizeRel )
 
 #-------------------------------------------------------------------------------
-# Require build directory.
-string( TOLOWER "${CMAKE_CURRENT_SOURCE_DIR}" source_dir_lower )
-string( TOLOWER "${CMAKE_CURRENT_BINARY_DIR}" binary_dir_lower )
-if (source_dir_lower STREQUAL binary_dir_lower)
+# Enforce out-of-source build
+string( TOLOWER "${CMAKE_CURRENT_SOURCE_DIR}" source_dir )
+string( TOLOWER "${CMAKE_CURRENT_BINARY_DIR}" binary_dir )
+if ("${source_dir}" STREQUAL "${binary_dir}")
     message( FATAL_ERROR
     "Compiling TestSweeper with CMake requires an out-of-source build. To proceed:
     rm -rf CMakeCache.txt CMakeFiles/   # delete files in ${CMAKE_CURRENT_SOURCE_DIR}
     mkdir build
     cd build
     cmake ..
-    make"
-    )
+    make" )
 endif()
 
 #-------------------------------------------------------------------------------
@@ -59,7 +60,7 @@ add_library(
 )
 
 # Include directory.
-# During build it's source dir; after install it's {prefix}/include.
+# During build it's {source}; after install it's {prefix}/include.
 target_include_directories(
     testsweeper
     PUBLIC
@@ -68,7 +69,7 @@ target_include_directories(
 )
 
 # OpenMP support.
-if (NOT USE_OPENMP)
+if (NOT use_openmp)
     message( STATUS "User has requested to NOT use OpenMP" )
 else()
     find_package( OpenMP )
@@ -98,19 +99,19 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.15)
         testsweeper PRIVATE "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall>>" )
 endif()
 
-if (NOT COLOR)
+if (NOT color)
     target_compile_definitions( testsweeper PUBLIC "NO_COLOR" )
 endif()
 
 #-------------------------------------------------------------------------------
-# Install libtestsweeper, and add to testsweeperTargets.cmake
+# Install library and add to <package>Targets.cmake
 install(
     TARGETS testsweeper
     EXPORT testsweeperTargets
     LIBRARY DESTINATION "lib"  # no default before 3.14
 )
 
-# Install header file
+# Install header files
 install(
     FILES "testsweeper.hh"
     DESTINATION "include"
@@ -123,7 +124,7 @@ install(
 )
 
 # Also export <package>Targets.cmake in build directory
-export (
+export(
     EXPORT testsweeperTargets
     FILE "testsweeperTargets.cmake"
 )
@@ -148,7 +149,7 @@ install(
 )
 
 #-------------------------------------------------------------------------------
-if (BUILD_TESTS)
+if (build_tests)
     # Compile example.
     add_executable( example example.cc )
     target_link_libraries( example testsweeper )
@@ -174,6 +175,6 @@ if (BUILD_TESTS)
 endif()
 
 #-------------------------------------------------------------------------------
-# To make this more user friendly, add 'make lib' and 'make tester' targets.
+# Add 'make lib' and 'make tester' targets.
 add_custom_target( lib DEPENDS testsweeper )
 add_custom_target( tester DEPENDS example )

@@ -122,18 +122,21 @@ directory under the TestSweeper root directory:
 ### Options
 
 CMake uses the settings in the Environment variables section above.
-Additionally, options include:
+Standard CMake options include:
 
-    COLOR={on,off}              use ANSI colors in TestSweeper output
-    USE_OPENMP={on,off}         use OpenMP, if available, to purge caches
-    BUILD_TESTS={on,off}        build test executable (example)
-    BUILD_SHARED_LIBS={on,off}  build as shared (default) or static library
+    BUILD_SHARED_LIBS={ON,off}  build as shared (default) or static library
     CMAKE_INSTALL_PREFIX        where to install, default /opt/slate
+
+TestSweeper specific options include (all values case insensitive):
+
+    color={ON,off}                use ANSI colors in output
+    use_openmp={ON,off}           use OpenMP, if available
+    build_tests={ON,off}          build test suite (test/tester)
 
 These options are defined on the command line using `-D`, e.g.,
 
     # in build directory
-    cmake -DCOLOR=off -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    cmake -Dbuild_tests=off -DCMAKE_INSTALL_PREFIX=/usr/local ..
 
 Alternatively, use the `ccmake` text-based interface or the CMake app GUI.
 
