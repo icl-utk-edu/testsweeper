@@ -26,8 +26,8 @@ stages {
                         #!/bin/sh +x
                         hostname && pwd
 
-                        source /home/jmfinney/spack/share/spack/setup-env.sh
-                        spack load gcc@6.4.0
+                        source /home/jenkins/spack_setup
+                        soad gcc@6.4.0
 
                         echo "========================================"
                         echo "maker ${maker}"
@@ -38,7 +38,7 @@ stages {
                             export top=..
                         fi
                         if [ "${maker}" = "cmake" ]; then
-                            spack load cmake
+                            sload cmake
                             rm -rf build
                             mkdir build
                             cd build
