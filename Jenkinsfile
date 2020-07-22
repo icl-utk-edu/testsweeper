@@ -27,7 +27,7 @@ stages {
                         hostname && pwd
 
                         source /home/jenkins/spack_setup
-                        soad gcc@6.4.0
+                        sload gcc@6.4.0
 
                         echo "========================================"
                         echo "maker ${maker}"
