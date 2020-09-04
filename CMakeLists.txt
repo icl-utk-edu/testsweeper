@@ -39,6 +39,12 @@ endif()
 set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
               None Debug Release RelWithDebInfo MinSizeRel )
 
+# When built as a sub-project, need to add a namespace to make common
+# targets unique, e.g., `make lib` becomes `make testsweeper_lib`.
+if (NOT "${CMAKE_PROJECT_NAME}" STREQUAL "testsweeper")
+    set( testsweeper_ "testsweeper_" )
+endif()
+
 #-------------------------------------------------------------------------------
 # Enforce out-of-source build
 string( TOLOWER "${CMAKE_CURRENT_SOURCE_DIR}" source_dir )
@@ -159,19 +165,20 @@ install(
 #-------------------------------------------------------------------------------
 if (build_tests)
     # Compile example.
-    add_executable( example example.cc )
-    target_link_libraries( example testsweeper )
-    set_target_properties( example PROPERTIES CXX_EXTENSIONS false )
+    set( example ${testsweeper_}example )
+    add_executable( ${example} example.cc )
+    target_link_libraries( ${example} testsweeper )
+    set_target_properties( ${example} PROPERTIES CXX_EXTENSIONS false )
 
     enable_testing()
 
-    add_test( NAME example COMMAND example )
+    add_test( NAME ${example} COMMAND ${example} )
     set_tests_properties(
-        example PROPERTIES PASS_REGULAR_EXPRESSION "Usage:" )
+        ${example} PROPERTIES PASS_REGULAR_EXPRESSION "Usage:" )
 
-    add_test( NAME example_foo COMMAND example foo )
+    add_test( NAME ${example}_foo COMMAND ${example} foo )
     set_tests_properties(
-        example_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
+        ${example}_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
 
     # Copy test script to build directory. Used in Jenkins.
     add_custom_command(
@@ -184,5 +191,5 @@ endif()
 
 #-------------------------------------------------------------------------------
 # Add 'make lib' and 'make tester' targets.
-add_custom_target( lib DEPENDS testsweeper )
-add_custom_target( tester DEPENDS example )
+add_custom_target( ${testsweeper_}lib DEPENDS testsweeper )
+add_custom_target( ${testsweeper_}tester DEPENDS ${example} )
