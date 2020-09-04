@@ -31,6 +31,8 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     message( STATUS "Setting CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
     # Append the new CMAKE_INSTALL_PREFIX, since CMake appended the old value.
     list( APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_INSTALL_PREFIX} )
+else()
+    message( STATUS "Using CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
 endif()
 
 # Provide menu of options. (Why doesn't CMake do this?)
@@ -81,6 +83,7 @@ endif()
 # Get git commit id.
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     execute_process( COMMAND git rev-parse --short HEAD
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                      OUTPUT_VARIABLE testsweeper_id )
     string( STRIP "${testsweeper_id}" testsweeper_id )
     message( STATUS "testsweeper_id = ${testsweeper_id}" )
@@ -104,23 +107,28 @@ if (NOT color)
 endif()
 
 #-------------------------------------------------------------------------------
+# GNU Filesystem Convensions
+include( GNUInstallDirs )
+set( INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/testsweeper )
+
 # Install library and add to <package>Targets.cmake
 install(
     TARGETS testsweeper
     EXPORT testsweeperTargets
-    LIBRARY DESTINATION "lib"  # no default before 3.14
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # no default before 3.14
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 # Install header files
 install(
     FILES "testsweeper.hh"
-    DESTINATION "include"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # Install <package>Targets.cmake
 install(
     EXPORT testsweeperTargets
-    DESTINATION "lib/testsweeper"
+    DESTINATION ${INSTALL_CONFIGDIR}
 )
 
 # Also export <package>Targets.cmake in build directory
@@ -135,7 +143,7 @@ include( CMakePackageConfigHelpers )
 configure_package_config_file(
     "testsweeperConfig.cmake.in"
     "testsweeperConfig.cmake"
-    INSTALL_DESTINATION "lib/testsweeper"
+    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
 )
 write_basic_package_version_file(
     "testsweeperConfigVersion.cmake"
@@ -145,7 +153,7 @@ write_basic_package_version_file(
 install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfigVersion.cmake"
-    DESTINATION "lib/testsweeper"
+    DESTINATION ${INSTALL_CONFIGDIR}
 )
 
 #-------------------------------------------------------------------------------
