@@ -42,7 +42,7 @@ stages {
                             rm -rf build
                             mkdir build
                             cd build
-                            cmake -DCOLOR=no -DCMAKE_CXX_FLAGS="-Werror" ..
+                            cmake -Dcolor=no -DCMAKE_CXX_FLAGS="-Werror" ..
                             export top=../..
                         fi
 
