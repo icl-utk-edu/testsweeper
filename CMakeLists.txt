@@ -20,6 +20,7 @@ option( BUILD_SHARED_LIBS "Build shared libraries" true )
 option( build_tests "Build test suite" true )
 option( color "Use ANSI color output" true )
 option( use_openmp "Use OpenMP, if available" true )
+option( testsweeper_install "Add install target" true )
 
 # Default prefix=/opt/slate
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -113,54 +114,58 @@ if (NOT color)
 endif()
 
 #-------------------------------------------------------------------------------
-# GNU Filesystem Convensions
-include( GNUInstallDirs )
-set( INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/testsweeper )
+# When TestSweeper is used as a sub-project,
+# the parent (e.g., BLAS++) may not want to install it.
+if (testsweeper_install)
+    # GNU Filesystem Convensions
+    include( GNUInstallDirs )
+    set( INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/testsweeper )
 
-# Install library and add to <package>Targets.cmake
-install(
-    TARGETS testsweeper
-    EXPORT testsweeperTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # no default before 3.14
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+    # Install library and add to <package>Targets.cmake
+    install(
+        TARGETS testsweeper
+        EXPORT testsweeperTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # no default before 3.14
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 
-# Install header files
-install(
-    FILES "testsweeper.hh"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+    # Install header files
+    install(
+        FILES "testsweeper.hh"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 
-# Install <package>Targets.cmake
-install(
-    EXPORT testsweeperTargets
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
+    # Install <package>Targets.cmake
+    install(
+        EXPORT testsweeperTargets
+        DESTINATION ${INSTALL_CONFIGDIR}
+    )
 
-# Also export <package>Targets.cmake in build directory
-export(
-    EXPORT testsweeperTargets
-    FILE "testsweeperTargets.cmake"
-)
+    # Also export <package>Targets.cmake in build directory
+    export(
+        EXPORT testsweeperTargets
+        FILE "testsweeperTargets.cmake"
+    )
 
-# Install <package>Config.cmake and <package>ConfigVersion.cmake,
-# to enable find_package( <package> ).
-include( CMakePackageConfigHelpers )
-configure_package_config_file(
-    "testsweeperConfig.cmake.in"
-    "testsweeperConfig.cmake"
-    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-)
-write_basic_package_version_file(
-    "testsweeperConfigVersion.cmake"
-    VERSION "${testsweeper_VERSION}"
-    COMPATIBILITY AnyNewerVersion
-)
-install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfigVersion.cmake"
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
+    # Install <package>Config.cmake and <package>ConfigVersion.cmake,
+    # to enable find_package( <package> ).
+    include( CMakePackageConfigHelpers )
+    configure_package_config_file(
+        "testsweeperConfig.cmake.in"
+        "testsweeperConfig.cmake"
+        INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+    )
+    write_basic_package_version_file(
+        "testsweeperConfigVersion.cmake"
+        VERSION "${testsweeper_VERSION}"
+        COMPATIBILITY AnyNewerVersion
+    )
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfig.cmake"
+              "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfigVersion.cmake"
+        DESTINATION ${INSTALL_CONFIGDIR}
+    )
+endif()
 
 #-------------------------------------------------------------------------------
 if (build_tests)
