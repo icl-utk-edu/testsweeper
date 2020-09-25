@@ -2,11 +2,12 @@
 # repo: http://bitbucket.org/icl/testsweeper
 # needed to build blaspp/test, lapackpp/test, slate/test
 
-cmake_minimum_required( VERSION 3.8 )
+cmake_minimum_required( VERSION 3.15 )
 # 3.1  target_compile_features
 # 3.8  target_compile_features( cxx_std_11 )
 # 3.14 install( LIBRARY DESTINATION lib ) default
 # 3.15 $<$COMPILE_LANG_AND_ID  # optional
+# 3.15 message DEBUG
 
 project(
     testsweeper
@@ -14,16 +15,28 @@ project(
     LANGUAGES CXX
 )
 
+# When built as a sub-project, add a namespace to make targets unique,
+# e.g., `make example` becomes `make testsweeper_example`.
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set( testsweeper_is_project true )
+    set( testsweeper_ "" )
+else()
+    set( testsweeper_is_project false )
+    set( testsweeper_ "testsweeper_" )
+endif()
+
 #-------------------------------------------------------------------------------
 # Options
 option( BUILD_SHARED_LIBS "Build shared libraries" true )
-option( build_tests "Build test suite" true )
+option( build_tests "Build test suite" "${testsweeper_is_project}" )
 option( color "Use ANSI color output" true )
 option( use_openmp "Use OpenMP, if available" true )
-option( testsweeper_install "Add install target" true )
+option( testsweeper_install "Add install target" "${testsweeper_is_project}" )
 
 # Default prefix=/opt/slate
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
+    AND testsweeper_is_project)
+
     set( CMAKE_INSTALL_PREFIX "/opt/slate"
          CACHE PATH
          "Install path prefix, prepended onto install directories."
@@ -40,11 +53,17 @@ endif()
 set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
               None Debug Release RelWithDebInfo MinSizeRel )
 
-# When built as a sub-project, need to add a namespace to make common
-# targets unique, e.g., `make lib` becomes `make testsweeper_lib`.
-if (NOT "${CMAKE_PROJECT_NAME}" STREQUAL "testsweeper")
-    set( testsweeper_ "testsweeper_" )
-endif()
+message( DEBUG "Settings:
+CMAKE_INSTALL_PREFIX   = ${CMAKE_INSTALL_PREFIX}
+CMAKE_BUILD_TYPE       = ${CMAKE_BUILD_TYPE}
+BUILD_SHARED_LIBS      = ${BUILD_SHARED_LIBS}
+build_tests            = ${build_tests}
+color                  = ${color}
+use_openmp             = ${use_openmp}
+testsweeper_install    = ${testsweeper_install}
+testsweeper_is_project = ${testsweeper_is_project}
+testsweeper_           = ${testsweeper_}
+" )
 
 #-------------------------------------------------------------------------------
 # Enforce out-of-source build
@@ -117,7 +136,7 @@ endif()
 # When TestSweeper is used as a sub-project,
 # the parent (e.g., BLAS++) may not want to install it.
 if (testsweeper_install)
-    # GNU Filesystem Convensions
+    # GNU Filesystem Conventions
     include( GNUInstallDirs )
     set( INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/testsweeper )
 
@@ -195,6 +214,7 @@ if (build_tests)
 endif()
 
 #-------------------------------------------------------------------------------
-# Add 'make lib' and 'make tester' targets.
-add_custom_target( ${testsweeper_}lib DEPENDS testsweeper )
-add_custom_target( ${testsweeper_}tester DEPENDS ${example} )
+# Add 'make lib' target.
+if (testsweeper_is_project)
+    add_custom_target( lib DEPENDS testsweeper )
+endif()
