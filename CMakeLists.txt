@@ -133,6 +133,39 @@ if (NOT color)
 endif()
 
 #-------------------------------------------------------------------------------
+if (build_tests)
+    # Compile example.
+    set( example ${testsweeper_}example )
+    add_executable( ${example} example.cc )
+    target_link_libraries( ${example} testsweeper )
+    set_target_properties( ${example} PROPERTIES CXX_EXTENSIONS false )
+
+    enable_testing()
+
+    add_test( NAME ${example} COMMAND ${example} )
+    set_tests_properties(
+        ${example} PROPERTIES PASS_REGULAR_EXPRESSION "Usage:" )
+
+    add_test( NAME ${example}_foo COMMAND ${example} foo )
+    set_tests_properties(
+        ${example}_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
+
+    # Copy test script to build directory. Used in Jenkins.
+    add_custom_command(
+        TARGET testsweeper POST_BUILD
+        COMMAND
+        cp -a ${CMAKE_CURRENT_SOURCE_DIR}/test
+              ${CMAKE_CURRENT_BINARY_DIR}/test
+    )
+endif()
+
+#-------------------------------------------------------------------------------
+# Add 'make lib' target.
+if (testsweeper_is_project)
+    add_custom_target( lib DEPENDS testsweeper )
+endif()
+
+#-------------------------------------------------------------------------------
 # When TestSweeper is used as a sub-project,
 # the parent (e.g., BLAS++) may not want to install it.
 if (testsweeper_install)
@@ -184,37 +217,4 @@ if (testsweeper_install)
               "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfigVersion.cmake"
         DESTINATION ${INSTALL_CONFIGDIR}
     )
-endif()
-
-#-------------------------------------------------------------------------------
-if (build_tests)
-    # Compile example.
-    set( example ${testsweeper_}example )
-    add_executable( ${example} example.cc )
-    target_link_libraries( ${example} testsweeper )
-    set_target_properties( ${example} PROPERTIES CXX_EXTENSIONS false )
-
-    enable_testing()
-
-    add_test( NAME ${example} COMMAND ${example} )
-    set_tests_properties(
-        ${example} PROPERTIES PASS_REGULAR_EXPRESSION "Usage:" )
-
-    add_test( NAME ${example}_foo COMMAND ${example} foo )
-    set_tests_properties(
-        ${example}_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
-
-    # Copy test script to build directory. Used in Jenkins.
-    add_custom_command(
-        TARGET testsweeper POST_BUILD
-        COMMAND
-        cp -a ${CMAKE_CURRENT_SOURCE_DIR}/test
-              ${CMAKE_CURRENT_BINARY_DIR}/test
-    )
-endif()
-
-#-------------------------------------------------------------------------------
-# Add 'make lib' target.
-if (testsweeper_is_project)
-    add_custom_target( lib DEPENDS testsweeper )
 endif()
