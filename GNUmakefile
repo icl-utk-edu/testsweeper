@@ -145,6 +145,9 @@ $(tester): $(tester_obj) $(lib)
 test: $(tester)
 tester: $(tester)
 
+check:
+	cd test; python run_tests.py
+
 #-------------------------------------------------------------------------------
 # headers
 # precompile headers to verify self-sufficiency

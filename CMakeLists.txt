@@ -150,13 +150,22 @@ if (build_tests)
     set_tests_properties(
         ${example}_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
 
-    # Copy test script to build directory. Used in Jenkins.
+    # Copy test script to build directory.
     add_custom_command(
         TARGET testsweeper POST_BUILD
         COMMAND
         cp -a ${CMAKE_CURRENT_SOURCE_DIR}/test
               ${CMAKE_CURRENT_BINARY_DIR}/test
     )
+
+    if (testsweeper_is_project)
+        add_custom_target(
+            "check"
+            COMMAND
+                python run_tests.py
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test"
+        )
+    endif()
 endif()
 
 #-------------------------------------------------------------------------------
