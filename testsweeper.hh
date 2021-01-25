@@ -368,7 +368,10 @@ public:
                const char* help ):
         TParamBase<int3_t>( name, width, type, int3_t(), help ),
         min_value_( min_value ),
-        max_value_( max_value )
+        max_value_( max_value ),
+        m_name_("m"),
+        n_name_("n"),
+        k_name_("k")
     {
         values_.clear();
         for (int64_t i = 100; i <= 500; i += 100) {
@@ -384,7 +387,10 @@ public:
                const char* help ):
         TParamBase<int3_t>( name, width, type, int3_t(), help ),
         min_value_( min_value ),
-        max_value_( max_value )
+        max_value_( max_value ),
+        m_name_("m"),
+        n_name_("n"),
+        k_name_("k")
     {
         values_.clear();
         parse( default_value );
@@ -414,9 +420,19 @@ public:
         return values_[ index_ ].k;
     }
 
+    void names(const char* m, const char* n, const char* k="")
+    {
+        m_name_ = m;
+        n_name_ = n;
+        k_name_ = k;
+    }
+
 protected:
     int64_t min_value_;
     int64_t max_value_;
+    std::string m_name_;
+    std::string n_name_;
+    std::string k_name_;
 };
 
 // =============================================================================

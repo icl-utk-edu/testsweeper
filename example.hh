@@ -30,6 +30,7 @@ public:
     testsweeper::ParamEnum< testsweeper::DataType > datatype_old;
     testsweeper::ParamEnum< testsweeper::DataType > datatype;
     testsweeper::ParamInt3   dim;
+    testsweeper::ParamInt3   grid;
 
     // ----- output parameters
     testsweeper::ParamScientific error;

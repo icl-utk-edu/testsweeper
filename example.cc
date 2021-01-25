@@ -105,6 +105,7 @@ Params::Params():
 
     //          name,      w,    type,            min,     max, help
     dim       ( "dim",     6,    ParamType::List, 0,   1000000, "m x n x k dimensions" ),
+    grid      ( "grid",    6,    ParamType::List, "1x1",   0, 1000000, "p x q dimensions"),
 
     // ----- output parameters
     // min, max are ignored

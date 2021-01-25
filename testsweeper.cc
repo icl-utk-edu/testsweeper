@@ -497,13 +497,13 @@ void ParamInt3::header( int line ) const
 {
     if (width_ > 0) {
         if (used_ & m_mask) {
-            printf( "%*s  ", width_, (line == 0 ? "" : "m") );
+            printf( "%*s  ", width_, (line == 0 ? "" : m_name_.c_str()) );
         }
         if (used_ & n_mask) {
-            printf( "%*s  ", width_, (line == 0 ? "" : "n") );
+            printf( "%*s  ", width_, (line == 0 ? "" : n_name_.c_str()) );
         }
         if (used_ & k_mask) {
-            printf( "%*s  ", width_, (line == 0 ? "" : "k") );
+            printf( "%*s  ", width_, (line == 0 ? "" : k_name_.c_str()) );
         }
     }
 }
