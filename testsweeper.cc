@@ -953,8 +953,9 @@ void ParamsBase::parse( const char *routine, int n, char **args )
             {
                 throw QuitException();
             }
-            for (auto param = ParamBase::s_params.begin();
-                 param != ParamBase::s_params.end(); ++param)
+            for (auto param  = ParamBase::s_params.begin();
+                      param != ParamBase::s_params.end();
+                    ++param)
             {
                 // handles both "--arg value" (two arg)
                 // and          "--arg=value" (one arg)
@@ -1016,8 +1017,9 @@ bool ParamsBase::next()
 void ParamsBase::header()
 {
     for (int line = 0; line < 2; ++line) {
-        for (auto param = ParamBase::s_params.begin();
-             param != ParamBase::s_params.end(); ++param)
+        for (auto param  = ParamBase::s_params.begin();
+                  param != ParamBase::s_params.end();
+                ++param)
         {
             (*param)->header( line );
         }
@@ -1028,8 +1030,9 @@ void ParamsBase::header()
 // -----------------------------------------------------------------------------
 void ParamsBase::print()
 {
-    for (auto param = ParamBase::s_params.begin();
-         param != ParamBase::s_params.end(); ++param)
+    for (auto param  = ParamBase::s_params.begin();
+              param != ParamBase::s_params.end();
+            ++param)
     {
         (*param)->print();
     }
@@ -1039,8 +1042,9 @@ void ParamsBase::print()
 // -----------------------------------------------------------------------------
 void ParamsBase::reset_output()
 {
-    for (auto param = ParamBase::s_params.begin();
-         param != ParamBase::s_params.end(); ++param)
+    for (auto param  = ParamBase::s_params.begin();
+              param != ParamBase::s_params.end();
+            ++param)
     {
         (*param)->reset_output();
     }
@@ -1056,16 +1060,18 @@ void ParamsBase::help( const char *routine )
             "%sParameters for %s:%s\n",
             ansi_bold, ansi_normal,
             ansi_bold, routine, ansi_normal );
-    for (auto param = ParamBase::s_params.begin();
-         param != ParamBase::s_params.end(); ++param)
+    for (auto param  = ParamBase::s_params.begin();
+              param != ParamBase::s_params.end();
+            ++param)
     {
         if ((*param)->used_ && (*param)->type_ == ParamType::Value)
             (*param)->help();
     }
     printf( "\n%sParameters that take comma-separated list of values and may be repeated:%s\n",
             ansi_bold, ansi_normal );
-    for (auto param = ParamBase::s_params.begin();
-         param != ParamBase::s_params.end(); ++param)
+    for (auto param  = ParamBase::s_params.begin();
+              param != ParamBase::s_params.end();
+            ++param)
     {
         if ((*param)->used_ && (*param)->type_ == ParamType::List)
             (*param)->help();
