@@ -420,6 +420,7 @@ public:
         return values_[ index_ ].k;
     }
 
+    /// Sets the names of the header values.
     void names(const char* m, const char* n, const char* k="")
     {
         m_name_ = m;
