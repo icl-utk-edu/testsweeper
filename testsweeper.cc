@@ -256,7 +256,7 @@ void ParamBase::header( int line ) const
 {
     if (used_ && width_ > 0) {
         size_t i = name_.find( '\n' );
-        const char *str = "";
+        std::string str;
         if (i != std::string::npos) {
             str = (line == 0
                 ? name_.substr( 0, i ).c_str()
@@ -267,7 +267,7 @@ void ParamBase::header( int line ) const
                 ? ""
                 : name_.c_str() );
         }
-        printf( "%*s  ", width_, str );
+        printf( "%*s  ", width_, str.c_str() );
     }
 }
 
