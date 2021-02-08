@@ -18,6 +18,71 @@
 
 #include "testsweeper.hh"
 
+//==================================================
+//copied from /slate-dev/blaspp/include/blas/util.hh
+namespace blas {
+// -----------------------------------------------------------------------------
+// Based on C++14 common_type implementation from
+// http://www.cplusplus.com/reference/type_traits/common_type/
+// Adds promotion of complex types based on the common type of the associated
+// real types. This fixes various cases:
+//
+// std::common_type_t< double, complex<float> > is complex<float>  (wrong)
+//        scalar_type< double, complex<float> > is complex<double> (right)
+//
+// std::common_type_t< int, complex<long> > is not defined (compile error)
+//        scalar_type< int, complex<long> > is complex<long> (right)
+// for zero types
+template< typename... Types >
+struct scalar_type_traits;
+
+// define scalar_type<> type alias
+template< typename... Types >
+using scalar_type = typename scalar_type_traits< Types... >::type;
+
+
+// -----------------------------------------------------------------------------
+// for any combination of types, determine associated real, scalar,
+// and complex types.
+//
+// real_type< float >                               is float
+// real_type< float, double, complex<float> >       is double
+//
+// scalar_type< float >                             is float
+// scalar_type< float, complex<float> >             is complex<float>
+// scalar_type< float, double, complex<float> >     is complex<double>
+//
+// complex_type< float >                            is complex<float>
+// complex_type< float, double >                    is complex<double>
+// complex_type< float, double, complex<float> >    is complex<double>
+
+
+// for zero types
+template< typename... Types >
+struct real_type_traits;
+
+// define real_type<> type alias
+template< typename... Types >
+using real_type = typename real_type_traits< Types... >::real_t;
+// define complex_type<> type alias
+template< typename... Types >
+using complex_type = std::complex< real_type< Types... > >;
+
+// for one type
+template< typename T >
+struct real_type_traits<T>
+{
+    using real_t = T;
+};
+
+// for one complex type, strip complex
+template< typename T >
+struct real_type_traits< std::complex<T> >
+{
+    using real_t = T;
+};
+}  // namespace blas
+//==================================================
 namespace testsweeper {
 
 //------------------------------------------------------------------------------
@@ -228,7 +293,7 @@ void ParamBase::header( int line ) const
                 : name_.c_str() );
         }
         printf( "%*s  ", width_, str );
-    }
+   }
 }
 
 // -----------------------------------------------------------------------------
@@ -504,6 +569,158 @@ void ParamInt3::header( int line ) const
         }
         if (used_ & k_mask) {
             printf( "%*s  ", width_, (line == 0 ? "" : k_name_.c_str()) );
+        }
+    }
+}
+
+// =============================================================================
+// ParamComplex class
+// -----------------------------------------------------------------------------
+// Scans single real or complex value and lists of values.
+//
+std::complex<double> ParamComplex::scan_complex( const char** str )
+{
+    char op, suffix;
+    double x, y;
+    std::complex<double> value;
+    int cnt, bytes1, bytes2, bytes3;
+    cnt = sscanf( *str, "%lf %n %c %n %lf%c %n", &x, &bytes1, &op, &bytes2, &y, &suffix, &bytes3 );
+    if (cnt == 4 && (op == '+' || op == '-') && suffix == 'i') {
+        // x+yi or x-yi complex value
+        if (op == '+')
+            value = std::complex<double>( x, y );
+        else
+            value = std::complex<double>( x, -y );
+
+        *str += bytes3;
+    }
+    else if (cnt == 2 && op == 'i') {
+        // xi imaginary value
+        value = std::complex<double>( 0, x );
+        *str += bytes2;
+    }
+    else if (cnt == 1) {
+        // x real value
+        value = x;
+        *str += bytes1;
+    }
+    else if (cnt > 1 && op == ',') { //handles case of two real values "2.34,1.11", or real and img "2.34,1.11i"
+        // x real value
+        value = x;
+        *str += bytes2 - 1; //leave comma
+    }
+    else {
+        std::string err = std::string("invalid value '") + *str
+                        + "'; expected format like '1.2' or '1.2+3.4i'";
+        throw std::runtime_error( err );
+    }
+    return value;
+}
+// -----------------------------------------------------------------------------
+// virtual
+void ParamComplex::parse( const char *str )
+{
+    //printf("ParamComplex::parse\n");
+  while (true) {
+        std::complex<double> val = scan_complex(&str);
+        TParamBase< std::complex<double> >::push_back( val );
+       if (*str == '\0') {
+            break;
+        }
+
+        if (*str != ',' && *str != ';') {
+            throw_error( "invalid argument at '%s', expected comma", str );
+        }
+        str += 1;
+    }
+}
+
+//------------------------------------------------------------------------------
+// cf. slate/test/print_matrix.hh, which is a bit different.
+// TS needs to output the entire field in a fixed width W,
+// different than the width passed here. I think W = 2*width + 3,
+// to account for initial -, [+-] between real & complex parts, and i at end.
+// For instance, main calls snprintf_value with width=4, precision=2,
+// and then prints the resulting string in a field width 11 (%-11s).
+//
+template <typename scalar_t>
+const char* snprintf_value(
+    char* buf, size_t buf_len, int width, int precision, scalar_t value)
+{   
+    using real_t = blas::real_type<scalar_t>;
+
+    real_t re = std::real( value );
+    real_t im = std::imag( value );
+    if (re == int(re) && im == int(im)) {
+        // exactly integer, print without digits after decimal point
+        if (im != 0) {
+            snprintf(buf, buf_len, "% *.0f%c%.0fi",
+                     width - precision, re,
+                     (im >= 0 ? '+' : '-'),
+                     std::abs(im));
+        }
+        else {
+            snprintf(buf, buf_len, "% *.0f%*s",
+                     width - precision, re, precision, "");
+        }
+    }
+    else {
+        // general case
+        if (im != 0) {
+            snprintf(buf, buf_len, "% *.*f%c%.*fi",
+                     width, precision, re,
+                     (im >= 0 ? '+' : '-'),
+                     precision, std::abs(im));
+        }
+        else {
+            snprintf(buf, buf_len, "% *.*f",
+                     width, precision, re);
+        }
+    }
+    return buf;
+}
+
+void ParamComplex::header( int line ) const
+{
+     if (used_ && width_ > 0) {
+        size_t i = name_.find( '\n' );
+        const char *str = "";
+        if (i != std::string::npos) {
+            str = (line == 0
+                ? name_.substr( 0, i ).c_str()
+                : name_.substr( i+1 ).c_str() );
+        }
+        else {
+            str = (line == 0
+                ? ""
+                : name_.c_str() );
+        }
+        printf( "%*s  ", display_width_, str );
+   }
+}
+
+// -----------------------------------------------------------------------------
+/// If field has been used, prints the floating point value.
+/// If value is set to no_data_flag, it prints "NA".
+/// If value < 1, it prints with precision (p) significant digits (%.pg).
+/// Otherwise, it prints with precision (p) digits after the decimal point (%.pf).
+/// The output width and precision are set in the constructor.
+// virtual
+void ParamComplex::print() const
+{
+    char buf[ 1000 ];
+    if (used_ && width_ > 0) {
+        if (same( no_data_flag, values_[ index_ ].real() )) {  //TODO: check also for imaginary?
+            printf( "%*s  ", width_, "NA" );
+        }
+        else {
+/*            if (std::abs( values_[ index_ ] ) < 1)
+                printf( "%#*.*g  ", width_, precision_, values_[ index_ ] );
+            else
+                printf( "%*.*f  ", width_, precision_, values_[ index_ ] );
+*/
+            snprintf_value( buf, sizeof(buf), width_, precision_, values_[ index_ ] );
+            printf( "%-*s  ",display_width_, buf);
         }
     }
 }

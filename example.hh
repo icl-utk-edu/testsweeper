@@ -12,7 +12,8 @@
 class Params: public testsweeper::ParamsBase
 {
 public:
-    const double nan = std::numeric_limits<double>::quiet_NaN();
+   const double inf = std::numeric_limits<double>::infinity();
+   const double nan = std::numeric_limits<double>::quiet_NaN();
 
     Params();
 
@@ -31,6 +32,8 @@ public:
     testsweeper::ParamEnum< testsweeper::DataType > datatype;
     testsweeper::ParamInt3   dim;
     testsweeper::ParamInt3   grid;
+    testsweeper::ParamComplex alpha;
+    testsweeper::ParamComplex beta;
 
     // ----- output parameters
     testsweeper::ParamScientific error;

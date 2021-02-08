@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <limits>
 #include <algorithm>
+#include <complex>
 
 // Version is updated by make_release.py; DO NOT EDIT.
 // Version 2020.09.00
@@ -435,6 +436,70 @@ protected:
     std::string n_name_;
     std::string k_name_;
 };
+
+//------------------------------------------------------------------------------
+// Derived from BLAS++.
+
+/// For real scalar types.
+template <typename real_t>
+struct MakeScalarTraits {
+    static real_t make( real_t re, real_t im )
+        { return re; }
+};
+
+/// For complex scalar types.
+template <typename real_t>
+struct MakeScalarTraits< std::complex<real_t> > {
+    static std::complex<real_t> make( real_t re, real_t im )
+        { return std::complex<real_t>( re, im ); }
+};
+
+/// Converts complex value into scalar_t,
+/// discarding imaginary part if scalar_t is real.
+template <typename scalar_t>
+scalar_t make_scalar( std::complex<double> val )
+{
+    return MakeScalarTraits<scalar_t>::make( std::real(val), std::imag(val) );
+}
+
+class ParamComplex : public TParamBase< std::complex<double> >
+{
+public:
+   friend class Params;
+   ParamComplex( const char* name, int width, int precision, ParamType type,
+               const char* default_value,
+               double min_value, double max_value,
+               const char* help ):
+        TParamBase< std::complex<double> >( name, width, type, std::complex<double>(), help ),
+        // Compute display width to account for 
+        // initial -, [+-] between real & complex parts, and i at end.
+        display_width_( 2*width + 3),
+        precision_( precision ),
+        min_value_( min_value ),
+        max_value_( max_value )       
+    {
+        values_.clear();
+        parse( default_value );
+        is_default_ = true;
+    }
+
+    template <typename T>
+    T get() {
+        used_ = true;  
+        return make_scalar<T>( values_[ index_ ] ); 
+    }
+    std::complex<double> scan_complex( const char** str );
+    virtual void parse( const char* str );
+    virtual void header( int line ) const;
+    virtual void print() const;
+
+protected:
+    int display_width_;
+    int precision_;
+    double min_value_;
+    double max_value_;
+};
+
 
 // =============================================================================
 class ParamDouble : public TParamBase< double >
