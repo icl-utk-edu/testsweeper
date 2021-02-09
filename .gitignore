@@ -11,7 +11,6 @@ build*
 config/compiler_cxx
 config/log.txt
 config/openmp
-example
 docs/doxygen/errors.txt
 docs/html/
 files.txt
@@ -23,5 +22,6 @@ lib/*.so
 lib/pkgconfig/*.pc
 make.inc
 test/tester
+test/out
 testsweeper-*
 wiki/

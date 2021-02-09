@@ -9,8 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "example.hh"
-
+#include "test.hh"
 
 // -----------------------------------------------------------------------------
 using testsweeper::ParamType;
@@ -22,7 +21,6 @@ using testsweeper::datatype2str;
 using testsweeper::ansi_bold;
 using testsweeper::ansi_red;
 using testsweeper::ansi_normal;
-using testsweeper::get_wtime;
 
 // -----------------------------------------------------------------------------
 // each section must have a corresponding entry in section_names
@@ -44,14 +42,14 @@ const char* section_names[] = {
 // { "", nullptr, Section::newline } entries force newline in help
 std::vector< testsweeper::routines_t > routines = {
     // Level 1
-    { "foo",    test_foo,       Section::level1 },
-    { "foo2",   test_foo,       Section::level1 },
-    { "foo3",   test_foo,       Section::level1 },
-    { "foo4",   test_foo,       Section::level1 },
-    { "foo5",   test_foo,       Section::level1 },
-    { "foo6",   test_foo,       Section::level1 },
-    { "foo7",   test_foo,       Section::level1 },
-    { "foo8",   test_foo,       Section::level1 },
+    { "sort",   test_sort,      Section::level1 },
+    { "sort2",  test_sort,      Section::level1 },
+    { "sort3",  test_sort,      Section::level1 },
+    { "sort4",  test_sort,      Section::level1 },
+    { "sort5",  test_sort,      Section::level1 },
+    { "sort6",  test_sort,      Section::level1 },
+    { "sort7",  test_sort,      Section::level1 },
+    { "sort8",  test_sort,      Section::level1 },
 
     // Level 2
     { "bar",    test_bar,       Section::level2 },
@@ -248,124 +246,4 @@ int main( int argc, char** argv )
     }
 
     return status;
-}
-
-// -----------------------------------------------------------------------------
-// traits class maps data type to norm_t and scalar_t.
-
-// for float, double:
-// norm and scalar are float, double, respectively.
-template< typename T >
-class traits
-{
-public:
-    typedef T norm_t;
-    typedef T scalar_t;
-};
-
-// for std::complex<float>, std::complex<double>:
-// norm   is float, double, respectively;
-// scalar is std::complex<float>, std::complex<double>, respectively.
-template< typename T >
-class traits< std::complex<T> >
-{
-public:
-    typedef T norm_t;
-    typedef std::complex<T> scalar_t;
-};
-
-// -----------------------------------------------------------------------------
-template< typename T >
-void test_foo_work( Params &params, bool run )
-{
-    typedef typename traits<T>::norm_t norm_t;
-
-    // get & mark input and non-standard output values
-    int64_t m = params.dim.m();
-    int64_t n = params.dim.n();
-    int64_t k = params.dim.k();
-    int64_t cache = params.cache();
-    bool check = (params.check() == 'y');
-    bool ref = (params.ref() == 'y');
-
-    // mark non-standard output values
-    params.ref_time();
-    params.ref_gflops();
-
-    // adjust header to msec
-    params.time.name( "SLATE\ntime (ms)" );
-    params.ref_time.name( "Ref.\ntime (ms)" );
-
-    if (! run)
-        return;
-
-    // ----------
-    // setup
-    double time;
-    double gflop = 2*m*n*k * 1e-9;
-
-    // run test
-    testsweeper::flush_cache( cache );
-    time = get_wtime();
-    usleep( 10*n );  // placeholder; 10n microseconds
-    time = get_wtime() - time;
-    params.time()   = time * 1000;  // msec
-    params.gflops() = gflop / time;
-
-    if (ref) {
-        // run reference
-        testsweeper::flush_cache( cache );
-        time = get_wtime();
-        usleep( 20*n );  // placeholder; 20n microseconds
-        time = get_wtime() - time;
-        params.ref_time()   = time * 1000;  // msec
-        params.ref_gflops() = gflop / time;
-    }
-
-    // check error
-    if (check) {
-        norm_t error = 1.23456e-17 * n;  // placeholder; fails for n >= 900
-        norm_t eps = std::numeric_limits< norm_t >::epsilon();
-        norm_t tol = params.tol() * eps;
-        params.error() = error;
-        params.okay()  = (error < tol);
-    }
-}
-
-// -----------------------------------------------------------------------------
-void test_foo( Params &params, bool run )
-{
-    switch (params.datatype()) {
-        case testsweeper::DataType::Single:
-            test_foo_work< float >( params, run );
-            break;
-
-        case testsweeper::DataType::Double:
-            test_foo_work< double >( params, run );
-            break;
-
-        case testsweeper::DataType::SingleComplex:
-            test_foo_work< std::complex<float> >( params, run );
-            break;
-
-        case testsweeper::DataType::DoubleComplex:
-            test_foo_work< std::complex<double> >( params, run );
-            break;
-
-        default:
-            throw std::runtime_error( "unknown datatype" );
-            break;
-    }
-}
-
-// -----------------------------------------------------------------------------
-void test_bar( Params &params, bool run )
-{
-    test_foo( params, run );
-}
-
-// -----------------------------------------------------------------------------
-void test_baz( Params &params, bool run )
-{
-    test_foo( params, run );
 }

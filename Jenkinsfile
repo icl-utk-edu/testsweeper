@@ -50,7 +50,7 @@ stages {
                         make -j8
 
                         echo "========================================"
-                        ldd example
+                        ldd test/tester
 
                         echo "========================================"
                         cd test

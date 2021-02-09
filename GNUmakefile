@@ -65,11 +65,11 @@ lib_src  = testsweeper.cc version.cc
 lib_obj  = $(addsuffix .o, $(basename $(lib_src)))
 dep     += $(addsuffix .d, $(basename $(lib_src)))
 
-tester_src = example.cc
+tester_src = test/test.cc test/test_sort.cc
 tester_obj = $(addsuffix .o, $(basename $(tester_src)))
 dep       += $(addsuffix .d, $(basename $(tester_src)))
 
-tester = example
+tester = test/tester
 
 #-------------------------------------------------------------------------------
 # Get Mercurial id, and make version.o depend on it via .id file.
@@ -93,8 +93,11 @@ version.o: .id
 # TestSweeper specific flags and libraries
 
 # additional flags and libraries for testers
+TEST_CXXFLAGS += -I.
 TEST_LDFLAGS += -L. -Wl,-rpath,$(abspath .)
 TEST_LIBS    += -ltestsweeper
+
+$(tester_obj): CXXFLAGS += $(TEST_CXXFLAGS)
 
 #-------------------------------------------------------------------------------
 # Rules
@@ -175,10 +178,10 @@ docs-todo:
 #-------------------------------------------------------------------------------
 # general rules
 clean:
-	$(RM) *.o *.a *.so *.gch $(tester)
+	$(RM) $(lib_a) $(lib_so) $(lib_obj) $(tester_obj) $(dep) $(headers_gch) $(tester)
 
 distclean: clean
-	$(RM) make.inc $(dep)
+	$(RM) make.inc
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@

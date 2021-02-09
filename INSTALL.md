@@ -47,7 +47,7 @@ Available targets:
                      then compiles the library and tester
     make config    - configures TestSweeper, creating a make.inc file
     make lib       - compiles the library (lib/libtestsweeper.so)
-    make tester    - compiles the tester (example)
+    make tester    - compiles test/tester
     make docs      - todo: generates documentation in docs/html/index.html
     make install   - installs the library and headers to ${prefix}
     make uninstall - remove installed library and headers from ${prefix}

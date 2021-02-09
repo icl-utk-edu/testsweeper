@@ -1,8 +1,0 @@
-TestSweeper version NA, id NA
-input: ../example --type s --dim '100:300:100x100x50' foo3
-                                    SLATE        SLATE        SLATE         Ref.         Ref.          
-type       m       n       k        error    time (ms)      Gflop/s    time (ms)      Gflop/s  status  
-   s     100     100      50   1.2346e-15  -----------  -----------  -----------  -----------  pass    
-   s     200     100      50   1.2346e-15  -----------  -----------  -----------  -----------  pass    
-   s     300     100      50   1.2346e-15  -----------  -----------  -----------  -----------  pass    
-All tests passed.

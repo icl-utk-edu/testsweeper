@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import sys
+import os
 import re
 import argparse
 import subprocess
@@ -30,97 +31,97 @@ cmds = [
     # Basics
     #
     # help (no input)
-    [ 0, '../example', False ],
+    [ 0, './tester', False ],
 
     # help -h
-    [ 1, '../example -h', False ],
+    [ 1, './tester -h', False ],
 
     # help --help
-    [ 2, '../example --help', False ],
+    [ 2, './tester --help', False ],
 
     # routine help -h
-    [ 3, '../example -h foo', False ],
+    [ 3, './tester -h sort', False ],
 
     # routine help --help
-    [ 4, '../example --help foo', False ],
+    [ 4, './tester --help sort', False ],
 
     # Defaults (--type d --dim 100:500:100).
-    [ 5, '../example foo' ],
+    [ 5, './tester sort' ],
 
     # Larger range; should elicit 2 failures (error = 1.23456e-17 * n).
-    [ 6, '../example --dim 100:1000:100 foo', True, 2 ],
+    [ 6, './tester --dim 100:1000:100 sort', True, 2 ],
 
     #----------
     # Types (enum)
     #
     # Specify types.
-    [ 100, '../example --type s,d foo' ],
+    [ 100, './tester --type s,d sort' ],
 
     # Invalid type x; should return error.
-    [ 101, '../example --type s,x,d foo', False, 255 ],
+    [ 101, './tester --type s,x,d sort', False, 255 ],
 
     #----------
     # Dimensions
     #
     # m == n == k
-    [ 200, '../example --type s --dim 100:300:100 foo2' ],
+    [ 200, './tester --type s --dim 100:300:100 sort2' ],
 
     # m == n == k, descending
-    [ 201, '../example --type s --dim 300:100:-100 foo2' ],
+    [ 201, './tester --type s --dim 300:100:-100 sort2' ],
 
     # single dimension
-    [ 202, '../example --type s --dim 1234 foo2' ],
+    [ 202, './tester --type s --dim 1234 sort2' ],
 
     # multiple --dim
-    [ 203, '../example --type s --dim 1234 --dim 100:300:100 foo2' ],
+    [ 203, './tester --type s --dim 1234 --dim 100:300:100 sort2' ],
 
     #----------
     # Zip of dimensions
     #
     # m x n == k.
-    [ 300, '../example --type s --dim 100:300:100x50:200:50 foo3' ],
+    [ 300, './tester --type s --dim 100:300:100x50:200:50 sort3' ],
 
     # m x n; k fixed.
-    [ 301, '../example --type s --dim 100:300:100x50:200:50x50 foo3' ],
+    [ 301, './tester --type s --dim 100:300:100x50:200:50x50 sort3' ],
 
     # m; n, k fixed.
-    [ 302, '../example --type s --dim 100:300:100x100x50 foo3' ],
+    [ 302, './tester --type s --dim 100:300:100x100x50 sort3' ],
 
     # m x n x k.
-    [ 303, '../example --type s --dim 100:300:100x50:200:50x10:50:10 foo3' ],
+    [ 303, './tester --type s --dim 100:300:100x50:200:50x10:50:10 sort3' ],
 
     #----------
     # Cartesian product of dimensions
     #
     # m * n == k
-    [ 400, '../example --type s --dim 100:300:100*50:200:50 foo4' ],
+    [ 400, './tester --type s --dim 100:300:100*50:200:50 sort4' ],
 
     # m * n * k
-    [ 401, '../example --type s --dim 100:300:100*50:200:50*10:50:10 foo4' ],
+    [ 401, './tester --type s --dim 100:300:100*50:200:50*10:50:10 sort4' ],
 
     # m fixed * n * k
-    [ 402, '../example --type s --dim 100*50:200:50*10:50:10 foo4' ],
+    [ 402, './tester --type s --dim 100*50:200:50*10:50:10 sort4' ],
 
     # m * n fixed * k
-    [ 403, '../example --type s --dim 100:300:100*50*10:50:10 foo4' ],
+    [ 403, './tester --type s --dim 100:300:100*50*10:50:10 sort4' ],
 
     # m * n * k fixed
-    [ 404, '../example --type s --dim 100:300:100*50:200:50*10 foo4' ],
+    [ 404, './tester --type s --dim 100:300:100*50:200:50*10 sort4' ],
 
     #----------
     # Check and ref
     #
     # check y
-    [ 500, '../example --check y foo5' ],
+    [ 500, './tester --check y sort5' ],
 
     # check n
-    [ 501, '../example --check n foo5' ],
+    [ 501, './tester --check n sort5' ],
 
     # ref y
-    [ 502, '../example --ref y foo5' ],
+    [ 502, './tester --ref y sort5' ],
 
     # ref n
-    [ 503, '../example --ref n foo5' ],
+    [ 503, './tester --ref n sort5' ],
 ]
 
 # ------------------------------------------------------------------------------
@@ -167,7 +168,7 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
     # end
 
     # Save output.
-    outfile = 'tst-%03d.txt' % (num)
+    outfile = 'out/%03d.txt' % (num)
     print( 'Saving to', outfile )
     try:
         # Always strip out ANSI codes and version numbers.
@@ -176,8 +177,8 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
                           r'version NA, id NA', output2 )
         if (strip_time):
             # Usually, strip out 4 time and gflops columns.
-            # This messes up some output like `example -h foo`.
-            output2 = re.sub( r'^((?: +\S+){5})((?: +\S+){4})(.*)',
+            # This messes up some output like `tester -h sort`.
+            output2 = re.sub( r'^((?: +\S+){6})((?: +\S+){4})(.*)',
                               r'\1  -----------  -----------  -----------  -----------\3',
                               output2, 0, re.M )
         out = open( outfile, 'w' )
@@ -188,7 +189,7 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
         err = -2
 
     # Compare with reference.
-    reffile = 'ref-%03d.txt' % (num)
+    reffile = 'ref/%03d.txt' % (num)
     print( 'Comparing to', reffile )
     try:
         file = open( reffile )
@@ -229,6 +230,9 @@ failed_tests = []
 passed_tests = []
 ntests = len(opts.tests)
 run_all = (ntests == 0)
+
+if (not os.path.exists( 'out' )):
+    os.mkdir( 'out' )
 
 seen = set()
 for tst in cmds:

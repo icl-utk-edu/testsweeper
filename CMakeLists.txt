@@ -134,38 +134,7 @@ endif()
 
 #-------------------------------------------------------------------------------
 if (build_tests)
-    # Compile example.
-    set( example ${testsweeper_}example )
-    add_executable( ${example} example.cc )
-    target_link_libraries( ${example} testsweeper )
-    set_target_properties( ${example} PROPERTIES CXX_EXTENSIONS false )
-
-    enable_testing()
-
-    add_test( NAME ${example} COMMAND ${example} )
-    set_tests_properties(
-        ${example} PROPERTIES PASS_REGULAR_EXPRESSION "Usage:" )
-
-    add_test( NAME ${example}_foo COMMAND ${example} foo )
-    set_tests_properties(
-        ${example}_foo PROPERTIES PASS_REGULAR_EXPRESSION "All tests passed" )
-
-    # Copy test script to build directory.
-    add_custom_command(
-        TARGET testsweeper POST_BUILD
-        COMMAND
-        cp -a ${CMAKE_CURRENT_SOURCE_DIR}/test
-              ${CMAKE_CURRENT_BINARY_DIR}/test
-    )
-
-    if (testsweeper_is_project)
-        add_custom_target(
-            "check"
-            COMMAND
-                python run_tests.py
-            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test"
-        )
-    endif()
+    add_subdirectory( test )
 endif()
 
 #-------------------------------------------------------------------------------
