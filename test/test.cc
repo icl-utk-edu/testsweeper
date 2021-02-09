@@ -112,16 +112,16 @@ Params::Params():
 
     // ----- output parameters
     // min, max are ignored
-    //          name,                  w, p, type,          default, min, max, help
-    error     ( "SLATE\nerror",       11, 4, ParamType::Output, nan,   0,   0, "numerical error" ),
-    ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, nan,   0,   0, "orthogonality error" ),
-    time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, nan,   0,   0, "time to solution" ),
-    gflops    ( "SLATE\nGflop/s",     11, 4, ParamType::Output, nan,   0,   0, "Gflop/s rate" ),
+    //          name,                  w, p, type,              default,                   min, max, help
+    error     ( "SLATE\nerror",       11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "numerical error" ),
+    ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "orthogonality error" ),
+    time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "time to solution" ),
+    gflops    ( "SLATE\nGflop/s",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "Gflop/s rate" ),
 
-    ref_error ( "Ref.\nerror",        11, 4, ParamType::Output, nan,   0,   0, "reference numerical error" ),
-    ref_ortho ( "Ref.\north. error",  11, 4, ParamType::Output, nan,   0,   0, "reference orthogonality error" ),
-    ref_time  ( "Ref.\ntime (s)",     11, 4, ParamType::Output, nan,   0,   0, "reference time to solution" ),
-    ref_gflops( "Ref.\nGflop/s",      11, 4, ParamType::Output, nan,   0,   0, "reference Gflop/s rate" ),
+    ref_error ( "Ref.\nerror",        11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference numerical error" ),
+    ref_ortho ( "Ref.\north. error",  11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference orthogonality error" ),
+    ref_time  ( "Ref.\ntime (s)",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference time to solution" ),
+    ref_gflops( "Ref.\nGflop/s",      11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference Gflop/s rate" ),
 
     // default -1 means "no check"
     okay      ( "status",              6,    ParamType::Output,  -1,   0,   0, "success indicator" )
