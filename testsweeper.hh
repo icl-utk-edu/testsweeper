@@ -470,10 +470,11 @@ public:
                const char* default_value,
                double min_value, double max_value,
                const char* help ):
-        TParamBase< std::complex<double> >( name, width, type, std::complex<double>(), help ),
-        // Compute display width to account for 
+        // Compute width to account for 
         // initial -, [+-] between real & complex parts, and i at end.
-        display_width_( 2*width + 3),
+        TParamBase< std::complex<double> >( name, 2*width + 3, type,
+            std::complex<double>(), help ),
+        display_width_( width ),
         precision_( precision ),
         min_value_( min_value ),
         max_value_( max_value )       
@@ -490,7 +491,6 @@ public:
     }
     std::complex<double> scan_complex( const char** str );
     virtual void parse( const char* str );
-    virtual void header( int line ) const;
     virtual void print() const;
 
 protected:

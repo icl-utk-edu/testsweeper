@@ -12,8 +12,8 @@
 class Params: public testsweeper::ParamsBase
 {
 public:
-   const double inf = std::numeric_limits<double>::infinity();
-   const double nan = std::numeric_limits<double>::quiet_NaN();
+    const double inf = std::numeric_limits<double>::infinity();
+    const double nan = std::numeric_limits<double>::quiet_NaN();
 
     Params();
 

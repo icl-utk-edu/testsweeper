@@ -18,29 +18,9 @@
 
 #include "testsweeper.hh"
 
+namespace testsweeper {
 //==================================================
-//copied from /slate-dev/blaspp/include/blas/util.hh
-namespace blas {
-// -----------------------------------------------------------------------------
-// Based on C++14 common_type implementation from
-// http://www.cplusplus.com/reference/type_traits/common_type/
-// Adds promotion of complex types based on the common type of the associated
-// real types. This fixes various cases:
-//
-// std::common_type_t< double, complex<float> > is complex<float>  (wrong)
-//        scalar_type< double, complex<float> > is complex<double> (right)
-//
-// std::common_type_t< int, complex<long> > is not defined (compile error)
-//        scalar_type< int, complex<long> > is complex<long> (right)
-// for zero types
-template< typename... Types >
-struct scalar_type_traits;
-
-// define scalar_type<> type alias
-template< typename... Types >
-using scalar_type = typename scalar_type_traits< Types... >::type;
-
-
+// Copied from blaspp/include/blas/util.hh
 // -----------------------------------------------------------------------------
 // for any combination of types, determine associated real, scalar,
 // and complex types.
@@ -81,9 +61,7 @@ struct real_type_traits< std::complex<T> >
 {
     using real_t = T;
 };
-}  // namespace blas
 //==================================================
-namespace testsweeper {
 
 //------------------------------------------------------------------------------
 // Global constants
@@ -293,7 +271,7 @@ void ParamBase::header( int line ) const
                 : name_.c_str() );
         }
         printf( "%*s  ", width_, str );
-   }
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -621,10 +599,10 @@ std::complex<double> ParamComplex::scan_complex( const char** str )
 void ParamComplex::parse( const char *str )
 {
     //printf("ParamComplex::parse\n");
-  while (true) {
+    while (true) {
         std::complex<double> val = scan_complex(&str);
         TParamBase< std::complex<double> >::push_back( val );
-       if (*str == '\0') {
+        if (*str == '\0') {
             break;
         }
 
@@ -636,18 +614,17 @@ void ParamComplex::parse( const char *str )
 }
 
 //------------------------------------------------------------------------------
-// cf. slate/test/print_matrix.hh, which is a bit different.
-// TS needs to output the entire field in a fixed width W,
-// different than the width passed here. I think W = 2*width + 3,
+// Output the entire field in a fixed width W,
+// different than the width passed here. W = 2*width + 3,
 // to account for initial -, [+-] between real & complex parts, and i at end.
-// For instance, main calls snprintf_value with width=4, precision=2,
+// For instance, print calls snprintf_value with width=4, precision=2,
 // and then prints the resulting string in a field width 11 (%-11s).
 //
 template <typename scalar_t>
 const char* snprintf_value(
     char* buf, size_t buf_len, int width, int precision, scalar_t value)
 {   
-    using real_t = blas::real_type<scalar_t>;
+    using real_t = real_type<scalar_t>;
 
     real_t re = std::real( value );
     real_t im = std::imag( value );
@@ -680,47 +657,23 @@ const char* snprintf_value(
     return buf;
 }
 
-void ParamComplex::header( int line ) const
-{
-     if (used_ && width_ > 0) {
-        size_t i = name_.find( '\n' );
-        const char *str = "";
-        if (i != std::string::npos) {
-            str = (line == 0
-                ? name_.substr( 0, i ).c_str()
-                : name_.substr( i+1 ).c_str() );
-        }
-        else {
-            str = (line == 0
-                ? ""
-                : name_.c_str() );
-        }
-        printf( "%*s  ", display_width_, str );
-   }
-}
 
 // -----------------------------------------------------------------------------
-/// If field has been used, prints the floating point value.
+/// If field has been used, prints the value.
 /// If value is set to no_data_flag, it prints "NA".
-/// If value < 1, it prints with precision (p) significant digits (%.pg).
-/// Otherwise, it prints with precision (p) digits after the decimal point (%.pf).
 /// The output width and precision are set in the constructor.
 // virtual
 void ParamComplex::print() const
 {
     char buf[ 1000 ];
-    if (used_ && width_ > 0) {
+    if (used_ && display_width_ > 0) {
         if (same( no_data_flag, values_[ index_ ].real() )) {  //TODO: check also for imaginary?
-            printf( "%*s  ", width_, "NA" );
+            printf( "%*s  ", display_width_, "NA" );
         }
         else {
-/*            if (std::abs( values_[ index_ ] ) < 1)
-                printf( "%#*.*g  ", width_, precision_, values_[ index_ ] );
-            else
-                printf( "%*.*f  ", width_, precision_, values_[ index_ ] );
-*/
-            snprintf_value( buf, sizeof(buf), width_, precision_, values_[ index_ ] );
-            printf( "%-*s  ",display_width_, buf);
+
+            snprintf_value( buf, sizeof(buf), display_width_, precision_, values_[ index_ ] );
+            printf( "%-*s  ",width_, buf);
         }
     }
 }
