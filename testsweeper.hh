@@ -238,7 +238,7 @@ protected:
 };
 
 // =============================================================================
-template< typename T >
+template <typename T>
 class TParamBase : public ParamBase
 {
 public:
@@ -295,7 +295,7 @@ protected:
 };
 
 // -----------------------------------------------------------------------------
-template< typename T >
+template <typename T>
 void TParamBase<T>::push_back( T val )
 {
     if (type_ == ParamType::List) {
@@ -470,14 +470,14 @@ public:
                const char* default_value,
                double min_value, double max_value,
                const char* help ):
-        // Compute width to account for 
+        // Compute width to account for
         // initial -, [+-] between real & complex parts, and i at end.
-        TParamBase< std::complex<double> >( name, 2*width + 3, type,
-            std::complex<double>(), help ),
+        TParamBase< std::complex<double> >(
+            name, 2*width + 3, type, std::complex<double>(), help ),
         display_width_( width ),
         precision_( precision ),
         min_value_( min_value ),
-        max_value_( max_value )       
+        max_value_( max_value )
     {
         values_.clear();
         parse( default_value );
@@ -486,8 +486,8 @@ public:
 
     template <typename T>
     T get() {
-        used_ = true;  
-        return make_scalar<T>( values_[ index_ ] ); 
+        used_ = true;
+        return make_scalar<T>( values_[ index_ ] );
     }
     std::complex<double> scan_complex( const char** str );
     virtual void parse( const char* str );
@@ -584,7 +584,7 @@ protected:
 };
 
 // =============================================================================
-template< typename ENUM >
+template <typename ENUM>
 class ParamEnum : public TParamBase< ENUM >
 {
 public:
@@ -632,7 +632,7 @@ protected:
 
 // -----------------------------------------------------------------------------
 // virtual
-template< typename ENUM >
+template <typename ENUM>
 void ParamEnum<ENUM>::parse( const char *str )
 {
     char buf[81] = { 0 };
@@ -665,7 +665,7 @@ void ParamEnum<ENUM>::parse( const char *str )
 
 // -----------------------------------------------------------------------------
 // virtual
-template< typename ENUM >
+template <typename ENUM>
 void ParamEnum<ENUM>::print() const
 {
     if (this->used_ && this->width_ > 0) {
@@ -676,7 +676,7 @@ void ParamEnum<ENUM>::print() const
 
 // -----------------------------------------------------------------------------
 // virtual
-template< typename ENUM >
+template <typename ENUM>
 void ParamEnum<ENUM>::help() const
 {
     if (this->type_ == ParamType::Value || this->type_ == ParamType::List) {

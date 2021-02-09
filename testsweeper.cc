@@ -19,6 +19,7 @@
 #include "testsweeper.hh"
 
 namespace testsweeper {
+
 //==================================================
 // Copied from blaspp/include/blas/util.hh
 // -----------------------------------------------------------------------------
@@ -28,35 +29,31 @@ namespace testsweeper {
 // real_type< float >                               is float
 // real_type< float, double, complex<float> >       is double
 //
-// scalar_type< float >                             is float
-// scalar_type< float, complex<float> >             is complex<float>
-// scalar_type< float, double, complex<float> >     is complex<double>
-//
 // complex_type< float >                            is complex<float>
 // complex_type< float, double >                    is complex<double>
 // complex_type< float, double, complex<float> >    is complex<double>
 
-
 // for zero types
-template< typename... Types >
+template <typename... Types>
 struct real_type_traits;
 
 // define real_type<> type alias
-template< typename... Types >
+template <typename... Types>
 using real_type = typename real_type_traits< Types... >::real_t;
+
 // define complex_type<> type alias
-template< typename... Types >
+template <typename... Types>
 using complex_type = std::complex< real_type< Types... > >;
 
 // for one type
-template< typename T >
+template <typename T>
 struct real_type_traits<T>
 {
     using real_t = T;
 };
 
 // for one complex type, strip complex
-template< typename T >
+template <typename T>
 struct real_type_traits< std::complex<T> >
 {
     using real_t = T;
@@ -623,7 +620,7 @@ void ParamComplex::parse( const char *str )
 template <typename scalar_t>
 const char* snprintf_value(
     char* buf, size_t buf_len, int width, int precision, scalar_t value)
-{   
+{
     using real_t = real_type<scalar_t>;
 
     real_t re = std::real( value );
