@@ -6,7 +6,7 @@ TestSweeper Installation Notes
 Synopsis
 --------------------------------------------------------------------------------
 
-Configure and compile the TestSweeper library and its example,
+Configure and compile the TestSweeper library and its tester,
 then install the headers and library.
 
 Option 1: Makefile
@@ -17,7 +17,7 @@ Option 2: CMake
 
     mkdir build && cd build
     cmake ..
-    make && make test && make install
+    make && make install
 
 
 Environment variables (Makefile and CMake)
@@ -38,6 +38,29 @@ TestSweeper does not rely on any libraries, other than optionally OpenMP,
 so setting LDFLAGS, CPATH, LIBRARY_PATH, etc. is not generally needed.
 
 
+Options (Makefile and CMake)
+--------------------------------------------------------------------------------
+
+TestSweeper specific options include (all values are case insensitive):
+
+    color
+        Whether to use ANSI colors in output. One of:
+        auto            uses color if output is a TTY
+                        (default with Makefile; not support with CMake)
+        yes             (default with CMake)
+        no
+
+With Makefile, options are specified as environment variables or on the
+command line using `option=value` syntax, such as:
+
+    python configure.py color=no
+
+With CMake, options are specified on the command line using
+`-Doption=value` syntax (not as environment variables), such as:
+
+    cmake -Dcolor=no ..
+
+
 Makefile Installation
 --------------------------------------------------------------------------------
 
@@ -48,6 +71,7 @@ Available targets:
     make config    - configures TestSweeper, creating a make.inc file
     make lib       - compiles the library (lib/libtestsweeper.so)
     make tester    - compiles test/tester
+    make check     - run basic checks using tester
     make docs      - todo: generates documentation in docs/html/index.html
     make install   - installs the library and headers to ${prefix}
     make uninstall - remove installed library and headers from ${prefix}
@@ -58,23 +82,25 @@ Available targets:
 ### Options
 
     make config [options]
+    or
+    python configure.py [options]
 
 Runs the `configure.py` script to detect your compiler and library properties,
 then creates a make.inc configuration file. You can also manually edit the
-make.inc file. Options are name=value pairs to set variables. The configure.py
-script can be invoked directly:
+make.inc file. Options are name=value pairs to set variables.
 
-    python configure.py [options]
-
-Running `configure.py -h` will print a help message with the current options.
-In addition to those listed in the Environment variables section above,
+Besides the Environment variables and Options listed above, additional
 options include:
 
-    color={auto,yes,no} use ANSI colors in TestSweeper output
-    static={0,1}        build as shared (default) or static library
-    prefix              where to install, default /opt/slate.
-                        headers go   in ${prefix}/include,
-                        library goes in ${prefix}/lib${LIB_SUFFIX}
+    static
+        Whether to build as a static or shared library.
+        0               shared library (default)
+        1               static library
+
+    prefix
+        Where to install, default /opt/slate.
+        Headers go   in ${prefix}/include,
+        library goes in ${prefix}/lib${LIB_SUFFIX}
 
 These can be set in your environment or on the command line, e.g.,
 
@@ -113,36 +139,67 @@ directory under the TestSweeper root directory:
 
     cd /path/to/testsweeper
     mkdir build && cd build
-    cmake [options] ..
+    cmake [-DCMAKE_INSTALL_PREFIX=/path/to/install] [options] ..
     make
-    make test
     make install
 
 
 ### Options
 
-CMake uses the settings in the Environment variables section above.
+Besides the Environment variables and Options listed above, additional
+options include:
+
+    use_openmp
+        Whether to use OpenMP, if available. One of:
+        yes (default)
+        no
+
+    build_tests
+        Whether to build test suite (test/tester).
+        Requires TestSweeper, CBLAS, and LAPACK. One of:
+        yes (default)
+        no
+
 Standard CMake options include:
 
-    BUILD_SHARED_LIBS={ON,off}  build as shared (default) or static library
-    CMAKE_INSTALL_PREFIX        where to install, default /opt/slate
+    BUILD_SHARED_LIBS
+        Whether to build as a static or shared library. One of:
+        yes             shared library (default)
+        no              static library
 
-TestSweeper specific options include (all values case insensitive):
+    CMAKE_INSTALL_PREFIX (alias prefix)
+        Where to install, default /opt/slate.
+        Headers go   in ${prefix}/include,
+        library goes in ${prefix}/lib
 
-    color={ON,off}                use ANSI colors in output
-    use_openmp={ON,off}           use OpenMP, if available
-    build_tests={ON,off}          build test suite (test/tester)
+    CMAKE_PREFIX_PATH
+        Where to look for CMake packages such as BLAS++ and TestSweeper.
 
-These options are defined on the command line using `-D`, e.g.,
+    CMAKE_BUILD_TYPE
+        Type of build. One of:
+        [empty]         default compiler optimization          (no flags)
+        Debug           no optimization, with asserts          (-O0 -g)
+        Release         optimized, no asserts, no debug info   (-O3 -DNDEBUG)
+        RelWithDebInfo  optimized, no asserts, with debug info (-O2 -DNDEBUG -g)
+        MinSizeRel      Release, but optimized for size        (-Os -DNDEBUG)
+
+    CMAKE_MESSAGE_LOG_LEVEL (alias log)
+        Level of messages to report. In ascending order:
+        FATAL_ERROR, SEND_ERROR, WARNING, AUTHOR_WARNING, DEPRECATION,
+        NOTICE, STATUS, VERBOSE, DEBUG, TRACE.
+        Particularly, DEBUG or TRACE gives useful information.
+
+With CMake, options are specified on the command line using
+`-Doption=value` syntax (not as environment variables), such as:
 
     # in build directory
-    cmake -Dbuild_tests=off -DCMAKE_INSTALL_PREFIX=/usr/local ..
+    cmake -Dbuild_tests=no -DCMAKE_INSTALL_PREFIX=/usr/local ..
 
 Alternatively, use the `ccmake` text-based interface or the CMake app GUI.
 
     # in build directory
     ccmake ..
-    Type 'c' to configure, then 'g' to generate Makefile
+    # Type 'c' to configure, then 'g' to generate Makefile
 
 To re-configure CMake, you may need to delete CMake's cache:
 
@@ -150,6 +207,7 @@ To re-configure CMake, you may need to delete CMake's cache:
     rm CMakeCache.txt
     # or
     rm -rf *
+    cmake [options] ..
 
 To debug the build, set `VERBOSE`:
 
