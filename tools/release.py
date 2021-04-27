@@ -150,6 +150,13 @@ def make( project, version_h, version_c ):
     print( '\n>> Tag '+ tag +', Version '+ version )
 
     #--------------------
+    # Check change log
+    txt = open( 'CHANGELOG.md' ).read()
+    if (not re.search( tag, txt )):
+        print( '>> Add', tag, 'to CHANGELOG.md. Release aborted.' )
+        exit(1)
+
+    #--------------------
     # Update version in version_h.
     # TODO update in CMakeLists.txt?
     print( '\n>> Updating version in:', version_h )
