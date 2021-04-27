@@ -97,6 +97,35 @@ def file_sub( filename, search, replace, **kwargs ):
 # end
 
 #-------------------------------------------------------------------------------
+def copyright():
+    '''
+    Update copyright in all files.
+    '''
+    today = datetime.date.today()
+    year  = today.year
+
+    files = myrun( 'git ls-tree -r master --name-only',
+                   stdout=PIPE, text=True ).rstrip().split( '\n' )
+    print( '\n>> Updating copyright in:', end=' ' )
+    for file in files:
+        print( file, end=', ' )
+        file_sub( file,
+                  r'Copyright \(c\) (\d+)(-\d+)?, University of Tennessee',
+                  r'Copyright (c) \1-%04d, University of Tennessee' % (year) )
+    # end
+    print()
+
+    myrun( 'git diff' )
+    print( '>> Commit changes [yn]? ', end='' )
+    response = input()
+    if (response != 'y'):
+        print( '>> Release aborted. Please revert changes as desired.' )
+        exit(1)
+
+    myrun( ['git', 'commit', '-m', 'copyright '+ str(year), '.'] )
+# end
+
+#-------------------------------------------------------------------------------
 def make( project, version_h, version_c ):
     '''
     Makes project release.
@@ -127,18 +156,6 @@ def make( project, version_h, version_c ):
     file_sub( version_h,
               r'// Version \d\d\d\d.\d\d.\d\d\n(#define \w+_VERSION) \d+',
               r'// Version %s\n\1 %s' % (tag, version), count=1 )
-
-    # Update copyright in all files.
-    files = myrun( 'git ls-tree -r master --name-only',
-                   stdout=PIPE, text=True ).rstrip().split( '\n' )
-    print( '\n>> Updating copyright in:', end=' ' )
-    for file in files:
-        print( file, end=', ' )
-        file_sub( file,
-                  r'Copyright \(c\) (\d+)(-\d+)?, University of Tennessee',
-                  r'Copyright (c) \1-%04d, University of Tennessee' % (year) )
-    # end
-    print()
 
     myrun( 'git diff' )
     print( '>> Do changes look good? Continue building release [yn]? ', end='' )
