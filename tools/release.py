@@ -13,8 +13,9 @@ Requires Python >= 3.7.
 
 Usage:
 
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     import release
+    release.copyright()
     release.make( 'project', 'version.h', 'version.c' )
 
 'project' is the name of the project, used for the tar filename.
@@ -158,13 +159,28 @@ def make( project, version_h, version_c ):
 
     #--------------------
     # Update version in version_h.
-    # TODO update in CMakeLists.txt?
     print( '\n>> Updating version in:', version_h )
     file_sub( version_h,
               r'// Version \d\d\d\d.\d\d.\d\d\n(#define \w+_VERSION) \d+',
               r'// Version %s\n\1 %s' % (tag, version), count=1 )
 
+    print( '\n>> Updating version in: GNUmakefile' )
+    file_sub( 'GNUmakefile',
+              r'VERSION:\d\d\d\d.\d\d.\d\d',
+              r'VERSION:%s' % (tag), count=1 )
+
+    print( '\n>> Updating version in: CMakeLists.txt' )
+    file_sub( 'CMakeLists.txt',
+              r'VERSION \d\d\d\d.\d\d.\d\d',
+              r'VERSION %s' % (tag), count=1 )
+
+    #print( '\n>> Updating version in: doxyfile.conf' )
+    #file_sub( 'docs/doxygen/doxyfile.conf',
+    #          r'(PROJECT_NUMBER *=) *"\d+\.\d+\.\d+"',
+    #          r'\1 "%s"' % (tag), count=1 )
+
     myrun( 'git diff' )
+    myrun( 'git diff --staged' )
     print( '>> Do changes look good? Continue building release [yn]? ', end='' )
     response = input()
     if (response != 'y'):
