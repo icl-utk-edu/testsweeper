@@ -5,6 +5,8 @@ maker=$1
 hostname && pwd
 export top=`pwd`
 
+shopt -s expand_aliases
+
 quiet() {
     { set +x; } 2> /dev/null;
     $@;
