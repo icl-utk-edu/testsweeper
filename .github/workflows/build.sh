@@ -2,6 +2,8 @@
 
 maker=$1
 
+source /etc/profile
+
 hostname && pwd
 export top=`pwd`
 
