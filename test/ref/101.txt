@@ -1,5 +1,5 @@
 
-Error: --type: invalid value 'x'
+Error: --type: invalid datatype 'x'
 TestSweeper version NA, id NA
 input: ./tester --type 's,x,d' sort
 Usage: test [-h|--help]

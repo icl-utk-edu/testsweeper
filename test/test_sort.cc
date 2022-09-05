@@ -191,7 +191,8 @@ void test_sort( Params &params, bool run )
             break;
 
         default:
-            throw std::runtime_error( "unknown datatype" );
+            throw std::runtime_error(
+                "unknown datatype: " + to_string( params.datatype() ) );
             break;
     }
 }
