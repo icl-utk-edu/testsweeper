@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021, University of Tennessee. All rights reserved.
+# Copyright (c) 2017-2022, University of Tennessee. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
@@ -43,12 +43,36 @@ interactive_ = False
 # values and gives user a choice. If False, config picks the first valid value.
 # value = interactive() returns value of interactive.
 # interactive( value ) sets value of interactive.
+# Making this a function config.interactive() avoids issues with the
+# package __init__.py importing it if it were a variable.
 def interactive( value=None ):
     global interactive_
     if (value is not None):
         interactive_ = value
     return interactive_
 # end
+
+# ------------------------------------------------------------------------------
+debug_ = False
+
+def debug( value=None ):
+    global debug_
+    if (value is not None):
+        debug_ = value
+    return debug_
+# end
+
+# ------------------------------------------------------------------------------
+namespace_ = None
+
+def namespace( value ):
+    return namespace_
+
+def define( var, value=None ):
+    txt = '-D' + namespace_ + '_' + var
+    if (value):
+        txt += '=' + value
+    return txt
 
 # ------------------------------------------------------------------------------
 # variables to replace instead of appending/prepending
@@ -528,13 +552,16 @@ def prog_cxx( choices=['g++', 'c++', 'CC', 'cxx', 'icpc', 'xlc++', 'clang++'] ):
         print( 'Trying $CXX =', cxx )
         choices = [ cxx ]
 
-    passed = []
+    passed = []  # CXX compilers, e.g., g++ or mpicxx
+    actual = []  # Detected underlying compilers, e.g., g++ or clang++
     for cxx in choices:
         print_test( cxx )
         (rc, out, err) = compile_run( 'config/compiler_cxx.cc', {'CXX': cxx} )
         # print (g++), (clang++), etc., as output by compiler_cxx, after yes
         if (rc == 0):
-            out = '(' + out.strip() + ')'
+            cxx_actual = out.strip()
+            out = '(' + cxx_actual + ')'
+            actual.append( cxx_actual )
         print_result( cxx, rc, out )
         if (rc == 0):
             passed.append( cxx )
@@ -543,14 +570,18 @@ def prog_cxx( choices=['g++', 'c++', 'CC', 'cxx', 'icpc', 'xlc++', 'clang++'] ):
     # end
     i = choose( 'Choose C++ compiler:', passed )
     environ['CXX'] = passed[i]
+    environ['CXX_actual'] = actual[i]
 # end
 
 #-------------------------------------------------------------------------------
-def prog_cxx_flags( flags ):
+def prog_cxx_flag( flags ):
     '''
-    Tests each flag in flags; if it passes, adds the flag to CXXFLAGS.
+    Tests each flag in flags; the first that passes is added to CXXFLAGS.
+    flags can be an individual string or an iterable (list, tuple, etc.).
     '''
-    print_header( 'C++ compiler flags' )
+    if (type( flags ) == str):
+        flags = [ flags ]
+    # end
     for flag in flags:
         print_test( flag )
         (rc, out, err) = compile_obj( 'config/compiler_cxx.cc', {'CXXFLAGS': flag} )
@@ -560,6 +591,7 @@ def prog_cxx_flags( flags ):
         print_result( flag, rc )
         if (rc == 0):
             environ.append( 'CXXFLAGS', flag )
+            break
     # end
 # end
 
@@ -573,32 +605,13 @@ def openmp( flags=['-fopenmp', '-qopenmp', '-openmp', '-omp', ''] ):
     src = 'config/openmp.cc'
     for flag in flags:
         print_test( flag )
-        env = {'CXXFLAGS': flag, 'LDFLAGS': flag}
+        env = {'CXXFLAGS': flag, 'LDFLAGS': flag, 'HAS_OPENMP': True}
         (rc, out, err) = compile_run( src, env )
         print_result( flag, rc )
         if (rc == 0):
             environ.merge( env )
             break
     # end
-# end
-
-#-------------------------------------------------------------------------------
-def cublas_library():
-    '''
-    Tests for linking CUDA and cuBLAS libraries.
-    Does not actually run the resulting exe, to allow compiling with CUDA on a
-    machine without GPUs.
-    '''
-    libs = '-lcudart -lcublas'
-    print_header( 'CUDA and cuBLAS libraries' )
-    print_test( libs )
-    env = {'LIBS': libs, 'CXXFLAGS': '-DHAVE_CUBLAS'}
-    (rc, out, err) = compile_exe( 'config/cublas.cc', env )
-    print_result( libs, rc )
-    if (rc == 0):
-        environ.merge( env )
-    else:
-        raise Error( 'cuBLAS not found' )
 # end
 
 #-------------------------------------------------------------------------------
@@ -679,7 +692,7 @@ def get_package( name, directories, repo_url, tar_url, tar_filename ):
 # end
 
 #-------------------------------------------------------------------------------
-def extract_defines_from_flags( flags='CXXFLAGS' ):
+def extract_defines_from_flags( flags='CXXFLAGS', var='HEADER_DEFINES' ):
     '''
     Extracts all "-Dname[=value]" defines from the given flags.
     Adds all "-Dname[=value]" defines to DEFINES.
@@ -700,7 +713,7 @@ def extract_defines_from_flags( flags='CXXFLAGS' ):
         else:
             header += '#define '+ name + '\n'
     # end
-    environ['HEADER_DEFINES'] = header
+    environ[ var ] = header
 # end
 
 #-------------------------------------------------------------------------------
@@ -786,7 +799,7 @@ def parse_args():
     Parses command line options.
     Sets if interactive and if ansicodes are enabled.
     '''
-    global opts, parser
+    global opts, parser, debug
 
     #--------------------
     # Parse command line. We'll handle help ourselves.
@@ -796,6 +809,8 @@ def parse_args():
                              +' otherwise use first choice found.' )
     parser.add_argument( '--color', action='store', default='auto',
                          help='Use ANSI colors: yes, no, or auto; default %(default)s.' )
+    parser.add_argument( '--debug', action='store_true',
+                         help='Enable debugging output.' )
     parser.add_argument( '-h', '--help', action='store_true',
                          help='Print help and exit.' )
     parser.add_argument( 'options', nargs=argparse.REMAINDER,
@@ -820,17 +835,23 @@ def parse_args():
         opts.interactive = environ['interactive']
     if (opts.interactive):
         interactive( True )
+
+    debug( opts.debug )
 # end
 
 #-------------------------------------------------------------------------------
-def init( prefix='/usr/local' ):
+def init( namespace, prefix='/usr/local' ):
     '''
     Initializes config.
     Opens the logfile and deals with OS-specific issues.
     '''
-    global log
+    global log, namespace_
 
-    environ['prefix'] = prefix
+    namespace_ = namespace
+
+    # Default prefix.
+    if (not environ['prefix']):
+        environ['prefix'] = prefix
 
     #--------------------
     logfile = 'config/log.txt'

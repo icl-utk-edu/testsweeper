@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017-2021, University of Tennessee. All rights reserved.
+# Copyright (c) 2017-2022, University of Tennessee. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
@@ -12,7 +12,7 @@ from __future__ import print_function
 import sys
 import re
 import config
-from   config import Error, font, print_warn
+from   config import Error, font, print_msg, print_warn, print_header
 
 #-------------------------------------------------------------------------------
 # header
@@ -36,23 +36,26 @@ See INSTALL.md for more details.
 
 #-------------------------------------------------------------------------------
 def main():
-    config.init( prefix='/opt/slate' )
+    config.init( namespace='TestSweeper', prefix='/opt/slate' )
     config.prog_cxx()
-    config.prog_cxx_flags([
-        '-O2', '-std=c++11', '-MMD',
-        '-Wall',
-        '-pedantic',
-        '-Wshadow',
-        '-Wno-unused-local-typedefs',
-        '-Wno-unused-function',
-        #'-Wmissing-declarations',
-        #'-Wconversion',
-        #'-Werror',
-    ])
-    config.openmp()
 
-    if (config.environ['color'] in ('n', 'no', 'never')):
-        config.environ.append( 'CXXFLAGS', '-DNO_COLOR' )
+    print_header( 'C++ compiler flags' )
+    # Pick highest level supported. oneAPI needs C++17.
+    # Crusher had issue with -std=c++20 (2022-07).
+    config.prog_cxx_flag(
+        ['-std=c++17', '-std=c++14', '-std=c++11'])
+    config.prog_cxx_flag( '-O2' )
+    config.prog_cxx_flag( '-MMD' )
+    config.prog_cxx_flag( '-Wall' )
+    config.prog_cxx_flag( '-Wno-unused-local-typedefs' )
+    config.prog_cxx_flag( '-Wno-unused-function' )
+    config.prog_cxx_flag( '-pedantic' )
+    config.prog_cxx_flag( '-Wshadow' )
+   #config.prog_cxx_flag( '-Wmissing-declarations' )
+   #config.prog_cxx_flag( '-Wconversion' )
+   #config.prog_cxx_flag( '-Werror' )
+
+    config.openmp()
 
     config.output_files( 'make.inc' )
     print( 'log in config/log.txt' )
