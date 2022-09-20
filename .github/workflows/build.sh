@@ -1,20 +1,19 @@
 #!/bin/bash -xe
 
-maker=$1
+#-------------------------------------------------------------------------------
+# Functions
 
-source /etc/profile
-
-hostname && pwd
-export top=`pwd`
-
-shopt -s expand_aliases
-
+# Suppress echo (-x) output of commands executed with `quiet`.
+# Useful for sourcing files, loading modules, spack, etc.
+# set +x, set -x are not echo'd.
 quiet() {
     { set +x; } 2> /dev/null;
     $@;
     set -x
 }
 
+# `section` is like `echo`, but suppresses output of the command itself.
+# https://superuser.com/a/1141026
 print_section() {
     builtin echo "$*"
     date
@@ -24,13 +23,25 @@ print_section() {
 }
 alias section='{ save_flags="$-"; set +x; } 2> /dev/null; print_section'
 
+
+#-------------------------------------------------------------------------------
+maker=$1
+
+quiet source /etc/profile
+
+hostname && pwd
+export top=`pwd`
+
+shopt -s expand_aliases
+
+
 section "======================================== Load compiler"
-module load gcc@7.3.0
+quiet module load gcc@7.3.0
 
 section "======================================== Verify environment"
-module list
-which g++
-g++ --version
+quiet module list
+quiet which g++
+quiet g++ --version
 
 section "======================================== Environment"
 env
@@ -43,7 +54,7 @@ if [ "${maker}" = "make" ]; then
     make config CXXFLAGS="-Werror" prefix=${top}/install
 fi
 if [ "${maker}" = "cmake" ]; then
-    module load cmake
+    quiet module load cmake
     which cmake
     cmake --version
 
