@@ -48,8 +48,8 @@ For assistance, visit the *SLATE User Forum* at
 Join by signing in with your Google credentials, then clicking
 *Join group to post*.
 
-Bug reports can be filed directly on Bitbucket's issue tracker:
-<http://bitbucket.org/icl/testsweeper/issues>.
+Bug reports can be filed directly on Github's issue tracker:
+<https://github.com/icl-utk-edu/testsweeper/issues>.
 
 * * *
 
@@ -67,7 +67,7 @@ Contributing
 --------------------------------------------------------------------------------
 
 The SLATE project welcomes contributions from new developers.
-Contributions can be offered through the standard Bitbucket pull request model.
+Contributions can be offered through the standard Github pull request model.
 We strongly encourage you to coordinate large contributions with the SLATE
 development team early in the process.
 
