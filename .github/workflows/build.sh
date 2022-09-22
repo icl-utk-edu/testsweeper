@@ -2,8 +2,8 @@
 
 maker=$1
 
-mydir=`dirname $0`
-source $mydir/setup_env.sh
+mydir=$(dirname $0)
+source ${mydir}/setup_env.sh
 
 section "======================================== Build"
 make -j8
@@ -13,5 +13,5 @@ make -j8 install
 ls -R ${top}/install
 
 section "======================================== Verify build"
-ldd test/tester
-
+ldd_result=$(ldd test/tester)
+echo "${ldd_result}"

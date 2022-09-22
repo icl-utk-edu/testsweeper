@@ -1,10 +1,9 @@
 #!/bin/bash -xe
 
 maker=$1
-device=$2
 
-mydir=`dirname $0`
-source $mydir/setup_env.sh
+mydir=$(dirname $0)
+source ${mydir}/setup_env.sh
 
 section "======================================== Tests"
 cd test
