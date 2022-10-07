@@ -5,12 +5,12 @@ maker=$1
 mydir=$(dirname $0)
 source ${mydir}/setup_env.sh
 
-section "======================================== Tests"
+print "======================================== Tests"
 cd test
 export OMP_NUM_THREADS=8
 ./run_tests.py --xml ${top}/report-${maker}.xml
 
 # todo smoke tests
 
-section "======================================== Finished"
+print "======================================== Finished"
 
