@@ -12,16 +12,16 @@ quiet() {
     set -x
 }
 
-# `section` is like `echo`, but suppresses output of the command itself.
+# `print` is like `echo`, but suppresses output of the command itself.
 # https://superuser.com/a/1141026
-print_section() {
+echo_and_restore() {
     builtin echo "$*"
     date
     case "${save_flags}" in
         (*x*)  set -x
     esac
 }
-alias section='{ save_flags="$-"; set +x; } 2> /dev/null; print_section'
+alias print='{ save_flags="$-"; set +x; } 2> /dev/null; echo_and_restore'
 
 
 #-------------------------------------------------------------------------------
@@ -33,11 +33,11 @@ export top=$(pwd)
 shopt -s expand_aliases
 
 
-section "======================================== Load compiler"
+print "======================================== Load compiler"
 quiet module load gcc@7.3.0
 
 if [ "${maker}" = "cmake" ]; then
-    section "======================================== Load cmake"
+    print "======================================== Load cmake"
     quiet module load cmake
     which cmake
     cmake --version
