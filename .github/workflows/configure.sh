@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -x
 
 maker=$1
 
@@ -25,10 +25,14 @@ export color=no
 rm -rf ${top}/install
 if [ "${maker}" = "make" ]; then
     make distclean
-    make config CXXFLAGS="-Werror" prefix=${top}/install
+    make config CXXFLAGS="-Werror" prefix=${top}/install \
+         || exit 10
 fi
 if [ "${maker}" = "cmake" ]; then
     cmake -Dcolor=no -DCMAKE_CXX_FLAGS="-Werror" \
-          -DCMAKE_INSTALL_PREFIX=${top}/install ..
+          -DCMAKE_INSTALL_PREFIX=${top}/install .. \
+          || exit 11
 fi
 
+print "======================================== Finished configure"
+exit 0

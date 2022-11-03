@@ -39,7 +39,7 @@ quiet module load gcc@7.3.0
 if [ "${maker}" = "cmake" ]; then
     print "======================================== Load cmake"
     quiet module load cmake
-    which cmake
+    quiet which cmake
     cmake --version
     cd build
 fi
