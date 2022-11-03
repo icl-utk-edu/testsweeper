@@ -178,9 +178,10 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
         if (strip_time):
             # Usually, strip out 4 time and gflops columns.
             # This messes up some output like `tester -h sort`.
-            output2 = re.sub( r'^((?: +\S+){6})((?: +\S+){4})(.*)',
-                              r'\1  -----------  -----------  -----------  -----------\3',
-                              output2, 0, re.M )
+            for i in range( 5, 9 ):
+                output2 = re.sub( r'^( +[sdcz](?: +\S+){' + str(i) + r'})( +).{5}\S{4}\b',
+                                  r'\1\2---------',
+                                  output2, 0, re.M )
         out = open( outfile, 'w' )
         out.write( output2 )
         out.close()

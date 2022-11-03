@@ -97,7 +97,14 @@ void test_sort_work( Params &params, bool run )
 
     // adjust header to msec
     params.time.name( "SLATE\ntime (ms)" );
-    params.ref_time.name( "Ref.\ntime (ms)" );
+    params.gflops.name( "gflop/s" );
+    params.ref_time.name( "LAPACK Reference\ntime (ms)" );
+    params.ref_gflops.name( "LAPACK\nreference gflop/s" );
+
+    assert( params.time.width()       == 11 );  // default width
+    assert( params.gflops.width()     == 11 );  // default width
+    assert( params.ref_time.width()   == 16 );  // LAPACK Reference  (1st line)
+    assert( params.ref_gflops.width() == 17 );  // reference gflop/s (2nd line)
 
     if (! run)
         return;

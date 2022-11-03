@@ -276,7 +276,7 @@ void ParamBase::header( int line ) const
 void ParamBase::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
-        printf( "    %-16s %s\n", prefix_.c_str(), help_.c_str() );
+        printf( "    %-16s %s\n", option_.c_str(), help_.c_str() );
     }
 }
 
@@ -354,7 +354,7 @@ void ParamInt::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %lld\n",
-                prefix_.c_str(), help_.c_str(), (long long) default_value_ );
+                option_.c_str(), help_.c_str(), (long long) default_value_ );
     }
 }
 
@@ -748,7 +748,7 @@ void ParamDouble::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default ",
-                prefix_.c_str(), help_.c_str() );
+                option_.c_str(), help_.c_str() );
         if (same( no_data_flag, default_value_ )) {
             printf( "NA\n" );
         }
@@ -782,7 +782,7 @@ void ParamScientific::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default ",
-                prefix_.c_str(), help_.c_str() );
+                option_.c_str(), help_.c_str() );
         if (same( no_data_flag, default_value_ )) {
             printf( "NA\n" );
         }
@@ -847,7 +847,7 @@ void ParamString::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %s",
-                prefix_.c_str(), help_.c_str(),
+                option_.c_str(), help_.c_str(),
                 default_value_.c_str() );
         if (valid_.size() > 0) {
             printf( "; valid: " );
@@ -928,7 +928,7 @@ void ParamChar::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
         printf( "    %-16s %s; default %c; valid: [%s]\n",
-                prefix_.c_str(), help_.c_str(),
+                option_.c_str(), help_.c_str(),
                 default_value_, valid_.c_str() );
     }
 }
@@ -957,11 +957,11 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                       param != ParamBase::s_params.end();
                     ++param)
             {
-                // handles both "--arg value" (two arg)
-                // and          "--arg=value" (one arg)
-                size_t plen = (*param)->prefix_.size();
+                // handles both "--option value" (two arg)
+                // and          "--option=value" (one arg)
+                size_t plen = (*param)->option_.size();
                 if ((len == plen || (len >= plen && arg[plen] == '=')) &&
-                    strncmp( arg, (*param)->prefix_.c_str(), plen ) == 0)
+                    strncmp( arg, (*param)->option_.c_str(), plen ) == 0)
                 {
                     if (! (*param)->used()) {
                         throw_error( "invalid parameter for routine '%s'",
@@ -975,7 +975,7 @@ void ParamsBase::parse( const char *routine, int n, char **args )
                     }
                     else if (len > plen+1 && arg[plen] == '=') {
                         // --arg=value (one argument)
-                        value = arg + (*param)->prefix_.size() + 1;
+                        value = arg + (*param)->option_.size() + 1;
                     }
                     else {
                         throw_error( "requires an argument" );

@@ -1,8 +1,8 @@
 TestSweeper version NA, id NA
 input: ./tester --type s --dim '100:300:100x50:200:50x50' sort3
-                                                 SLATE        SLATE        SLATE         Ref.         Ref.          
-type       m       n       k        alpha        error    time (ms)      Gflop/s    time (ms)      Gflop/s  status  
-   s     100      50      50   3.14+1.41i   6.1728e-16  -----------  -----------  -----------  -----------  pass    
-   s     200     100      50   3.14+1.41i   1.2346e-15  -----------  -----------  -----------  -----------  pass    
-   s     300     150      50   3.14+1.41i   1.8518e-15  -----------  -----------  -----------  -----------  pass    
+                                                 SLATE        SLATE               LAPACK Reference             LAPACK          
+type       m       n       k        alpha        error    time (ms)      gflop/s         time (ms)  reference gflop/s  status  
+   s     100      50      50   3.14+1.41i   6.1728e-16    ---------    ---------         ---------          ---------  pass    
+   s     200     100      50   3.14+1.41i   1.2346e-15    ---------    ---------         ---------          ---------  pass    
+   s     300     150      50   3.14+1.41i   1.8518e-15    ---------    ---------         ---------          ---------  pass    
 All tests passed.

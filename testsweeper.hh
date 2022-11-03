@@ -179,10 +179,29 @@ class ParamBase
 public:
     friend class ParamsBase;
 
-    ParamBase( const char* name, int width, ParamType type,
+    //----------------------------------------
+    /// Create parameter.
+    ///
+    /// @param[in] in_name
+    ///     Parameter's name, used as header in output and command line option.
+    ///     @see name() to override command line option.
+    ///
+    /// @param[in] width
+    ///     Minimum width of column in output. If width=0, column is hidden.
+    ///     Actual column width is max( width, length( name ) ).
+    ///
+    /// @param[in] type
+    ///     Parameter type:
+    ///     - Output: output-only parameter like time and gflops.
+    ///     - Value:  single-valued parameter like check and ref.
+    ///     - List:   parameter that can have multiple values for
+    ///               TestSweeper to iterate over, like datatype.
+    ///
+    /// @param[in] help
+    ///     Description of parameter to print with `tester -h routine`.
+    ///
+    ParamBase( const char* in_name, int width, ParamType type,
                const char* help ):
-        name_   ( name ),
-        prefix_ ( "--" + name_ ),
         help_   ( help ),
         index_  ( 0 ),
         width_  ( width ),
@@ -190,6 +209,7 @@ public:
         is_default_( true ),
         used_   ( false )
     {
+        name( in_name );
         s_params.push_back( this );
     }
 
@@ -211,13 +231,37 @@ public:
     bool used() const { return used_; }
     void used( bool in_used ) { used_ = in_used; }
 
-    void name( const char* in_name, const char* in_prefix=nullptr )
+    //----------------------------------------
+    /// Set parameter's name.
+    ///
+    /// @param[in] in_name
+    ///     Parameter's name, used as header in output.
+    ///     Increases the column width to accomodate the new name as needed,
+    ///     if the width is not zero.
+    ///
+    /// @param[in] in_option
+    ///     If not null, used as command line option to set paramater.
+    ///     If null, in_name is used as command line option.
+    ///
+    void name( const char* in_name, const char* in_option=nullptr )
     {
         name_ = in_name;
-        if (in_prefix)
-            prefix_ = "--" + std::string(in_prefix);
+        if (width_ > 0) {
+            int line1 = 0;
+            while (in_name[ line1 ] != '\0' && in_name[ line1 ] != '\n') {
+                ++line1;
+            }
+            int line2 = line1;
+            while (in_name[ line2 ] != '\0') {
+                ++line2;
+            }
+            line2 = line2 - line1 - 1;
+            width_ = std::max( width_, std::max( line1, line2 ) );
+        }
+        if (in_option)
+            option_ = "--" + std::string(in_option);
         else
-            prefix_ = "--" + name_;
+            option_ = "--" + name_;
     }
 
     int  width() const { return width_; }
@@ -228,7 +272,7 @@ protected:
     static std::vector< ParamBase* > s_params;
 
     std::string name_;
-    std::string prefix_;
+    std::string option_;
     std::string help_;
     size_t      index_;
     int         width_;
@@ -681,7 +725,7 @@ void ParamEnum<ENUM>::help() const
 {
     if (this->type_ == ParamType::Value || this->type_ == ParamType::List) {
         printf( "    %-16s %s; default %s\n",
-                this->prefix_.c_str(), this->help_.c_str(),
+                this->option_.c_str(), this->help_.c_str(),
                 this->enum2str_( this->default_value_ ));
     }
 }
