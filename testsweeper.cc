@@ -1095,10 +1095,10 @@ test_func_ptr find_tester(
 void usage(
     int argc, char **argv,
     std::vector< routines_t >& routines,
-    const char **section_names )
+    const char **section_names,
+    int col_width, int ncols )
 {
     using namespace testsweeper;
-    int ncols = 4;
     printf( "%sUsage:%s %s [-h|--help]\n"
             "       %s [-h|--help] routine\n"
             "       %s [parameters] routine\n\n"
@@ -1122,7 +1122,7 @@ void usage(
         else if (cnt % ncols == 0) {
             printf( "\n" );
         }
-        printf( "  %-18s", routines[i].name );
+        printf( "  %-*s", col_width, routines[i].name );
         cnt += 1;
     }
     printf( "\n" );

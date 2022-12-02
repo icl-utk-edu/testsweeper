@@ -768,7 +768,8 @@ test_func_ptr find_tester(
 void usage(
     int argc, char **argv,
     std::vector< routines_t >& routines,
-    const char **section_names );
+    const char **section_names,
+    int col_width=18, int ncols=4 );
 
 double get_wtime();
 
