@@ -54,7 +54,7 @@ TestSweeper specific options include (all values are case insensitive):
 With Makefile, options are specified as environment variables or on the
 command line using `option=value` syntax, such as:
 
-    python configure.py color=no
+    python3 configure.py color=no
 
 With CMake, options are specified on the command line using
 `-Doption=value` syntax (not as environment variables), such as:
@@ -84,7 +84,7 @@ Available targets:
 
     make config [options]
     or
-    python configure.py [options]
+    python3 configure.py [options]
 
 Runs the `configure.py` script to detect your compiler and library properties,
 then creates a make.inc configuration file. You can also manually edit the
@@ -105,7 +105,7 @@ options include:
 
 These can be set in your environment or on the command line, e.g.,
 
-    python configure.py CXX=g++ prefix=/usr/local
+    python3 configure.py CXX=g++ prefix=/usr/local
 
 
 ### Manual configuration

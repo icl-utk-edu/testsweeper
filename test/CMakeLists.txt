@@ -27,7 +27,7 @@ if (testsweeper_is_project)
     add_custom_target(
         "check"
         COMMAND
-            python run_tests.py
+            python3 run_tests.py
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 endif()
