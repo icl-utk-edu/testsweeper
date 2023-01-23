@@ -35,6 +35,11 @@ shopt -s expand_aliases
 
 print "======================================== Load compiler"
 quiet module load gcc@7.3.0
+quiet which g++
+g++ --version
+
+quiet module load pkgconf
+quiet which pkg-config
 
 if [ "${maker}" = "cmake" ]; then
     print "======================================== Load cmake"
@@ -43,3 +48,5 @@ if [ "${maker}" = "cmake" ]; then
     cmake --version
     cd build
 fi
+
+quiet module list
