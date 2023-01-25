@@ -17,8 +17,8 @@
 #include <complex>
 
 // Version is updated by make_release.py; DO NOT EDIT.
-// Version 2021.04.00
-#define TESTSWEEPER_VERSION 20210400
+// Version 2023.01.00
+#define TESTSWEEPER_VERSION 20230100
 
 namespace testsweeper {
 
