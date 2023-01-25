@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021, University of Tennessee. All rights reserved.
+# Copyright (c) 2017-2022, University of Tennessee. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
@@ -95,6 +95,8 @@ def file_sub( filename, search, replace, **kwargs ):
     if (txt != txt2):
         #print( 'writing', filename )
         open( filename, mode='w' ).write( txt2 )
+    else:
+        print( '##### Warning: no change in', filename, '#####' )
 # end
 
 #-------------------------------------------------------------------------------
@@ -109,6 +111,9 @@ def copyright():
                    stdout=PIPE, text=True ).rstrip().split( '\n' )
     print( '\n>> Updating copyright in:', end=' ' )
     for file in files:
+        if (re.search( r'^(old/|src/hip/)', file ) or os.path.isdir( file )):
+            continue
+
         print( file, end=', ' )
         file_sub( file,
                   r'Copyright \(c\) (\d+)(-\d+)?, University of Tennessee',
@@ -136,10 +141,12 @@ def make( project, version_h, version_c ):
     month = today.month
     release = 0
 
+    top_dir = os.getcwd()
+
     # Search for latest tag this month and increment release if found.
     tags = myrun( 'git tag', stdout=PIPE, text=True ).rstrip().split( '\n' )
     tags.sort( reverse=True )
-    pattern = r'%04d\.%02d\.(\d+)' % (year, month)
+    pattern = r'v%04d\.%02d\.(\d+)' % (year, month)
     for tag in tags:
         s = re.search( pattern, tag )
         if (s):
@@ -147,6 +154,7 @@ def make( project, version_h, version_c ):
             break
 
     tag = '%04d.%02d.%02d' % (year, month, release)
+    vtag = 'v' + tag
     version = '%04d%02d%02d' % (year, month, release)
     print( '\n>> Tag '+ tag +', Version '+ version )
 
@@ -166,8 +174,8 @@ def make( project, version_h, version_c ):
 
     print( '\n>> Updating version in: GNUmakefile' )
     file_sub( 'GNUmakefile',
-              r'VERSION:\d\d\d\d.\d\d.\d\d',
-              r'VERSION:%s' % (tag), count=1 )
+              r'(VERSION.)\d\d\d\d.\d\d.\d\d',
+              r'\g<1>%s' % (tag), count=1 )
 
     print( '\n>> Updating version in: CMakeLists.txt' )
     file_sub( 'CMakeLists.txt',
@@ -188,7 +196,7 @@ def make( project, version_h, version_c ):
         exit(1)
 
     myrun( ['git', 'commit', '-m', 'Version '+ tag, '.'] )
-    myrun( ['git', 'tag', tag, '-a', '-m', 'Version '+ tag] )
+    myrun( ['git', 'tag', vtag, '-a', '-m', 'Version '+ tag] )
 
     #--------------------
     # Prepare tar file.
@@ -206,7 +214,7 @@ def make( project, version_h, version_c ):
     # end
 
     os.mkdir( dir )
-    subprocess.run( 'git archive ' + tag + ' | tar -x -C ' + dir, shell=True )
+    subprocess.run( 'git archive ' + vtag + ' | tar -x -C ' + dir, shell=True )
     os.chdir( dir )
 
     # Update hash ID in version_c.
