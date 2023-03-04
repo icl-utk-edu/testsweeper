@@ -305,12 +305,18 @@ public:
         return values_[ index_ ];
     }
 
+    T const& operator ()() const
+    {
+        return values_[ index_ ];
+    }
+
     void operator ()( T const& value )
     {
         used_ = true;
         values_[ index_ ] = value;
     }
 
+    [[deprecated( "use param() instead of param.value(). To be removed 2024-03." )]]
     T& value()
     {
         used_ = true;
