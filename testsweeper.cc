@@ -846,7 +846,7 @@ void ParamString::print() const
 void ParamString::help() const
 {
     if (type_ == ParamType::Value || type_ == ParamType::List) {
-        printf( "    %-16s %s; default %s",
+        printf( "    %-16s %s; default '%s'",
                 option_.c_str(), help_.c_str(),
                 default_value_.c_str() );
         if (valid_.size() > 0) {
