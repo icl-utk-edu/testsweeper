@@ -815,10 +815,10 @@ bool ParamString::is_valid( const std::string& str )
 void ParamString::parse( const char *str )
 {
     char* copy = strdup( str );
-    char* token = strtok( copy, ", " );
+    char* token = strtok( copy, "," );
     while (token != nullptr) {
         push_back( token );
-        token = strtok( nullptr, ", " );
+        token = strtok( nullptr, "," );
     }
     free( copy );
 }
