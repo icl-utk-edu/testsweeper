@@ -75,6 +75,12 @@ cmds = [
     # multiple --dim
     [ 203, './tester --type s --dim 1234 --dim 100:300:100 sort2' ],
 
+    # metric and binary prefix
+    [ 204, './tester --dim 1k:4kx1ki:4ki --dim 1M:4Mx1Mi:4Mi --dim 1G:4Gx1Gi:4Gi --dim 1T:4Tx1Ti:4Ti --dim 1P:4Px1Pi:4Pi --dim 1E:4Ex1Ei:4Ei sort2', True, 24 ],
+
+    # exponent
+    [ 205, './tester --dim 1e3:4e3 --dim 1e6:4e6 sort2', True, 8 ],
+
     #----------
     # Zip of dimensions
     #

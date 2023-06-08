@@ -118,97 +118,219 @@ void throw_error( const char* format, ... )
     throw std::runtime_error( msg );
 }
 
-// -----------------------------------------------------------------------------
-// @brief Scans string for single integer or range of integers (start:end:step).
-//        Advances the string to after the range or number.
-//
-// @param[in,out] strp - pointer to string containing an integer or range.
-//                       On output, advanced to after the number or range.
-// @param[out] start - start of range
-// @param[out] end   - end of range
-// @param[out] step  - step size; 0 if start = end
-//
-// @retval 1 - failure
-// @retval 0 - success
-
-int scan_range( const char **strp, int64_t *start, int64_t *end, int64_t *step )
+//------------------------------------------------------------------------------
+/// Scan string for metric or binary prefix and return multiplier.
+/// E.g., for "k" returns 1000, for "Ki" returns 1024.
+/// If no prefix is recognized, returns 1.
+/// Also recognizes exponents "eN" for integer N >= 0.
+///
+/// metric                 |  binary
+/// -----------------------|----------------------------
+/// k: kilo 1000   = 1e3   |  Ki: kibi kilobinary 1024
+/// M: mega 1000^2 = 1e6   |  Mi: mebi megabinary 1024^2
+/// G: giga 1000^3 = 1e9   |  Gi: gibi gigabinary 1024^3
+/// T: tera 1000^4 = 1e12  |  Ti: tebi terabinary 1024^4
+/// P: peta 1000^5 = 1e15  |  Pi: pebi petabinary 1024^5
+/// E: exa  1000^6 = 1e18  |  Ei: exbi  exabinary 1024^6
+///
+/// @param[in,out] pstr
+///     Pointer to string to scan.
+///     On exit, updated to point after any prefix that was scanned.
+///
+/// @return multiplier
+///
+int64_t scan_multiplier( const char **pstr )
 {
-    long long start_, end_, step_;
-    int bytes1, bytes2, bytes3, cnt;
-    cnt = sscanf(*strp, "%lld %n: %lld %n: %lld %n",
-                 &start_, &bytes1, &end_, &bytes2, &step_, &bytes3);
-    *start = start_;
-    *end   = end_;
-    *step  = step_;
-    if (cnt == 3) {
-        if (*start == *end)
-            *step = 0;
-        *strp += bytes3;
-        return ! ((*step == 0 && *start == *end) ||
-                  (*step >  0 && *start <  *end) ||
-                  (*step <  0 && *start >  *end));
+    const int64_t i1024 = 1024;
+    int exponent, bytes;
+
+    // Metric is lowercase k, but IEC is uppercase Ki for binary;
+    // ignore case for k only.
+    if (tolower(**pstr) == 'k') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024;
+        }
+        else {
+            return 1e3;
+        }
     }
-    else if (cnt == 2) {
-        *strp += bytes2;
-        if (*start == *end)
-            *step = 0;
-        else
-            *step = 1;
-        return ! (*start <= *end);
+    else if (**pstr == 'M') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024 * i1024;
+        }
+        else {
+            return 1e6;
+        }
     }
-    else if (cnt == 1) {
-        *strp += bytes1;
-        *end  = *start;
-        *step = 0;
-        return 0;
+    else if (**pstr == 'G') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024 * i1024 * i1024;
+        }
+        else {
+            return 1e9;
+        }
+    }
+    else if (**pstr == 'T') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024 * i1024 * i1024 * i1024;
+        }
+        else {
+            return 1e12;
+        }
+    }
+    else if (**pstr == 'P') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024 * i1024 * i1024 * i1024 * i1024;
+        }
+        else {
+            return 1e15;
+        }
+    }
+    else if (**pstr == 'E') {
+        *pstr += 1;
+        if (**pstr == 'i') {
+            *pstr += 1;
+            return i1024 * i1024 * i1024 * i1024 * i1024 * i1024;
+        }
+        else {
+            return 1e18;
+        }
+    }
+    else if (sscanf( *pstr, "e%d%n", &exponent, &bytes ) == 1) {
+        *pstr += bytes;
+        return int64_t( pow( 10.0, exponent ) );
     }
     else {
         return 1;
     }
 }
 
-// -----------------------------------------------------------------------------
-// @brief Scans string for single double or range of doubles (start:end:step).
-//        Advances the string to after the range or number.
-//
-// @param[in,out] strp - pointer to string containing a double or range.
-//                       On output, advanced to after the number or range.
-// @param[out] start - start of range
-// @param[out] end   - end of range
-// @param[out] step  - step size; 0 if start = end
-//
-// @retval 1 - failure
-// @retval 0 - success
-
-int scan_range( const char **strp, double *start, double *end, double *step )
+///-----------------------------------------------------------------------------
+/// Scans string for single integer or range of integers (start:end:step).
+/// Advances the string to after the range or number.
+///
+/// @param[in,out] pstr: pointer to string containing an integer or range.
+///                      On output, advanced to after the number or range.
+/// @param[out] start: start of range
+/// @param[out] end:   end of range
+/// @param[out] step:  step size; default is start; 0 if start = end.
+///
+/// @retval 1: failure
+/// @retval 0: success
+///
+int scan_range( const char** pstr, int64_t* start, int64_t* end, int64_t* step )
 {
-    int bytes1, bytes2, bytes3, cnt;
-    cnt = sscanf(*strp, "%lf %n: %lf %n: %lf %n",
-                 start, &bytes1, end, &bytes2, step, &bytes3);
+    long long start_, end_, step_;
+    int bytes;
+    const char* str = *pstr;
+
+    // cnt of numbers scanned (start, end, step).
+    int cnt = 0;
+
+    // Start number.
+    int info = sscanf( str, "%lld %n", &start_, &bytes );
+    if (info == 1) {
+        cnt += 1;
+        str += bytes;
+        start_ *= scan_multiplier( &str );
+
+        // End number.
+        info = sscanf( str, " : %lld %n", &end_, &bytes );
+        if (info == 1) {
+            cnt += 1;
+            str += bytes;
+            end_ *= scan_multiplier( &str );
+
+            // Step number.
+            info = sscanf( str, " : %lld %n", &step_, &bytes );
+            if (info == 1) {
+                cnt += 1;
+                str += bytes;
+                step_ *= scan_multiplier( &str );
+            }
+        }
+    }
+
+    *pstr  = str;
+    *start = start_;
+    *end   = end_;
+    *step  = step_;
     if (cnt == 3) {
         if (*start == *end)
             *step = 0;
-        *strp += bytes3;
         return ! ((*step == 0 && *start == *end) ||
                   (*step >  0 && *start <  *end) ||
                   (*step <  0 && *start >  *end));
     }
     else if (cnt == 2) {
-        *strp += bytes2;
         if (*start == *end)
             *step = 0;
         else
-            *step = 1;
+            *step = *start;
         return ! (*start <= *end);
     }
     else if (cnt == 1) {
-        *strp += bytes1;
         *end  = *start;
         *step = 0;
-        return 0;
+        return 0;  // ok
     }
     else {
-        return 1;
+        return 1;  // failure
+    }
+}
+
+///-----------------------------------------------------------------------------
+/// Scans string for a double or range of doubles (start:end:step).
+/// Advances the string to after the number or range.
+///
+/// @param[in,out] pstr: pointer to string containing a double or range.
+///                      On output, advanced to after the number or range.
+/// @param[out] start: start of range
+/// @param[out] end:   end of range
+/// @param[out] step:  step size; default is start; 0 if start = end.
+///
+/// @retval 1: failure
+/// @retval 0: success
+///
+int scan_range( const char** pstr, double* start, double* end, double* step )
+{
+    int bytes1, bytes2, bytes3, cnt;
+    cnt = sscanf( *pstr, "%lf %n: %lf %n: %lf %n",
+                  step, &bytes1, end, &bytes2, step, &bytes3 );
+    if (cnt == 3) {
+        if (*start == *end)
+            *step = 0;
+        *pstr += bytes3;
+        return ! ((*step == 0 && *start == *end) ||
+                  (*step >  0 && *start <  *end) ||
+                  (*step <  0 && *start >  *end));
+    }
+    else if (cnt == 2) {
+        *pstr += bytes2;
+        if (*start == *end)
+            *step = 0;
+        else
+            *step = *start;
+        return ! (*start <= *end);
+    }
+    else if (cnt == 1) {
+        *pstr += bytes1;
+        *end  = *start;
+        *step = 0;
+        return 0;  // ok
+    }
+    else {
+        return 1;  // failure
     }
 }
 
@@ -683,7 +805,7 @@ void ParamComplex::print() const
 // virtual
 void ParamDouble::parse( const char *str )
 {
-    double start, end, step;
+    double start = 0, end = 0, step = 0;
     while (true) {
         if (scan_range( &str, &start, &end, &step ) != 0) {
             throw_error( "invalid argument at '%s', "

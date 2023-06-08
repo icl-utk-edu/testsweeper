@@ -78,6 +78,7 @@ void print( const char* label, std::vector<T>& x )
 template <typename scalar_t>
 void test_sort_work( Params &params, bool run )
 {
+    using llong = long long;
     using testsweeper::get_wtime;
     typedef typename traits<scalar_t>::real_t real_t;
 
@@ -111,7 +112,8 @@ void test_sort_work( Params &params, bool run )
 
     // ----------
     // setup
-    size_t len = m + n + k;
+    int64_t imax = 100000;
+    size_t len = std::min( m, imax ) + std::min( n, imax ) + std::min( k, imax );
     std::vector<real_t> x( len );
     for (auto& x_i: x) {
         x_i = rand() / double(RAND_MAX) + std::abs( alpha );

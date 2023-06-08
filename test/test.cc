@@ -103,7 +103,7 @@ Params::Params():
                 "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
 
     //          name,      w,    type,            min,     max, help
-    dim       ( "dim",     6,    ParamType::List, 0,   1000000, "m x n x k dimensions" ),
+    dim       ( "dim",     6,    ParamType::List, 0,   INT64_MAX, "m x n x k dimensions" ),
     grid      ( "grid",    6,    ParamType::List, "1x1",   0, 1000000, "p x q dimensions"),
 
     //          name,      w,  p, type,            default,                                min,     max, help
