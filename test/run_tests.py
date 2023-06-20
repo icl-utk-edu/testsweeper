@@ -81,6 +81,12 @@ cmds = [
     # exponent
     [ 205, './tester --dim 1e3:4e3 --dim 1e6:4e6 sort2', True, 8 ],
 
+    # single nb
+    [ 206, './tester --nb 32 --dim 100 sort2' ],
+
+    # range nb
+    [ 207, './tester --nb 32:256:32 --dim 100 sort2' ],
+
     #----------
     # Zip of dimensions
     #
@@ -184,7 +190,7 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
         if (strip_time):
             # Usually, strip out 4 time and gflops columns.
             # This messes up some output like `tester -h sort`.
-            for i in range( 5, 9 ):
+            for i in range( 6, 10 ):
                 output2 = re.sub( r'^( +[sdcz](?: +\S+){' + str(i) + r'})( +).{5}\S{4}\b',
                                   r'\1\2---------',
                                   output2, 0, re.M )

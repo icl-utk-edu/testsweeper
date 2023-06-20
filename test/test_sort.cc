@@ -83,6 +83,7 @@ void test_sort_work( Params &params, bool run )
     typedef typename traits<scalar_t>::real_t real_t;
 
     // get & mark input and non-standard output values
+    int64_t nb = params.nb();
     int64_t m = params.dim.m();
     int64_t n = params.dim.n();
     int64_t k = params.dim.k();
@@ -91,6 +92,7 @@ void test_sort_work( Params &params, bool run )
     bool check = (params.check() == 'y');
     bool ref = (params.ref() == 'y') || check;  // check requires ref
     scalar_t alpha = params.alpha.get<scalar_t>();
+    (void) nb;  // Mark as unused.
 
     // mark non-standard output values
     params.ref_time();

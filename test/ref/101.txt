@@ -16,5 +16,6 @@ Parameters for sort:
 
 Parameters that take comma-separated list of values and may be repeated:
     --type           One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer; default d
+    --nb             block size; default 32
     --dim            m x n x k dimensions
     --alpha          alpha value

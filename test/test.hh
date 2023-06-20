@@ -30,6 +30,7 @@ public:
     // ----- routine parameters
     testsweeper::ParamEnum< testsweeper::DataType > datatype_old;
     testsweeper::ParamEnum< testsweeper::DataType > datatype;
+    testsweeper::ParamInt    nb;
     testsweeper::ParamInt3   dim;
     testsweeper::ParamInt3   grid;
     testsweeper::ParamComplex alpha;

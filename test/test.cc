@@ -102,9 +102,10 @@ Params::Params():
     datatype  ( "type",    4,    ParamType::List, DataType::Double, str2datatype, datatype2str,
                 "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
 
-    //          name,      w,    type,            min,     max, help
-    dim       ( "dim",     6,    ParamType::List, 0,   INT64_MAX, "m x n x k dimensions" ),
-    grid      ( "grid",    6,    ParamType::List, "1x1",   0, 1000000, "p x q dimensions"),
+    //          name,      w,    type,            default, min, max,       help
+    nb        ( "nb",      3,    ParamType::List, 32,      0,   INT64_MAX, "block size" ),
+    dim       ( "dim",     6,    ParamType::List,          0,   INT64_MAX, "m x n x k dimensions" ),
+    grid      ( "grid",    6,    ParamType::List, "1x1",   0,   1000000,   "p x q dimensions"),
 
     //          name,      w,  p, type,            default,                                min,     max, help
     alpha     ( "alpha",   4,  2, ParamType::List, "3.141592653589793+1.414213562373095i",   -inf, inf, "alpha value" ),
