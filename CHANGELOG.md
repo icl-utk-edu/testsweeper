@@ -1,5 +1,10 @@
+2023.06.00
+  - Add metric (k, M, G), binary (Ki, Mi, Gi), and exponent (1e3) notation
+    for integers
+  - Update string parsing
+
 2023.01.00
-  - Move repo to https://github.com/icl-utk-edu/testsweeper/
+  - Move repo to GitHub: https://github.com/icl-utk-edu/testsweeper/
   - Adjustable column widths
   - Use python3
 
