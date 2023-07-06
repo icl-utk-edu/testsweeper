@@ -230,7 +230,7 @@ int64_t scan_multiplier( const char **pstr )
 ///
 int scan_range( const char** pstr, int64_t* start, int64_t* end, int64_t* step )
 {
-    long long start_, end_, step_;
+    long long start_ = 0, end_ = 0, step_ = 0;
     int bytes;
     const char* str = *pstr;
 
