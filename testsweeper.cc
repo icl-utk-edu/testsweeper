@@ -268,25 +268,23 @@ int scan_range( const char** pstr, int64_t* start, int64_t* end, int64_t* step )
     if (cnt == 3) {
         if (*start == *end)
             *step = 0;
-        return ! ((*step == 0 && *start == *end) ||
-                  (*step >  0 && *start <  *end) ||
-                  (*step <  0 && *start >  *end));
     }
     else if (cnt == 2) {
         if (*start == *end)
             *step = 0;
         else
             *step = *start;
-        return ! (*start <= *end);
     }
     else if (cnt == 1) {
         *end  = *start;
         *step = 0;
-        return 0;  // ok
     }
     else {
         return 1;  // failure
     }
+    return ! ((*step == 0 && *start == *end) ||
+              (*step >  0 && *start <  *end) ||
+              (*step <  0 && *start >  *end));
 }
 
 ///-----------------------------------------------------------------------------
@@ -311,9 +309,6 @@ int scan_range( const char** pstr, double* start, double* end, double* step )
         if (*start == *end)
             *step = 0;
         *pstr += bytes3;
-        return ! ((*step == 0 && *start == *end) ||
-                  (*step >  0 && *start <  *end) ||
-                  (*step <  0 && *start >  *end));
     }
     else if (cnt == 2) {
         *pstr += bytes2;
@@ -321,17 +316,18 @@ int scan_range( const char** pstr, double* start, double* end, double* step )
             *step = 0;
         else
             *step = *start;
-        return ! (*start <= *end);
     }
     else if (cnt == 1) {
         *pstr += bytes1;
         *end  = *start;
         *step = 0;
-        return 0;  // ok
     }
     else {
         return 1;  // failure
     }
+    return ! ((*step == 0 && *start == *end) ||
+              (*step >  0 && *start <  *end) ||
+              (*step <  0 && *start >  *end));
 }
 
 // -----------------------------------------------------------------------------
