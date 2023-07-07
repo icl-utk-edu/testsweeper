@@ -306,7 +306,7 @@ int scan_range( const char** pstr, double* start, double* end, double* step )
 {
     int bytes1, bytes2, bytes3, cnt;
     cnt = sscanf( *pstr, "%lf %n: %lf %n: %lf %n",
-                  step, &bytes1, end, &bytes2, step, &bytes3 );
+                  start, &bytes1, end, &bytes2, step, &bytes3 );
     if (cnt == 3) {
         if (*start == *end)
             *step = 0;
