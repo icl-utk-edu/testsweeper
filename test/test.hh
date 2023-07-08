@@ -34,7 +34,7 @@ public:
     testsweeper::ParamInt3   dim;
     testsweeper::ParamInt3   grid;
     testsweeper::ParamComplex alpha;
-    testsweeper::ParamComplex beta;
+    testsweeper::ParamDouble beta;
 
     // ----- output parameters
     testsweeper::ParamScientific error;

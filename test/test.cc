@@ -108,9 +108,9 @@ Params::Params():
     dim       ( "dim",     6,    ParamType::List,          0,   INT64_MAX, "m x n x k dimensions" ),
     grid      ( "grid",    6,    ParamType::List, "1x1",   0,   1000000,   "p x q dimensions"),
 
-    //          name,      w,  p, type,            default,                                min,     max, help
-    alpha     ( "alpha",   4,  2, ParamType::List, "3.141592653589793+1.414213562373095i",   -inf, inf, "alpha value" ),
-    beta      ( "beta",    4,  2, ParamType::List, "2.718281828459045+1.732050807568877i",   -inf, inf, "beta value" ),
+    //          name,      w,  p, type,            default,                                 min, max, help
+    alpha     ( "alpha",   4,  2, ParamType::List, "3.141592653589793+1.414213562373095i", -inf, inf, "alpha value" ),
+    beta      ( "beta",    4,  2, ParamType::List, 2.718281828459045,                      -inf, inf, "beta value" ),
 
     // ----- output parameters
     // min, max are ignored

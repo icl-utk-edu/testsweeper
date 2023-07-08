@@ -19,3 +19,4 @@ Parameters that take comma-separated list of values and may be repeated:
     --nb             block size; default 32
     --dim            m x n x k dimensions
     --alpha          alpha value
+    --beta           beta value; default 2.72

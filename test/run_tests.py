@@ -14,8 +14,9 @@ import argparse
 import subprocess
 import xml.etree.ElementTree as ET
 import io
+import time
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument( '--xml', help='generate report.xml for jenkins' )
@@ -25,31 +26,31 @@ opts = parser.parse_args()
 opts.tests = list( map( int, opts.tests ) )
 
 #-------------------------------------------------------------------------------
-# 4 tuple: [ index, command, strip_time=True, expected exit code=0 ]
+# 4 tuple: [ index, command, expected exit code=0 ]
 cmds = [
     #----------
     # Basics
     #
     # help (no input)
-    [ 0, './tester', False ],
+    [ 0, './tester' ],
 
     # help -h
-    [ 1, './tester -h', False ],
+    [ 1, './tester -h' ],
 
     # help --help
-    [ 2, './tester --help', False ],
+    [ 2, './tester --help' ],
 
     # routine help -h
-    [ 3, './tester -h sort', False ],
+    [ 3, './tester -h sort' ],
 
     # routine help --help
-    [ 4, './tester --help sort', False ],
+    [ 4, './tester --help sort' ],
 
     # Defaults (--type d --dim 100:500:100).
     [ 5, './tester sort' ],
 
     # Larger range; should elicit 2 failures (error = 1.23456e-17 * n).
-    [ 6, './tester --dim 100:1000:100 sort', True, 2 ],
+    [ 6, './tester --dim 100:1000:100 sort', 2 ],
 
     #----------
     # Types (enum)
@@ -58,7 +59,7 @@ cmds = [
     [ 100, './tester --type s,d sort' ],
 
     # Invalid type x; should return error.
-    [ 101, './tester --type s,x,d sort', False, 255 ],
+    [ 101, './tester --type s,x,d sort', 255 ],
 
     #----------
     # Dimensions
@@ -76,16 +77,19 @@ cmds = [
     [ 203, './tester --type s --dim 1234 --dim 100:300:100 sort2' ],
 
     # metric and binary prefix
-    [ 204, './tester --dim 1k:4kx1ki:4ki --dim 1M:4Mx1Mi:4Mi --dim 1G:4Gx1Gi:4Gi --dim 1T:4Tx1Ti:4Ti --dim 1P:4Px1Pi:4Pi --dim 1E:4Ex1Ei:4Ei sort2', True, 24 ],
+    [ 204, './tester --dim 1k:4kx1ki:4ki --dim 1M:4Mx1Mi:4Mi --dim 1G:4Gx1Gi:4Gi --dim 1T:4Tx1Ti:4Ti --dim 1P:4Px1Pi:4Pi --dim 1E:4Ex1Ei:4Ei sort2', 24 ],
 
     # exponent
-    [ 205, './tester --dim 1e3:4e3 --dim 1e6:4e6 sort2', True, 8 ],
+    [ 205, './tester --dim 1e3:4e3 --dim 1e6:4e6 sort2', 8 ],
 
     # single nb
     [ 206, './tester --nb 32 --dim 100 sort2' ],
 
     # range nb
     [ 207, './tester --nb 32:256:32 --dim 100 sort2' ],
+
+    # with illegal step = start = 0
+    [ 208, './tester --nb 0:5 sort2', 255 ],
 
     #----------
     # Zip of dimensions
@@ -134,15 +138,37 @@ cmds = [
 
     # ref n
     [ 503, './tester --ref n sort5' ],
+
+    #----------
+    # Float and complex
+    [ 600, './tester --alpha -2,0,2 sort6' ],
+
+    # inf
+    [ 601, './tester --alpha -inf,0,inf sort6', 10 ],
+
+    # complex
+    [ 602, './tester --alpha 1.23+2.34i,1.23-2.34i --dim 100 sort6' ],
+
+    # float range
+    [ 603, './tester --beta 1.234:5.678:0.5 --dim 100 sort6' ],
+
+    # with step = start
+    [ 604, './tester --beta 2.5:12.5 --dim 100 sort6' ],
+
+    # with illegal step = start = 0
+    [ 605, './tester --beta 0:12.5 --dim 100 sort6', 255 ],
+
+    # with start = 0, step != 0
+    [ 606, './tester --beta 0:12.5:1.25 --dim 100 sort6' ],
 ]
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # When output is redirected to file instead of TTY console,
 # print extra messages to stderr on TTY console.
 #
 output_redirected = not sys.stdout.isatty()
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # If output is redirected, prints to both stderr and stdout;
 # otherwise prints to just stdout.
 #
@@ -154,9 +180,25 @@ def print_tee( *args ):
 # end
 
 #-------------------------------------------------------------------------------
+# Used in
+#     re.sub( pattern, strip_time_sub, line )
+# where pattern matches 4 time or Gflop/s fields to replace with hyphens,
+# and status field to keep.
+# If re.sub matched line '    3.5       4.5  12.34   5.23  pass',
+# this returns string    '  -----  --------  -----  -----  pass'
+#
+def strip_time_sub( match ):
+    result = ''
+    for i in range( 1, 5 ):
+        result += '  ' + '-' * (len( match.group( i ) ) - 2)
+    result += '  ' + match.group( 5 )
+    return result
+# end
+
+#-------------------------------------------------------------------------------
 # Runs cmd. Returns exit code and output (stdout and stderr merged).
 #
-def run_test( num, cmd, strip_time, expected_err=0 ):
+def run_test( num, cmd, expected_err=0 ):
     print_tee( str(num) + ': ' + cmd )
     output = ''
     p = subprocess.Popen( cmd.split(), stdout=subprocess.PIPE,
@@ -187,13 +229,13 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
         output2 = re.sub( r'\x1B\[\d+m', r'', output )
         output2 = re.sub( r'version \S+, id \S+',
                           r'version NA, id NA', output2 )
-        if (strip_time):
-            # Usually, strip out 4 time and gflops columns.
-            # This messes up some output like `tester -h sort`.
-            for i in range( 6, 10 ):
-                output2 = re.sub( r'^( +[sdcz](?: +\S+){' + str(i) + r'})( +).{5}\S{4}\b',
-                                  r'\1\2---------',
-                                  output2, 0, re.M )
+        # Strip out 4 time and Gflop/s fields before status.
+        # Using ( +(?:\d+\.\d+|inf|NA)){4} captures only 1 group, the last,
+        # hence repeating it 4 times to capture 4 groups.
+        output2 = re.sub(
+            r'( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA)) +(pass|FAIL|no check)',
+            strip_time_sub, output2 )
+        # end
         out = open( outfile, 'w' )
         out.write( output2 )
         out.close()
@@ -217,7 +259,7 @@ def run_test( num, cmd, strip_time, expected_err=0 ):
     return (err, output)
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Utility to pretty print XML.
 # See https://stackoverflow.com/a/33956544/1655607
 #
@@ -237,8 +279,12 @@ def indent_xml( elem, level=0 ):
             elem.tail = i
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # run each test
+
+start = time.time()
+print_tee( time.ctime() )
+
 failed_tests = []
 passed_tests = []
 ntests = len(opts.tests)
@@ -252,23 +298,19 @@ for tst in cmds:
     num = tst[0]
     cmd = tst[1]
 
-    strip_time = True
-    if (len( tst ) > 2):
-        strip_time = tst[2]
-
     expected_err = 0
-    if (len( tst ) > 3):
-        expected_err = tst[3]
+    if (len( tst ) > 2):
+        expected_err = tst[2]
 
     if (run_all or tst[0] in opts.tests):
         seen.add( tst[0] )
-        (err, output) = run_test( num, cmd, strip_time, expected_err )
+        (err, output) = run_test( num, cmd, expected_err )
         if (err != expected_err):
             failed_tests.append( (cmd, err, output) )
         else:
             passed_tests.append( cmd )
-not_seen = list( filter( lambda x: x not in seen, opts.tests ))
 
+not_seen = list( filter( lambda x: x not in seen, opts.tests ) )
 if (not_seen):
     print_tee( 'Warning: unknown tests:', ' '.join( map( str, not_seen )))
 
@@ -277,6 +319,8 @@ nfailed = len( failed_tests )
 if (nfailed > 0):
     print_tee( '\n' + str(nfailed) + ' tests FAILED:\n' +
                '\n'.join( [x[0] for x in failed_tests] ) )
+else:
+    print_tee( '\n' + 'All tests passed.' )
 
 # generate jUnit compatible test report
 if opts.xml:
@@ -309,5 +353,9 @@ if opts.xml:
     indent_xml( root )
     tree.write( opts.xml )
 # end
+
+elapsed = time.time() - start
+print_tee( 'Elapsed %.2f sec' % elapsed )
+print_tee( time.ctime() )
 
 exit( nfailed )

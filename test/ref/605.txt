@@ -1,10 +1,12 @@
+
+Error: --beta: invalid argument at '', expected float or range start:end:step
 TestSweeper version NA, id NA
-input: ./tester --help sort
+input: ./tester --beta '0:12.5' --dim 100 sort6
 Usage: test [-h|--help]
        test [-h|--help] routine
        test [parameters] routine
 
-Parameters for sort:
+Parameters for sort6:
     --check          check the results; default y; valid: [ny]
     --ref            run reference; sometimes check -> ref; default n; valid: [ny]
     --tol            tolerance (e.g., error < tol*epsilon to pass); default 50

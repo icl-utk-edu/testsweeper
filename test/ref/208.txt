@@ -1,10 +1,12 @@
+
+Error: --nb: invalid argument at '', expected integer or range start:end:step
 TestSweeper version NA, id NA
-input: ./tester --help sort
+input: ./tester --nb '0:5' sort2
 Usage: test [-h|--help]
        test [-h|--help] routine
        test [parameters] routine
 
-Parameters for sort:
+Parameters for sort2:
     --check          check the results; default y; valid: [ny]
     --ref            run reference; sometimes check -> ref; default n; valid: [ny]
     --tol            tolerance (e.g., error < tol*epsilon to pass); default 50

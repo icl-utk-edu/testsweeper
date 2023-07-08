@@ -92,6 +92,7 @@ void test_sort_work( Params &params, bool run )
     bool check = (params.check() == 'y');
     bool ref = (params.ref() == 'y') || check;  // check requires ref
     scalar_t alpha = params.alpha.get<scalar_t>();
+    real_t beta = params.beta();
     (void) nb;  // Mark as unused.
 
     // mark non-standard output values
@@ -118,7 +119,7 @@ void test_sort_work( Params &params, bool run )
     size_t len = std::min( m, imax ) + std::min( n, imax ) + std::min( k, imax );
     std::vector<real_t> x( len );
     for (auto& x_i: x) {
-        x_i = rand() / double(RAND_MAX) + std::abs( alpha );
+        x_i = rand() / double(RAND_MAX) + std::abs( alpha ) + beta;
     }
     std::vector<real_t> x_ref = x;  // copy
 
