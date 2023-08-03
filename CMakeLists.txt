@@ -7,7 +7,7 @@
 
 cmake_minimum_required( VERSION 3.15 )
 # 3.1  target_compile_features
-# 3.8  target_compile_features( cxx_std_11 )
+# 3.8  target_compile_features( cxx_std_17 )
 # 3.14 install( LIBRARY DESTINATION lib ) default
 # 3.15 $<$COMPILE_LANG_AND_ID  # optional
 # 3.15 message DEBUG
@@ -147,6 +147,7 @@ if (testsweeper_is_project)
 endif()
 
 #-------------------------------------------------------------------------------
+# Install rules.
 # When TestSweeper is used as a sub-project,
 # the parent (e.g., BLAS++) may not want to install it.
 if (testsweeper_install)
@@ -162,14 +163,15 @@ if (testsweeper_install)
     install(
         TARGETS testsweeper
         EXPORT testsweeperTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # no default before 3.14
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
 
     # Install header files
     install(
         FILES "testsweeper.hh"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     )
 
     # Install <package>Targets.cmake
