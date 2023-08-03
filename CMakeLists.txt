@@ -152,7 +152,11 @@ endif()
 if (testsweeper_install)
     # GNU Filesystem Conventions
     include( GNUInstallDirs )
-    set( INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/testsweeper )
+    if (WIN32)
+        set( install_configdir "testsweeper" )
+    else()
+        set( install_configdir "${CMAKE_INSTALL_LIBDIR}/cmake/testsweeper" )
+    endif()
 
     # Install library and add to <package>Targets.cmake
     install(
@@ -171,7 +175,7 @@ if (testsweeper_install)
     # Install <package>Targets.cmake
     install(
         EXPORT testsweeperTargets
-        DESTINATION ${INSTALL_CONFIGDIR}
+        DESTINATION "${install_configdir}"
     )
 
     # Also export <package>Targets.cmake in build directory
@@ -186,7 +190,7 @@ if (testsweeper_install)
     configure_package_config_file(
         "testsweeperConfig.cmake.in"
         "testsweeperConfig.cmake"
-        INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+        INSTALL_DESTINATION "${install_configdir}"
     )
     write_basic_package_version_file(
         "testsweeperConfigVersion.cmake"
@@ -196,6 +200,6 @@ if (testsweeper_install)
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfig.cmake"
               "${CMAKE_CURRENT_BINARY_DIR}/testsweeperConfigVersion.cmake"
-        DESTINATION ${INSTALL_CONFIGDIR}
+        DESTINATION "${install_configdir}"
     )
 endif()
