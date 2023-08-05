@@ -16,16 +16,18 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   icl_testsweeper:
+    timeout-minutes: 120
     strategy:
       matrix:
         maker: [make, cmake]
+        compiler: [gnu, intel]
       fail-fast: false
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - name: Configure
-        run: .github/workflows/configure.sh ${{matrix.maker}}
+        run: .github/workflows/configure.sh ${{matrix.maker}} ${{matrix.compiler}}
       - name: Build
-        run: .github/workflows/build.sh ${{matrix.maker}}
+        run: .github/workflows/build.sh ${{matrix.maker}} ${{matrix.compiler}}
       - name: Test
-        run: .github/workflows/test.sh ${{matrix.maker}}
+        run: .github/workflows/test.sh ${{matrix.maker}} ${{matrix.compiler}}

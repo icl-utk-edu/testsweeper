@@ -32,14 +32,33 @@ export top=$(pwd)
 
 shopt -s expand_aliases
 
-
-print "======================================== Load compiler"
-quiet module load gcc@7.3.0
-quiet which g++
-g++ --version
+quiet module load python
+quiet which python
+quiet which python3
+python  --version
+python3 --version
 
 quiet module load pkgconf
 quiet which pkg-config
+
+export color=no
+export CXXFLAGS="-Werror -Wno-unused-command-line-argument"
+
+#----------------------------------------------------------------- Compiler
+if [ "${compiler}" = "intel" ]; then
+    print "======================================== Load Intel oneAPI compiler"
+    quiet module load intel-oneapi-compilers
+else
+    print "======================================== Load GNU compiler"
+    quiet module load gcc@8.5.0
+fi
+print "---------------------------------------- Verify compiler"
+print "CXX = $CXX"
+print "CC  = $CC"
+print "FC  = $FC"
+${CXX} --version
+${CC}  --version
+${FC}  --version
 
 if [ "${maker}" = "cmake" ]; then
     print "======================================== Load cmake"
@@ -48,5 +67,3 @@ if [ "${maker}" = "cmake" ]; then
     cmake --version
     cd build
 fi
-
-quiet module list

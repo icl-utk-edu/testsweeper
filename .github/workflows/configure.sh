@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
 maker=$1
+compiler=$2
 
 if [ "${maker}" = "cmake" ]; then
     rm -rf build
@@ -11,18 +12,24 @@ mydir=$(dirname $0)
 source ${mydir}/setup_env.sh
 
 print "======================================== Environment"
-env
+# Show environment variables, excluding functions.
+(set -o posix; set)
+
+print "======================================== Modules"
+quiet module list -l
 
 print "======================================== Setup build"
-export color=no
+# Note: set all env variables in setup_env.sh,
+# else build.sh and test.sh won't see them.
+
 rm -rf ${top}/install
 if [ "${maker}" = "make" ]; then
     make distclean
-    make config CXXFLAGS="-Werror" prefix=${top}/install \
+    make config prefix=${top}/install \
          || exit 10
-fi
-if [ "${maker}" = "cmake" ]; then
-    cmake -Dcolor=no -DCMAKE_CXX_FLAGS="-Werror" \
+
+elif [ "${maker}" = "cmake" ]; then
+    cmake -Dcolor=no \
           -DCMAKE_INSTALL_PREFIX=${top}/install \
           .. \
           || exit 12

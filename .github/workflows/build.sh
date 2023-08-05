@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
 maker=$1
+compiler=$2
 
 mydir=$(dirname $0)
 source ${mydir}/setup_env.sh
