@@ -18,6 +18,8 @@ project(
     LANGUAGES CXX
 )
 
+include( CheckCXXCompilerFlag )
+
 # When built as a sub-project, add a namespace to make targets unique,
 # e.g., `make example` becomes `make testsweeper_example`.
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -129,6 +131,18 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.15)
     set( gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU>" )
     target_compile_options(
         testsweeper PRIVATE "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall>>" )
+endif()
+
+# Handle NaN correctly with Intel icpx.
+check_cxx_compiler_flag( "-fp-model=precise" fp_model )
+if (fp_model)
+    target_compile_options( testsweeper PUBLIC -fp-model=precise )
+endif()
+
+# Avoid annoying icpx warning: 'linker' input unused
+check_cxx_compiler_flag( "-Wno-unused-command-line-argument" warn_unused )
+if (warn_unused)
+    target_compile_options( testsweeper PUBLIC -Wno-unused-command-line-argument )
 endif()
 
 if (NOT color)

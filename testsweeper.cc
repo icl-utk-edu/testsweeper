@@ -207,8 +207,13 @@ int64_t scan_multiplier( const char **pstr )
         }
     }
     else if (sscanf( *pstr, "e%d%n", &exponent, &bytes ) == 1) {
+        // pow() function can lead to undesireable rounding, 1e6 = 999999,
+        // so multiply with loop.
         *pstr += bytes;
-        return int64_t( pow( 10.0, exponent ) );
+        int64_t mul = 1;
+        for (int i = 0; i < exponent; ++i)
+            mul *= 10;
+        return mul;
     }
     else {
         return 1;

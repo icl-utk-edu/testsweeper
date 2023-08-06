@@ -49,8 +49,10 @@ def main():
     config.prog_cxx_flag( '-Wall' )
     config.prog_cxx_flag( '-Wno-unused-local-typedefs' )
     config.prog_cxx_flag( '-Wno-unused-function' )
+    config.prog_cxx_flag( '-Wno-unused-command-line-argument' )
     config.prog_cxx_flag( '-pedantic' )
     config.prog_cxx_flag( '-Wshadow' )
+    config.prog_cxx_flag( '-fp-model=precise' ) # Handle NaN correctly with Intel icpx.
    #config.prog_cxx_flag( '-Wmissing-declarations' )
    #config.prog_cxx_flag( '-Wconversion' )
    #config.prog_cxx_flag( '-Werror' )
