@@ -56,6 +56,7 @@ void throw_error( const char* format, ... );
 // -----------------------------------------------------------------------------
 enum class DataType {
     Integer       = 'i',
+    Half          = 'h',
     Single        = 's',
     Double        = 'd',
     SingleComplex = 'c',
@@ -68,7 +69,7 @@ enum class DataType {
 inline DataType char2datatype( char ch )
 {
     ch = tolower( ch );
-    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
+    if (ch != 'i' && ch != 'h' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
         throw_error( "invalid value '%c'", ch );
     }
     return DataType( ch );
@@ -94,6 +95,9 @@ inline DataType str2datatype( const char* str )
           || str_ == "i32"
           || str_ == "int"
           || str_ == "integer"       ) return DataType::Integer;
+    else if (str_ == "h"
+          || str_ == "r16"
+          || str_ == "half"          ) return DataType::Half;
     else if (str_ == "s"
           || str_ == "r32"
           || str_ == "float"
@@ -121,6 +125,7 @@ inline const char* datatype2str( DataType en )
 {
     switch (en) {
         case DataType::Integer:       return "i";
+        case DataType::Half:          return "h";
         case DataType::Single:        return "s";
         case DataType::Double:        return "d";
         case DataType::SingleComplex: return "c";
