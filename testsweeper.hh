@@ -331,8 +331,10 @@ public:
     void set_default( const T& default_value )
     {
         default_value_ = default_value;
-        values_.clear();
-        values_.push_back( default_value );
+        if (is_default_) {
+            values_.clear();
+            values_.push_back( default_value );
+        }
     }
 
     virtual void reset_output()
