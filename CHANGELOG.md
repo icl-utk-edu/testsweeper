@@ -1,3 +1,7 @@
+2023.11.05
+  - Improve set_default to reset value
+  - Add half precision
+
 2023.08.25
   - Use yyyy.mm.dd version scheme, instead of yyyy.mm.release
   - Fixes for Intel clang compiler
