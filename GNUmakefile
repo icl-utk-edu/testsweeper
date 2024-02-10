@@ -73,10 +73,12 @@ ifneq ($(findstring darwin, $(ostype)),)
                      -current_version ${abi_version} \
                      -compatibility_version ${soversion}
     so = dylib
-    so2 = .dylib  # on macOS, .dylib comes after version: libfoo.4.dylib
+    so2 = .dylib
+    # on macOS, .dylib comes after version: libfoo.4.dylib
 else
     so = so
-    so1 = .so  # on Linux, .so comes before version: libfoo.so.4
+    so1 = .so
+    # on Linux, .so comes before version: libfoo.so.4
 endif
 
 #-------------------------------------------------------------------------------

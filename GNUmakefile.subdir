@@ -1,0 +1,50 @@
+# Copyright (c) 2017-2023, University of Tennessee. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the BSD 3-Clause license. See the accompanying LICENSE file.
+#
+# Subdirectories include this makefile to forward rules to the top level makefile.
+# Define ${top} for where the top level is.
+# Example: src/GNUmakefile:
+#     top = ..
+#     include ${top}/GNUmakefile.subdir
+
+.SUFFIXES:
+
+pwd     := ${shell pwd}
+abs_top := ${abspath ${top}}
+cdir    := ${subst ${abs_top}/,,${pwd}}
+
+.DEFAULT_GOAL: ${cdir}
+.PHONY: ${cdir}
+
+${cdir}:
+	cd ${top} && ${MAKE} $@
+
+DONT_FORWARD += echo_sub
+echo_sub:
+	@echo "pwd     ${pwd}"
+	@echo "abs_top ${abs_top}"
+	@echo "cdir    ${cdir}"
+
+# ------------------------------------------------------------------------------
+ifneq (${MAKECMDGOALS},)
+
+# If arguments are given, presumably files like test.o, forward them to top
+# with cdir prefix.
+# All files are forwarded as one rule, based on first; rest are quietly ignored.
+goals   := ${filter-out echo ${DONT_FORWARD}, ${MAKECMDGOALS}}
+forward := ${addprefix ${cdir}/, ${goals}}
+first   := ${firstword ${goals}}
+rest    := ${wordlist 2, ${words ${goals}}, ${goals}}
+
+${first}: force
+	cd ${top} && ${MAKE} ${forward}
+
+${rest}: force
+	@echo > /dev/null
+
+endif
+# ------------------------------------------------------------------------------
+
+force: ;
