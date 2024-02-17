@@ -15,13 +15,15 @@
 // -----------------------------------------------------------------------------
 using testsweeper::ParamType;
 using testsweeper::DataType;
-using testsweeper::char2datatype;
-using testsweeper::datatype2char;
-using testsweeper::str2datatype;
-using testsweeper::datatype2str;
+using testsweeper::DataType_help;
 using testsweeper::ansi_bold;
 using testsweeper::ansi_red;
 using testsweeper::ansi_normal;
+using testsweeper::no_data_flag;
+
+const ParamType PT_Value  = testsweeper::ParamType::Value;
+const ParamType PT_List   = testsweeper::ParamType::List;
+const ParamType PT_Output = testsweeper::ParamType::Output;
 
 // -----------------------------------------------------------------------------
 // each section must have a corresponding entry in section_names
@@ -83,50 +85,56 @@ Params::Params():
     // p = precision
     // def = default
     // ----- test framework parameters
-    //         name,       w,    type,         default, valid, help
-    check     ( "check",   0,    ParamType::Value, 'y', "ny",  "check the results" ),
-    ref       ( "ref",     0,    ParamType::Value, 'n', "ny",  "run reference; sometimes check -> ref" ),
+    //         name,       w,    ParamType, default, valid, help
+    check     ( "check",   0,    PT_Value,  'y', "ny",  "check the results" ),
+    ref       ( "ref",     0,    PT_Value,  'n', "ny",  "run reference; sometimes check -> ref" ),
 
-    //          name,      w, p, type,         default, min,  max, help
-    tol       ( "tol",     0, 0, ParamType::Value,  50,   1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
-    repeat    ( "repeat",  0,    ParamType::Value,   1,   1, 1000, "times to repeat each test" ),
-    verbose   ( "verbose", 0,    ParamType::Value,   0,   0,   10, "verbose level" ),
-    cache     ( "cache",   0,    ParamType::Value,  20,   1, 1024, "total cache size, in MiB" ),
+    //          name,      w, p, ParamType, default, min,  max, help
+    tol       ( "tol",     0, 0, PT_Value,  50,   1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
+    repeat    ( "repeat",  0,    PT_Value,   1,   1, 1000, "times to repeat each test" ),
+    verbose   ( "verbose", 0,    PT_Value,   0,   0,   10, "verbose level" ),
+    cache     ( "cache",   0,    PT_Value,  20,   1, 1024, "total cache size, in MiB" ),
 
     // ----- routine parameters
-    //          name,      w, p, type,            default,          char2enum,     enum2char,     enum2str,     help
-    datatype_old
-              ( "type-old",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str,
-                "s=single (float), d=double, c=complex<float>, z=complex<double>, i=int" ),
+    //          name,      w, p, ParamType, default,          help
+    datatype  ( "type",    4,    PT_List,   DataType::Double, DataType_help ),
 
-    //          name,      w, p, type,            default,          str2enum,     enum2str,    help
-    datatype  ( "type",    4,    ParamType::List, DataType::Double, str2datatype, datatype2str,
-                "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
+    #ifdef DEPRECATED
+        //      name,         w, ParamType, default; char2enum, enum2char, enum2str, help
+        datatype_old
+              ( "type-old-1", 4, PT_List,   DataType::Double,
+                char2datatype, datatype2char, datatype2str, DataType_help ),
 
-    //          name,      w,    type,            default, min, max,       help
-    nb        ( "nb",      3,    ParamType::List, 32,      0,   INT64_MAX, "block size" ),
-    dim       ( "dim",     6,    ParamType::List,          0,   INT64_MAX, "m x n x k dimensions" ),
-    grid      ( "grid",    6,    ParamType::List, "1x1",   0,   1000000,   "p x q dimensions"),
+        //      name,          w, ParamType, default; str2enum, enum2str, help
+        datatype_old2
+              ( "type-old-2", 4, PT_List,    DataType::Double,
+                str2datatype, datatype2str, DataType_help ),
+    #endif
 
-    //          name,      w,  p, type,            default,                                 min, max, help
-    alpha     ( "alpha",   4,  2, ParamType::List, "3.141592653589793+1.414213562373095i", -inf, inf, "alpha value" ),
-    beta      ( "beta",    4,  2, ParamType::List, 2.718281828459045,                      -inf, inf, "beta value" ),
+    //          name,      w,     ParamType, default, min, max,       help
+    nb        ( "nb",      3,     PT_List,   32,      0,   INT64_MAX, "block size" ),
+    dim       ( "dim",     6,     PT_List,            0,   INT64_MAX, "m x n x k dimensions" ),
+    grid      ( "grid",    6,     PT_List,   "1x1",   0,   1000000,   "p x q dimensions"),
+
+    //          name,      w,  p, ParamType, default,                                 min, max, help
+    alpha     ( "alpha",   4,  2, PT_List,   "3.141592653589793+1.414213562373095i", -inf, inf, "alpha value" ),
+    beta      ( "beta",    4,  2, PT_List,   2.718281828459045,                      -inf, inf, "beta value" ),
 
     // ----- output parameters
     // min, max are ignored
-    //          name,                  w, p, type,              default,                   min, max, help
-    error     ( "SLATE\nerror",       11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "numerical error" ),
-    ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "orthogonality error" ),
-    time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "time to solution" ),
-    gflops    ( "SLATE\nGflop/s",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "Gflop/s rate" ),
+    //          name,                  w, p, ParamType, default,      min, max, help
+    error     ( "SLATE\nerror",       11, 4, PT_Output, no_data_flag,   0,   0, "numerical error" ),
+    ortho     ( "SLATE\north. error", 11, 4, PT_Output, no_data_flag,   0,   0, "orthogonality error" ),
+    time      ( "SLATE\ntime (s)",    11, 4, PT_Output, no_data_flag,   0,   0, "time to solution" ),
+    gflops    ( "SLATE\nGflop/s",     11, 4, PT_Output, no_data_flag,   0,   0, "Gflop/s rate" ),
 
-    ref_error ( "Ref.\nerror",        11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference numerical error" ),
-    ref_ortho ( "Ref.\north. error",  11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference orthogonality error" ),
-    ref_time  ( "Ref.\ntime (s)",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference time to solution" ),
-    ref_gflops( "Ref.\nGflop/s",      11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference Gflop/s rate" ),
+    ref_error ( "Ref.\nerror",        11, 4, PT_Output, no_data_flag,   0,   0, "reference numerical error" ),
+    ref_ortho ( "Ref.\north. error",  11, 4, PT_Output, no_data_flag,   0,   0, "reference orthogonality error" ),
+    ref_time  ( "Ref.\ntime (s)",     11, 4, PT_Output, no_data_flag,   0,   0, "reference time to solution" ),
+    ref_gflops( "Ref.\nGflop/s",      11, 4, PT_Output, no_data_flag,   0,   0, "reference Gflop/s rate" ),
 
     // default -1 means "no check"
-    okay      ( "status",              6,    ParamType::Output,  -1,   0,   0, "success indicator" )
+    okay      ( "status",              6,    PT_Output, -1, 0, 0, "success indicator" )
 {
     // mark standard set of output fields as used
     okay();

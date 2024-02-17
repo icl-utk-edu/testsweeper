@@ -28,8 +28,11 @@ public:
     testsweeper::ParamInt    cache;
 
     // ----- routine parameters
-    testsweeper::ParamEnum< testsweeper::DataType > datatype_old;
     testsweeper::ParamEnum< testsweeper::DataType > datatype;
+    #ifdef DEPRECATED
+        testsweeper::ParamEnum< testsweeper::DataType > datatype_old;
+        testsweeper::ParamEnum< testsweeper::DataType > datatype_old2;
+    #endif
     testsweeper::ParamInt    nb;
     testsweeper::ParamInt3   dim;
     testsweeper::ParamInt3   grid;
