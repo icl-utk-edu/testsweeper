@@ -22,9 +22,9 @@ jobs:
         maker: [make, cmake]
         compiler: [gnu, intel]
       fail-fast: false
-    runs-on: self-hosted
+    runs-on: slurm:cpu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Configure
         run: .github/workflows/configure.sh ${{matrix.maker}} ${{matrix.compiler}}
       - name: Build
