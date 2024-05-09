@@ -18,6 +18,12 @@ project(
     LANGUAGES CXX
 )
 
+# See notes in GNUmakefile about using abi-compliance-checker.
+# soversion is major ABI version.
+set( abi_version 1.0.0 )
+string( REPLACE "." ";" abi_list "${abi_version}" )
+list( GET abi_list 0 soversion )
+
 include( CheckCXXCompilerFlag )
 
 # When built as a sub-project, add a namespace to make targets unique,
@@ -32,6 +38,16 @@ endif()
 
 #-------------------------------------------------------------------------------
 # Options
+if (testsweeper_is_project)
+    set( log "" CACHE STRING "Shorthand for CMAKE_MESSAGE_LOG_LEVEL" )
+    set_property( CACHE log PROPERTY STRINGS
+                  FATAL_ERROR SEND_ERROR WARNING AUTHOR_WARNING DEPRECATION
+                  NOTICE STATUS VERBOSE DEBUG TRACE )
+    if (log)
+        set( CMAKE_MESSAGE_LOG_LEVEL "${log}" )
+    endif()
+endif()
+
 option( BUILD_SHARED_LIBS "Build shared libraries" true )
 option( build_tests "Build test suite" "${testsweeper_is_project}" )
 option( color "Use ANSI color output" true )
@@ -68,6 +84,8 @@ use_openmp             = ${use_openmp}
 testsweeper_install    = ${testsweeper_install}
 testsweeper_is_project = ${testsweeper_is_project}
 testsweeper_           = ${testsweeper_}
+abi_version            = ${abi_version}
+soversion              = ${soversion}
 " )
 
 #-------------------------------------------------------------------------------
@@ -130,6 +148,8 @@ set_target_properties(
     CXX_STANDARD_REQUIRED true  # prohibit < c++17
     CXX_EXTENSIONS false        # prohibit gnu++17
     WINDOWS_EXPORT_ALL_SYMBOLS ON
+    VERSION   "${abi_version}"
+    SOVERSION "${soversion}"
 )
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.15)

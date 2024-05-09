@@ -44,12 +44,39 @@ ifeq ($(origin LD),default)
     LD = $(CXX)
 endif
 
+# Use abi-compliance-checker to compare the ABI (application binary
+# interface) of 2 releases. Changing the ABI does not necessarily change
+# the API (application programming interface). Rearranging a struct or
+# changing a by-value argument from int64 to int doesn't change the
+# API--no source code changes are required, just a recompile.
+#
+# if structs or routines are changed or removed:
+#     bump major version and reset minor, revision = 0;
+# else if structs or routines are added:
+#     bump minor version and reset revision = 0;
+# else (e.g., bug fixes):
+#     bump revision
+#
+# soversion is major ABI version.
+abi_version = 1.0.0
+soversion = ${word 1, ${subst ., ,${abi_version}}}
+
+#-------------------------------------------------------------------------------
 # auto-detect OS
 # $OSTYPE may not be exported from the shell, so echo it
 ostype := $(shell echo $${OSTYPE})
 ifneq ($(findstring darwin, $(ostype)),)
     # MacOS is darwin
     macos = 1
+    # MacOS needs shared library's path set, and shared library version.
+    ldflags_shared = -install_name @rpath/${notdir $@} \
+                     -current_version ${abi_version} \
+                     -compatibility_version ${soversion}
+    so = dylib
+    so2 = .dylib  # on macOS, .dylib comes after version: libfoo.4.dylib
+else
+    so = so
+    so1 = .so  # on Linux, .so comes before version: libfoo.so.4
 endif
 
 #-------------------------------------------------------------------------------
@@ -57,17 +84,9 @@ endif
 ifneq ($(static),1)
     CXXFLAGS += -fPIC
     LDFLAGS  += -fPIC
-    lib_ext = so
+    lib_ext = ${so}
 else
     lib_ext = a
-endif
-
-#-------------------------------------------------------------------------------
-# MacOS needs shared library's path set
-ifeq ($(macos),1)
-    install_name = -install_name @rpath/$(notdir $@)
-else
-    install_name =
 endif
 
 #-------------------------------------------------------------------------------
@@ -124,7 +143,7 @@ install: lib
 	mkdir -p $(DESTDIR)$(prefix)/include
 	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 	cp $(headers) $(DESTDIR)$(prefix)/include
-	cp $(lib) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
+	cp -av libtestsweeper.* $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
 
 uninstall:
 	$(RM) $(addprefix $(DESTDIR)$(prefix)/include/, $(headers))
@@ -136,12 +155,21 @@ $(lib_obj) $(tester_obj): make.inc
 
 #-------------------------------------------------------------------------------
 # TestSweeper library
-lib_a  = libtestsweeper.a
-lib_so = libtestsweeper.so
-lib    = libtestsweeper.$(lib_ext)
+lib_name = libtestsweeper
+lib_a  = ${lib_name}.a
+lib_so = ${lib_name}.${so}
+lib    = ${lib_name}.${lib_ext}
 
-$(lib_so): $(lib_obj)
-	$(LD) $(LDFLAGS) -shared $(install_name) $(lib_obj) $(LIBS) -o $@
+# libfoo.so.3 or libfoo.3.dylib
+lib_so_abi_version = ${lib_name}${so1}.${abi_version}${so2}
+lib_so_soversion   = ${lib_name}${so1}.${soversion}${so2}
+
+${lib_so_abi_version}: ${lib_obj}
+	${LD} ${LDFLAGS} -shared ${ldflags_shared} ${lib_obj} ${LIBS} -o $@
+
+${lib_so}: | ${lib_so_abi_version}
+	ln -fs ${lib_so_abi_version} ${lib_so}
+	ln -fs ${lib_so_abi_version} ${lib_so_soversion}
 
 $(lib_a): $(lib_obj)
 	$(RM) $@
@@ -217,10 +245,15 @@ echo:
 	@echo "static        = '$(static)'"
 	@echo "id            = '$(id)'"
 	@echo "last_id       = '$(last_id)'"
+	@echo "abi_version   = '${abi_version}'"
+	@echo "soversion     = '${soversion}'"
 	@echo
+	@echo "lib_name      = ${lib_name}"
 	@echo "lib_a         = $(lib_a)"
 	@echo "lib_so        = $(lib_so)"
 	@echo "lib           = $(lib)"
+	@echo "lib_so_abi_version = ${lib_so_abi_version}"
+	@echo "lib_so_soversion   = ${lib_so_soversion}"
 	@echo
 	@echo "lib_src       = $(lib_src)"
 	@echo
@@ -240,6 +273,7 @@ echo:
 	@echo "LD            = $(LD)"
 	@echo "LDFLAGS       = $(LDFLAGS)"
 	@echo "LIBS          = $(LIBS)"
+	@echo "ldflags_shared = ${ldflags_shared}"
 	@echo
 	@echo "TEST_LDFLAGS  = $(TEST_LDFLAGS)"
 	@echo "TEST_LIBS     = $(TEST_LIBS)"
