@@ -421,13 +421,6 @@ public:
         values_[ index_ ] = value;
     }
 
-    [[deprecated( "use param() instead of param.value(). To be removed 2024-03." )]]
-    T& value()
-    {
-        used_ = true;
-        return values_[ index_ ];
-    }
-
     void set_default( const T& default_value )
     {
         default_value_ = default_value;
