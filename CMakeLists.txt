@@ -122,9 +122,15 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
         testsweeper PRIVATE TESTSWEEPER_ID="${testsweeper_id}" )
 endif()
 
-# Use and export -std=c++11; don't allow -std=gnu++11 extensions.
-target_compile_features( testsweeper PUBLIC cxx_std_11 )
-set_target_properties( testsweeper PROPERTIES CXX_EXTENSIONS false )
+# Use and export -std=c++17.
+# CMake inexplicably allows gnu++17 or "decay" to earlier c++; prohibit those.
+target_compile_features( testsweeper PUBLIC cxx_std_17 )
+set_target_properties(
+    testsweeper PROPERTIES
+    CXX_STANDARD_REQUIRED true  # prohibit < c++17
+    CXX_EXTENSIONS false        # prohibit gnu++17
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.15)
     # Conditionally add -Wall. See CMake tutorial.

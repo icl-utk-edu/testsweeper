@@ -15,6 +15,7 @@
 #include <limits>
 #include <algorithm>
 #include <complex>
+#include <type_traits>
 
 // Version is updated by make_release.py; DO NOT EDIT.
 // Version 2023.11.05
@@ -53,6 +54,10 @@ public:
 // -----------------------------------------------------------------------------
 void throw_error( const char* format, ... );
 
+
+// =============================================================================
+// Enums
+
 // -----------------------------------------------------------------------------
 enum class DataType {
     Integer       = 'i',
@@ -63,36 +68,34 @@ enum class DataType {
     DoubleComplex = 'z',
 };
 
-// ----------------------------------------
-// Accepts: s (single/float), d (double), c (complex-single), z (complex-double),
-//          i (int)
-inline DataType char2datatype( char ch )
-{
-    ch = tolower( ch );
-    if (ch != 'i' && ch != 'h' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
-        throw_error( "invalid value '%c'", ch );
-    }
-    return DataType( ch );
-}
+extern const char* DataType_help;
 
-// ----------------------------------------
-inline char datatype2char( DataType en )
-{
-    return char( en );
-}
-
-// ----------------------------------------
-/// Accepts a variety of inputs:
-/// { i, i32, int,   integer } => int
-/// { s, r32, float, single  } => float
-/// { d, r64, double         } => double
-/// { c, c32, complex<float>,  complex-float, complex-single } => complex<float>
-/// { z, c64, complex<double>, complex-double                } => complex<double>
-inline DataType str2datatype( const char* str )
+//----------------------------------------
+/// Convert string to DataType enum. Accepts a variety of inputs:
+///
+/// { i,        int, integer            } => Integer
+///
+/// { h, r16,   half                    } => Half
+/// { s, r32,   float, single           } => Float
+/// { d, r64,   double                  } => Double
+/// { c, c32,   complex<float>          } => FloatComplex
+/// { z, c64,   complex<double>         } => DoubleComplex
+///
+/// Single letters come from traditional BLAS names (i, s, d, c, z)
+/// and a few commonly accepted new ones (h, q).
+/// The r32, c32, etc. come from XBLAS proposal,
+/// https://bit.ly/blas-g2-proposal
+///
+/// @param[in] str
+///     String value to convert.
+///
+/// @param[in] dummy
+///     Dummy argument used to specify the return type for overloading.
+///
+inline DataType from_string( std::string const& str, DataType dummy )
 {
     std::string str_ = str;
     if      (str_ == "i"
-          || str_ == "i32"
           || str_ == "int"
           || str_ == "integer"       ) return DataType::Integer;
     else if (str_ == "h"
@@ -114,16 +117,36 @@ inline DataType str2datatype( const char* str )
           || str_ == "c64"
           || str_ == "complex<double>"
           || str_ == "complex-double") return DataType::DoubleComplex;
-    else {
-        throw_error( "invalid value '%s'", str );
-        return DataType(0);
-    }
+    else
+        throw_error( "invalid datatype '%s'", str.c_str() );
+    return DataType::Integer;
 }
 
-// ----------------------------------------
-inline const char* datatype2str( DataType en )
+//--------------------
+[[deprecated("Use from_string. To be removed 2025-05.")]]
+inline DataType char2datatype( char ch )
 {
-    switch (en) {
+    ch = tolower( ch );
+    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
+        throw_error( "invalid datatype '%c'", ch );
+    }
+    return DataType( ch );
+}
+
+//--------------------
+[[deprecated("Use from_string. To be removed 2025-05.")]]
+inline DataType str2datatype( const char* str )
+{
+    return from_string( str, DataType() );
+}
+
+//----------------------------------------
+/// Convert DataType enum to C-style string representation.
+/// Temporary common low-level implementation for to_string and datatype2str.
+///
+inline const char* to_c_string( DataType value )
+{
+    switch (value) {
         case DataType::Integer:       return "i";
         case DataType::Half:          return "h";
         case DataType::Single:        return "s";
@@ -131,8 +154,85 @@ inline const char* datatype2str( DataType en )
         case DataType::SingleComplex: return "c";
         case DataType::DoubleComplex: return "z";
     }
-    return "";
+    throw_error( "invalid datatype" );
+    return "?";
 }
+
+//--------------------
+/// Convert DataType enum to C++ string representation.
+///
+inline std::string to_string( DataType value )
+{
+    return std::string( to_c_string( value ) );
+}
+
+//--------------------
+[[deprecated("Use to_string. To be removed 2025-05.")]]
+inline const char* datatype2str( DataType value )
+{
+    // Can't write datatype2str using return to_string( value ).c_str()
+    // since string is on stack.
+    return to_c_string( value );
+}
+
+//--------------------
+[[deprecated("Use to_string. To be removed 2025-05.")]]
+inline char datatype2char( DataType value )
+{
+    return to_c_string( value )[ 0 ];
+}
+
+
+//==============================================================================
+// Utilities
+
+//------------------------------------------------------------------------------
+/// Use SFINAE to test for existence of from_string( string, T* ) function.
+template <typename T>
+class has_from_string
+{
+private:
+    /// Matches from_string( string str, T* val ); return type is void.
+    template <typename T2>
+    static auto test( std::string str, T2 val )
+        -> decltype( from_string( str, T2() ) );
+
+    /// Matches everything else; return type is void (something other than T).
+    template <typename T2>
+    static void test(...);
+
+public:
+    // True if from_string( string, type ) exists, based on void return type.
+    static const bool value = std::is_same<
+        T,
+        decltype( test<T>( std::string(), T() ) )
+    >::value;
+};
+
+//------------------------------------------------------------------------------
+/// Use SFINAE to test for existence of to_string( T ) function.
+/// This relies on ADL; it doesn't check the std namespace, so it won't
+/// work for basic types (int, float, etc.) -- not sure how to do that.
+template <typename T>
+class has_to_string
+{
+private:
+    /// Matches to_string( T val ); return type is string.
+    template <typename T2>
+    static auto test( T2 val )
+        -> decltype( to_string( val ) );
+
+    /// Matches everything else; return type is int (something other than string).
+    template <typename>
+    static int test(...);
+
+public:
+    // True if from_string( string, type ) exists, based on string return type.
+    static const bool value = std::is_same<
+        std::string,
+        decltype( test<T>( T() ) )
+    >::value;
+};
 
 // -----------------------------------------------------------------------------
 int scan_range( const char **strp, int64_t *start, int64_t *end, int64_t *step );
@@ -653,8 +753,19 @@ public:
     typedef ENUM (*str2enum)( const char* str );
     typedef const char* (*enum2str)( ENUM en );
 
-    // deprecated
-    // Takes char2enum, enum2char, enum2str.
+    /// Constructor for enums that have to_string and from_string.
+    ParamEnum( const char* name, int width, ParamType type,
+               ENUM default_value,
+               const char* help ):
+        TParamBase<ENUM>( name, width, type, default_value, help ),
+        char2enum_( nullptr ),
+        enum2char_( nullptr ),
+        str2enum_ ( nullptr ),
+        enum2str_ ( nullptr )
+    {}
+
+    /// Deprecated constructor taking char2enum, enum2char, enum2str.
+    [[deprecated("Use constructor without char2enum, etc. To be removed 2025-05.")]]
     ParamEnum( const char* name, int width, ParamType type,
                ENUM default_value,
                char2enum in_char2enum, enum2char in_enum2char,
@@ -667,7 +778,8 @@ public:
         enum2str_( in_enum2str )
     {}
 
-    // Takes str2enum, enum2str.
+    /// Deprecated constructor taking str2enum, enum2str.
+    [[deprecated("Use constructor without char2enum, etc. To be removed 2025-05.")]]
     ParamEnum( const char* name, int width, ParamType type,
                ENUM default_value,
                str2enum in_str2enum, enum2str in_enum2str,
@@ -684,6 +796,7 @@ public:
     virtual void help() const;
 
 protected:
+    // Deprecated: char2enum_, etc.
     char2enum char2enum_;
     enum2char enum2char_;
     str2enum  str2enum_;
@@ -706,10 +819,14 @@ void ParamEnum<ENUM>::parse( const char *str )
         str += len;
         // Parse word into enum. str2enum_ & char2enum_ throw errors.
         ENUM val;
-        if (str2enum_) {
+        if constexpr (has_from_string<ENUM>::value) {
+            val = from_string( buf, ENUM() );
+        }
+        else if (str2enum_) {
             val = str2enum_( buf );
         }
         else {
+            assert( char2enum_ != nullptr );
             val = char2enum_( buf[0] );
         }
         this->push_back( val );
@@ -729,8 +846,17 @@ template <typename ENUM>
 void ParamEnum<ENUM>::print() const
 {
     if (this->used_ && this->width_ > 0) {
-        printf( "%*s  ", this->width_,
-                this->enum2str_( this->values_[ this->index_ ] ));
+        if constexpr (has_to_string<ENUM>::value) {
+            printf( "%*s  ", this->width_,
+                    to_string( this->values_[ this->index_ ] ).c_str() );
+        }
+        else if (enum2str_) {
+            printf( "%*s  ", this->width_,
+                    this->enum2str_( this->values_[ this->index_ ] ));
+        }
+        else {
+            throw_error( "no to_string method available" );
+        }
     }
 }
 
@@ -740,9 +866,19 @@ template <typename ENUM>
 void ParamEnum<ENUM>::help() const
 {
     if (this->type_ == ParamType::Value || this->type_ == ParamType::List) {
-        printf( "    %-16s %s; default %s\n",
-                this->option_.c_str(), this->help_.c_str(),
-                this->enum2str_( this->default_value_ ));
+        if constexpr (has_to_string<ENUM>::value) {
+            printf( "    %-16s %s; default %s\n",
+                    this->option_.c_str(), this->help_.c_str(),
+                    to_string( this->default_value_ ).c_str() );
+        }
+        else if (enum2str_) {
+            printf( "    %-16s %s; default %s\n",
+                    this->option_.c_str(), this->help_.c_str(),
+                    this->enum2str_( this->default_value_ ));
+        }
+        else {
+            throw_error( "no to_string method available" );
+        }
     }
 }
 
