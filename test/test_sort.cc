@@ -96,6 +96,7 @@ void test_sort_work( Params &params, bool run )
     (void) nb;  // Mark as unused.
 
     // mark non-standard output values
+    params.gflops();
     params.ref_time();
     params.ref_gflops();
 
@@ -105,8 +106,8 @@ void test_sort_work( Params &params, bool run )
     params.ref_time.name( "LAPACK Reference\ntime (ms)" );
     params.ref_gflops.name( "LAPACK\nreference gflop/s" );
 
-    assert( params.time.width()       == 11 );  // default width
-    assert( params.gflops.width()     == 11 );  // default width
+    assert( params.time.width()       == 9  );  // default width
+    assert( params.gflops.width()     == 12 );  // default width
     assert( params.ref_time.width()   == 16 );  // LAPACK Reference  (1st line)
     assert( params.ref_gflops.width() == 17 );  // reference gflop/s (2nd line)
 

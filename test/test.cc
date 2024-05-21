@@ -15,13 +15,28 @@
 // -----------------------------------------------------------------------------
 using testsweeper::ParamType;
 using testsweeper::DataType;
+using testsweeper::DataType_help;
+
+#ifdef DEPRECATED
 using testsweeper::char2datatype;
 using testsweeper::datatype2char;
 using testsweeper::str2datatype;
 using testsweeper::datatype2str;
+#endif
+
 using testsweeper::ansi_bold;
 using testsweeper::ansi_red;
 using testsweeper::ansi_normal;
+
+const ParamType PT_Value = ParamType::Value;
+const ParamType PT_List  = ParamType::List;
+const ParamType PT_Out   = ParamType::Output;
+
+const double no_data = testsweeper::no_data_flag;
+const char*  pi_rt2i = "3.141592653589793 + 1.414213562373095i";
+const char*  e_rt3i  = "2.718281828459045 + 1.732050807568877i";
+const double pi      = 3.141592653589793;
+const double e       = 2.718281828459045;
 
 // -----------------------------------------------------------------------------
 // each section must have a corresponding entry in section_names
@@ -81,58 +96,64 @@ Params::Params():
 
     // w = width
     // p = precision
-    // def = default
-    // ----- test framework parameters
-    //         name,       w,    type,         default, valid, help
-    check     ( "check",   0,    ParamType::Value, 'y', "ny",  "check the results" ),
-    ref       ( "ref",     0,    ParamType::Value, 'n', "ny",  "run reference; sometimes check -> ref" ),
+    //----- test framework parameters
+    //          name,         w, type, default, valid, help
+    check     ( "check",      0, PT_Value, 'y', "ny", "check the results" ),
+    ref       ( "ref",        0, PT_Value, 'n', "ny", "run reference; sometimes check implies ref" ),
 
-    //          name,      w, p, type,         default, min,  max, help
-    tol       ( "tol",     0, 0, ParamType::Value,  50,   1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
-    repeat    ( "repeat",  0,    ParamType::Value,   1,   1, 1000, "times to repeat each test" ),
-    verbose   ( "verbose", 0,    ParamType::Value,   0,   0,   10, "verbose level" ),
-    cache     ( "cache",   0,    ParamType::Value,  20,   1, 1024, "total cache size, in MiB" ),
+    //          name,         w, p, type, default,  min,  max, help
+    tol       ( "tol",        0, 0, PT_Value,  50,    1, 1000, "tolerance (e.g., error < tol*epsilon to pass)" ),
+    repeat    ( "repeat",     0,    PT_Value,   1,    1, 1000, "times to repeat each test" ),
+    verbose   ( "verbose",    0,    PT_Value,   0,    0,   10, "verbose level" ),
+    cache     ( "cache",      0,    PT_Value,  20,    1, 1024, "total cache size, in MiB" ),
 
-    // ----- routine parameters
-    //          name,      w, p, type,            default,          char2enum,     enum2char,     enum2str,     help
+    //----- routine parameters, enums
+    #ifdef DEPRECATED
+    //      name,             w, type, default; char2enum, enum2char, enum2str, help
     datatype_old
-              ( "type-old",    4,    ParamType::List, DataType::Double, char2datatype, datatype2char, datatype2str,
-                "s=single (float), d=double, c=complex<float>, z=complex<double>, i=int" ),
+              ( "type-old",       4, PT_List,   DataType::Double,
+                char2datatype, datatype2char, datatype2str, DataType_help ),
 
-    //          name,      w, p, type,            default,          str2enum,     enum2str,    help
-    datatype  ( "type",    4,    ParamType::List, DataType::Double, str2datatype, datatype2str,
-                "One of: s, r32, single, float; d, r64, double; c, c32, complex<float>; z, c64, complex<double>; i, int, integer" ),
+    //      name,             w, type, default; str2enum, enum2str, help
+    datatype_old2
+              ( "type-old2",      4, PT_List,   DataType::Double,
+                str2datatype, datatype2str, DataType_help ),
+    #endif
 
-    //          name,      w,    type,            default, min, max,       help
-    nb        ( "nb",      3,    ParamType::List, 32,      0,   INT64_MAX, "block size" ),
-    dim       ( "dim",     6,    ParamType::List,          0,   INT64_MAX, "m x n x k dimensions" ),
-    grid      ( "grid",    6,    ParamType::List, "1x1",   0,   1000000,   "p x q dimensions"),
+    //          name,         w, type,    default, help
+    datatype  ( "type",       4, PT_List, DataType::Double, DataType_help ),
 
-    //          name,      w,  p, type,            default,                                 min, max, help
-    alpha     ( "alpha",   4,  2, ParamType::List, "3.141592653589793+1.414213562373095i", -inf, inf, "alpha value" ),
-    beta      ( "beta",    4,  2, ParamType::List, 2.718281828459045,                      -inf, inf, "beta value" ),
+    //----- routine parameters, numeric
+    //          name,         w, p, type,    default,  min,  max, help
+    dim       ( "dim",        6,    PT_List,             0, 1e10, "m by n by k dimensions" ),
+    nb        ( "nb",         4,    PT_List,     384,    0,  1e6, "block size" ),
+    alpha     ( "alpha",      3, 1, PT_List, pi_rt2i, -inf,  inf, "scalar alpha" ),
+    beta      ( "beta",       3, 1, PT_List,       e, -inf,  inf, "scalar beta" ),
+    grid      ( "grid",       3,    PT_List,   "1x1",    0,  1e6, "MPI grid p by q dimensions" ),
 
-    // ----- output parameters
+    //----- output parameters
     // min, max are ignored
-    //          name,                  w, p, type,              default,                   min, max, help
-    error     ( "SLATE\nerror",       11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "numerical error" ),
-    ortho     ( "SLATE\north. error", 11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "orthogonality error" ),
-    time      ( "SLATE\ntime (s)",    11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "time to solution" ),
-    gflops    ( "SLATE\nGflop/s",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "Gflop/s rate" ),
+    // error:   %8.2e allows 9.99e-99
+    // time:    %9.3f allows 99999.999 s = 2.9 days
+    // gflops: %12.3f allows 99999999.999 Gflop/s = 100 Pflop/s
+    //          name,         w, p, type,   default, min, max, help
+    error     ( "error",      8, 2, PT_Out, no_data, 0, 0, "numerical error" ),
+    ortho     ( "orth.",      8, 2, PT_Out, no_data, 0, 0, "orthogonality error" ),
+    time      ( "time (s)",   9, 3, PT_Out, no_data, 0, 0, "time to solution" ),
+    gflops    ( "gflop/s",   12, 3, PT_Out, no_data, 0, 0, "Gflop/s rate" ),
 
-    ref_error ( "Ref.\nerror",        11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference numerical error" ),
-    ref_ortho ( "Ref.\north. error",  11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference orthogonality error" ),
-    ref_time  ( "Ref.\ntime (s)",     11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference time to solution" ),
-    ref_gflops( "Ref.\nGflop/s",      11, 4, ParamType::Output, testsweeper::no_data_flag,   0,   0, "reference Gflop/s rate" ),
+    ref_time  ( "ref time (s)",  9, 3, PT_Out, no_data, 0, 0, "reference time to solution" ),
+    ref_gflops( "ref gflop/s",  12, 3, PT_Out, no_data, 0, 0, "reference Gflop/s rate" ),
 
     // default -1 means "no check"
-    okay      ( "status",              6,    ParamType::Output,  -1,   0,   0, "success indicator" )
+    //          name,         w, type, default, min, max, help
+    okay      ( "status",     6, PT_Out,    -1, 0, 0, "success indicator" ),
+    msg       ( "",           1, PT_Out,    "",       "error message" )
 {
     // mark standard set of output fields as used
     okay();
     error();
     time();
-    gflops();
 
     // mark framework parameters as used, so they will be accepted on the command line
     check();
@@ -148,6 +169,13 @@ Params::Params():
 int main( int argc, char** argv )
 {
     using testsweeper::QuitException;
+
+    // These may or may not be used; mark unused to silence warnings.
+    #define unused( var ) ((void)var)
+    unused( pi_rt2i );
+    unused( e_rt3i  );
+    unused( pi      );
+    unused( e       );
 
     // check that all sections have names
     assert( sizeof(section_names)/sizeof(*section_names) == Section::num_sections );
