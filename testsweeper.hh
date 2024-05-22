@@ -519,6 +519,7 @@ scalar_t make_scalar( std::complex<double> val )
     return MakeScalarTraits<scalar_t>::make( std::real(val), std::imag(val) );
 }
 
+// =============================================================================
 class ParamComplex : public TParamBase< std::complex<double> >
 {
 public:
@@ -538,6 +539,7 @@ public:
     {
         values_.clear();
         parse( default_value );
+        default_value_ = values_[ 0 ];
         is_default_ = true;
     }
 
@@ -549,6 +551,7 @@ public:
     std::complex<double> scan_complex( const char** str );
     virtual void parse( const char* str );
     virtual void print() const;
+    virtual void help() const;
 
 protected:
     int display_width_;

@@ -714,13 +714,14 @@ std::complex<double> ParamComplex::scan_complex( const char** str )
     }
     return value;
 }
+
 // -----------------------------------------------------------------------------
 // virtual
 void ParamComplex::parse( const char *str )
 {
     //printf("ParamComplex::parse\n");
     while (true) {
-        std::complex<double> val = scan_complex(&str);
+        std::complex<double> val = scan_complex( &str );
         TParamBase< std::complex<double> >::push_back( val );
         if (*str == '\0') {
             break;
@@ -777,7 +778,6 @@ const char* snprintf_value(
     return buf;
 }
 
-
 // -----------------------------------------------------------------------------
 /// If field has been used, prints the value.
 /// If value is set to no_data_flag, it prints "NA".
@@ -791,9 +791,28 @@ void ParamComplex::print() const
             printf( "%*s  ", display_width_, "NA" );
         }
         else {
+            snprintf_value( buf, sizeof(buf), display_width_, precision_,
+                            values_[ index_ ] );
+            printf( "%-*s  ", width_, buf);
+        }
+    }
+}
 
-            snprintf_value( buf, sizeof(buf), display_width_, precision_, values_[ index_ ] );
-            printf( "%-*s  ",width_, buf);
+// -----------------------------------------------------------------------------
+// virtual
+void ParamComplex::help() const
+{
+    if (type_ == ParamType::Value || type_ == ParamType::List) {
+        printf( "    %-16s %s; default ",
+                option_.c_str(), help_.c_str() );
+        if (same( no_data_flag, default_value_.real() )) {
+            printf( "NA\n" );
+        }
+        else {
+            char buf[ 1000 ];
+            snprintf_value( buf, sizeof(buf), display_width_, precision_,
+                            default_value_ );
+            printf( "%s\n", buf );
         }
     }
 }
