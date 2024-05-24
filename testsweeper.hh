@@ -92,34 +92,33 @@ extern const char* DataType_help;
 /// @param[in] dummy
 ///     Dummy argument used to specify the return type for overloading.
 ///
-inline DataType from_string( std::string const& str, DataType dummy )
+inline void from_string( std::string const& str, DataType* val )
 {
     std::string str_ = str;
     if      (str_ == "i"
           || str_ == "int"
-          || str_ == "integer"       ) return DataType::Integer;
+          || str_ == "integer"       ) *val = DataType::Integer;
     else if (str_ == "h"
           || str_ == "r16"
-          || str_ == "half"          ) return DataType::Half;
+          || str_ == "half"          ) *val = DataType::Half;
     else if (str_ == "s"
           || str_ == "r32"
           || str_ == "float"
-          || str_ == "single"        ) return DataType::Single;
+          || str_ == "single"        ) *val = DataType::Single;
     else if (str_ == "d"
           || str_ == "r64"
-          || str_ == "double"        ) return DataType::Double;
+          || str_ == "double"        ) *val = DataType::Double;
     else if (str_ == "c"
           || str_ == "c32"
           || str_ == "complex<float>"
           || str_ == "complex-float"
-          || str_ == "complex-single") return DataType::SingleComplex;
+          || str_ == "complex-single") *val = DataType::SingleComplex;
     else if (str_ == "z"
           || str_ == "c64"
           || str_ == "complex<double>"
-          || str_ == "complex-double") return DataType::DoubleComplex;
+          || str_ == "complex-double") *val = DataType::DoubleComplex;
     else
         throw_error( "invalid datatype '%s'", str.c_str() );
-    return DataType::Integer;
 }
 
 //--------------------
@@ -137,7 +136,9 @@ inline DataType char2datatype( char ch )
 [[deprecated("Use from_string. To be removed 2025-05.")]]
 inline DataType str2datatype( const char* str )
 {
-    return from_string( str, DataType() );
+    DataType val;
+    from_string( str, &val );
+    return val;
 }
 
 //----------------------------------------
@@ -192,20 +193,22 @@ template <typename T>
 class has_from_string
 {
 private:
-    /// Matches from_string( string str, T* val ); return type is void.
-    template <typename T2>
-    static auto test( std::string str, T2 val )
-        -> decltype( from_string( str, T2() ) );
+    typedef T* T_ptr;
 
-    /// Matches everything else; return type is void (something other than T).
+    /// Matches `from_string( string str, T* val )`; return type is void.
     template <typename T2>
-    static void test(...);
+    static auto test( std::string str, T2* val )
+        -> decltype( from_string( str, val ) );
+
+    /// Matches everything else; return type is int (something other than void).
+    template <typename T2>
+    static int test(...);
 
 public:
-    // True if from_string( string, type ) exists, based on void return type.
-    static const bool value = std::is_same<
-        T,
-        decltype( test<T>( std::string(), T() ) )
+    // True if `void from_string( string, T* )` exists.
+    static constexpr bool value = std::is_same<
+        void,
+        decltype( test<T>( std::string(), T_ptr() ) )
     >::value;
 };
 
@@ -217,18 +220,18 @@ template <typename T>
 class has_to_string
 {
 private:
-    /// Matches to_string( T val ); return type is string.
+    /// Matches `to_string( T val )`; return type is string.
     template <typename T2>
     static auto test( T2 val )
         -> decltype( to_string( val ) );
 
     /// Matches everything else; return type is int (something other than string).
-    template <typename>
+    template <typename T2>
     static int test(...);
 
 public:
-    // True if from_string( string, type ) exists, based on string return type.
-    static const bool value = std::is_same<
+    // True if `std::string to_string( T val )` exists.
+    static constexpr bool value = std::is_same<
         std::string,
         decltype( test<T>( T() ) )
     >::value;
@@ -811,9 +814,9 @@ void ParamEnum<ENUM>::parse( const char *str )
         }
         str += len;
         // Parse word into enum. str2enum_ & char2enum_ throw errors.
-        ENUM val;
+        ENUM val{};
         if constexpr (has_from_string<ENUM>::value) {
-            val = from_string( buf, ENUM() );
+            from_string( buf, &val );
         }
         else if (str2enum_) {
             val = str2enum_( buf );

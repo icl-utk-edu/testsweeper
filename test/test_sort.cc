@@ -6,6 +6,46 @@
 #include "test.hh"
 
 // -----------------------------------------------------------------------------
+/// An enum class without to_string, from_string.
+enum class EnumOld
+{
+    a, b, c
+};
+
+// -----------------------------------------------------------------------------
+/// An enum class with wrong to_string, from_string.
+enum class EnumOld2
+{
+    a, b, c
+};
+
+const char* to_string( EnumOld2 value )
+{
+    return "value";
+}
+
+void from_string( std::string const& str, EnumOld2 value )
+{
+}
+
+// -----------------------------------------------------------------------------
+/// An enum class with to_string, from_string.
+enum class EnumNew
+{
+    x, y, z
+};
+
+std::string to_string( EnumNew value )
+{
+    return "value";
+}
+
+void from_string( std::string const& str, EnumNew* value )
+{
+    *value = EnumNew::x;
+}
+
+// -----------------------------------------------------------------------------
 // traits class maps data type to real_t and scalar_t.
 
 // for float, double:
@@ -113,6 +153,16 @@ void test_sort_work( Params &params, bool run )
 
     if (! run)
         return;
+
+    //----------
+    // Test has_to_string, has_from_string
+
+    static_assert( ! testsweeper::has_to_string<EnumOld>::value );
+    static_assert( ! testsweeper::has_from_string<EnumOld>::value );
+    static_assert( ! testsweeper::has_to_string<EnumOld2>::value );
+    static_assert( ! testsweeper::has_from_string<EnumOld2>::value );
+    static_assert( testsweeper::has_to_string<EnumNew>::value );
+    static_assert( testsweeper::has_from_string<EnumNew>::value );
 
     // ----------
     // setup
