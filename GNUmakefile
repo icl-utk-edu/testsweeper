@@ -15,14 +15,14 @@
 #
 # OpenMP is optional; used only for timer and flushing caches.
 
-ifeq ($(MAKECMDGOALS),config)
+ifeq (${MAKECMDGOALS},config)
     # For `make config`, don't include make.inc with previous config;
     # force re-creating make.inc.
     .PHONY: config
     config: make.inc
 
     make.inc: force
-else ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
+else ifneq ($(findstring clean,${MAKECMDGOALS}),clean)
     # For `make clean` or `make distclean`, don't include make.inc,
     # which could generate it. Otherwise, include make.inc.
     include make.inc
@@ -40,8 +40,8 @@ RANLIB   ?= ranlib
 prefix   ?= /opt/slate
 
 # Default LD=ld won't work; use CXX. Can override in make.inc or environment.
-ifeq ($(origin LD),default)
-    LD = $(CXX)
+ifeq (${origin LD},default)
+    LD = ${CXX}
 endif
 
 # Use abi-compliance-checker to compare the ABI (application binary
@@ -64,8 +64,8 @@ soversion = ${word 1, ${subst ., ,${abi_version}}}
 #-------------------------------------------------------------------------------
 # auto-detect OS
 # $OSTYPE may not be exported from the shell, so echo it
-ostype := $(shell echo $${OSTYPE})
-ifneq ($(findstring darwin, $(ostype)),)
+ostype := ${shell echo $${OSTYPE}}
+ifneq ($(findstring darwin, ${ostype}),)
     # MacOS is darwin
     macos = 1
     # MacOS needs shared library's path set, and shared library version.
@@ -83,7 +83,7 @@ endif
 
 #-------------------------------------------------------------------------------
 # if shared
-ifneq ($(static),1)
+ifneq (${static},1)
     CXXFLAGS += -fPIC
     LDFLAGS  += -fPIC
     lib_ext = ${so}
@@ -95,30 +95,30 @@ endif
 # Files
 
 lib_src  = testsweeper.cc version.cc
-lib_obj  = $(addsuffix .o, $(basename $(lib_src)))
-dep     += $(addsuffix .d, $(basename $(lib_src)))
+lib_obj  = ${addsuffix .o, ${basename ${lib_src}}}
+dep     += ${addsuffix .d, ${basename ${lib_src}}}
 
 tester_src = test/test.cc test/test_sort.cc
-tester_obj = $(addsuffix .o, $(basename $(tester_src)))
-dep       += $(addsuffix .d, $(basename $(tester_src)))
+tester_obj = ${addsuffix .o, ${basename ${tester_src}}}
+dep       += ${addsuffix .d, ${basename ${tester_src}}}
 
 tester = test/tester
 
 #-------------------------------------------------------------------------------
 # Get Mercurial id, and make version.o depend on it via .id file.
 
-ifneq ($(wildcard .git),)
-    id := $(shell git rev-parse --short HEAD)
-    version.o: CXXFLAGS += -DTESTSWEEPER_ID='"$(id)"'
+ifneq (${wildcard .git},)
+    id := ${shell git rev-parse --short HEAD}
+    version.o: CXXFLAGS += -DTESTSWEEPER_ID='"${id}"'
 endif
 
-last_id := $(shell [ -e .id ] && cat .id || echo 'NA')
-ifneq ($(id),$(last_id))
+last_id := ${shell [ -e .id ] && cat .id || echo 'NA'}
+ifneq (${id},${last_id})
     .id: force
 endif
 
 .id:
-	echo $(id) > .id
+	echo ${id} > .id
 
 version.o: .id
 
@@ -127,10 +127,10 @@ version.o: .id
 
 # additional flags and libraries for testers
 TEST_CXXFLAGS += -I.
-TEST_LDFLAGS += -L. -Wl,-rpath,$(abspath .)
+TEST_LDFLAGS += -L. -Wl,-rpath,${abspath .}
 TEST_LIBS    += -ltestsweeper
 
-$(tester_obj): CXXFLAGS += $(TEST_CXXFLAGS)
+${tester_obj}: CXXFLAGS += ${TEST_CXXFLAGS}
 
 #-------------------------------------------------------------------------------
 # Rules
@@ -142,18 +142,18 @@ $(tester_obj): CXXFLAGS += $(TEST_CXXFLAGS)
 all: lib tester
 
 install: lib
-	mkdir -p $(DESTDIR)$(prefix)/include
-	mkdir -p $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
-	cp $(headers) $(DESTDIR)$(prefix)/include
-	cp -av libtestsweeper.* $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)
+	mkdir -p ${DESTDIR}${prefix}/include
+	mkdir -p ${DESTDIR}${prefix}/lib${LIB_SUFFIX}
+	cp ${headers} ${DESTDIR}${prefix}/include
+	cp -av libtestsweeper.* ${DESTDIR}${prefix}/lib${LIB_SUFFIX}
 
 uninstall:
-	$(RM) $(addprefix $(DESTDIR)$(prefix)/include/, $(headers))
-	$(RM) $(DESTDIR)$(prefix)/lib$(LIB_SUFFIX)/libtestsweeper.*
+	${RM} ${addprefix ${DESTDIR}${prefix}/include/, ${headers}}
+	${RM} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libtestsweeper.*
 
 #-------------------------------------------------------------------------------
 # if re-configured, recompile everything
-$(lib_obj) $(tester_obj): make.inc
+${lib_obj} ${tester_obj}: make.inc
 
 #-------------------------------------------------------------------------------
 # TestSweeper library
@@ -173,22 +173,22 @@ ${lib_so}: | ${lib_so_abi_version}
 	ln -fs ${lib_so_abi_version} ${lib_so}
 	ln -fs ${lib_so_abi_version} ${lib_so_soversion}
 
-$(lib_a): $(lib_obj)
-	$(RM) $@
-	$(AR) cr $@ $(lib_obj)
-	$(RANLIB) $@
+${lib_a}: ${lib_obj}
+	${RM} $@
+	${AR} cr $@ ${lib_obj}
+	${RANLIB} $@
 
-lib: $(lib)
+lib: ${lib}
 
 #-------------------------------------------------------------------------------
 # tester
-$(tester): $(tester_obj) $(lib)
-	$(LD) $(TEST_LDFLAGS) $(LDFLAGS) $(tester_obj) \
-		$(TEST_LIBS) $(LIBS) -o $@
+${tester}: ${tester_obj} ${lib}
+	${LD} ${TEST_LDFLAGS} ${LDFLAGS} ${tester_obj} \
+		${TEST_LIBS} ${LIBS} -o $@
 
 # sub-directory rules
-test: $(tester)
-tester: $(tester)
+test: ${tester}
+tester: ${tester}
 
 check:
 	cd test; ${python} run_tests.py
@@ -197,12 +197,12 @@ check:
 # headers
 # precompile headers to verify self-sufficiency
 headers     = testsweeper.hh
-headers_gch = $(addsuffix .gch, $(basename $(headers)))
+headers_gch = ${addsuffix .gch, ${basename ${headers}}}
 
-headers: $(headers_gch)
+headers: ${headers_gch}
 
 headers/clean:
-	$(RM) $(headers_gch)
+	${RM} ${headers_gch}
 
 #-------------------------------------------------------------------------------
 # documentation
@@ -220,62 +220,62 @@ docs-todo:
 #-------------------------------------------------------------------------------
 # general rules
 clean:
-	$(RM) $(lib_a) $(lib_so) $(lib_obj) $(tester_obj) $(dep) $(headers_gch) $(tester)
+	${RM} ${lib_a} ${lib_so} ${lib_obj} ${tester_obj} ${dep} ${headers_gch} ${tester}
 
 distclean: clean
-	$(RM) make.inc
+	${RM} make.inc
 
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	${CXX} ${CXXFLAGS} -c $< -o $@
 
 # preprocess source
 %.i: %.cc
-	$(CXX) $(CXXFLAGS) -E $< -o $@
+	${CXX} ${CXXFLAGS} -E $< -o $@
 
 # precompile header to check for errors
 %.gch: %.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	${CXX} ${CXXFLAGS} -c $< -o $@
 
 %.gch: %.hh
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	${CXX} ${CXXFLAGS} -c $< -o $@
 
--include $(dep)
+-include ${dep}
 
 #-------------------------------------------------------------------------------
 # debugging
 echo:
-	@echo "static        = '$(static)'"
-	@echo "id            = '$(id)'"
-	@echo "last_id       = '$(last_id)'"
+	@echo "static        = '${static}'"
+	@echo "id            = '${id}'"
+	@echo "last_id       = '${last_id}'"
 	@echo "abi_version   = '${abi_version}'"
 	@echo "soversion     = '${soversion}'"
 	@echo
 	@echo "lib_name      = ${lib_name}"
-	@echo "lib_a         = $(lib_a)"
-	@echo "lib_so        = $(lib_so)"
-	@echo "lib           = $(lib)"
+	@echo "lib_a         = ${lib_a}"
+	@echo "lib_so        = ${lib_so}"
+	@echo "lib           = ${lib}"
 	@echo "lib_so_abi_version = ${lib_so_abi_version}"
 	@echo "lib_so_soversion   = ${lib_so_soversion}"
 	@echo
-	@echo "lib_src       = $(lib_src)"
+	@echo "lib_src       = ${lib_src}"
 	@echo
-	@echo "lib_obj       = $(lib_obj)"
+	@echo "lib_obj       = ${lib_obj}"
 	@echo
-	@echo "tester_src    = $(tester_src)"
+	@echo "tester_src    = ${tester_src}"
 	@echo
-	@echo "tester_obj    = $(tester_obj)"
+	@echo "tester_obj    = ${tester_obj}"
 	@echo
-	@echo "tester        = $(tester)"
+	@echo "tester        = ${tester}"
 	@echo
-	@echo "dep           = $(dep)"
+	@echo "dep           = ${dep}"
 	@echo
-	@echo "CXX           = $(CXX)"
-	@echo "CXXFLAGS      = $(CXXFLAGS)"
+	@echo "CXX           = ${CXX}"
+	@echo "CXXFLAGS      = ${CXXFLAGS}"
 	@echo
-	@echo "LD            = $(LD)"
-	@echo "LDFLAGS       = $(LDFLAGS)"
-	@echo "LIBS          = $(LIBS)"
+	@echo "LD            = ${LD}"
+	@echo "LDFLAGS       = ${LDFLAGS}"
+	@echo "LIBS          = ${LIBS}"
 	@echo "ldflags_shared = ${ldflags_shared}"
 	@echo
-	@echo "TEST_LDFLAGS  = $(TEST_LDFLAGS)"
-	@echo "TEST_LIBS     = $(TEST_LIBS)"
+	@echo "TEST_LDFLAGS  = ${TEST_LDFLAGS}"
+	@echo "TEST_LIBS     = ${TEST_LIBS}"
