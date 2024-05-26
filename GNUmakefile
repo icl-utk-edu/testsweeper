@@ -39,6 +39,8 @@ make.inc:
 RANLIB   ?= ranlib
 prefix   ?= /opt/slate
 
+abs_prefix := ${abspath ${prefix}}
+
 # Default LD=ld won't work; use CXX. Can override in make.inc or environment.
 ifeq (${origin LD},default)
     LD = ${CXX}
@@ -62,6 +64,8 @@ abi_version = 1.0.0
 soversion = ${word 1, ${subst ., ,${abi_version}}}
 
 #-------------------------------------------------------------------------------
+ldflags_shared = -shared
+
 # auto-detect OS
 # $OSTYPE may not be exported from the shell, so echo it
 ostype := ${shell echo $${OSTYPE}}
@@ -69,13 +73,15 @@ ifneq ($(findstring darwin, ${ostype}),)
     # MacOS is darwin
     macos = 1
     # MacOS needs shared library's path set, and shared library version.
-    ldflags_shared = -install_name @rpath/${notdir $@} \
-                     -current_version ${abi_version} \
-                     -compatibility_version ${soversion}
+    ldflags_shared += -install_name @rpath/${notdir $@} \
+                      -current_version ${abi_version} \
+                      -compatibility_version ${soversion}
     so = dylib
     so2 = .dylib
     # on macOS, .dylib comes after version: libfoo.4.dylib
 else
+    # Linux needs shared library's soname.
+    ldflags_shared += -Wl,-soname,${notdir ${lib_soname}}
     so = so
     so1 = .so
     # on Linux, .so comes before version: libfoo.so.4
@@ -136,47 +142,66 @@ ${tester_obj}: CXXFLAGS += ${TEST_CXXFLAGS}
 # Rules
 .DELETE_ON_ERROR:
 .SUFFIXES:
-.PHONY: all lib src test tester headers include docs clean distclean
+.PHONY: all docs hooks lib src test tester headers include clean distclean
 .DEFAULT_GOAL = all
 
-all: lib tester
+all: lib tester hooks
 
 install: lib
-	mkdir -p ${DESTDIR}${prefix}/include
-	mkdir -p ${DESTDIR}${prefix}/lib${LIB_SUFFIX}
-	cp ${headers} ${DESTDIR}${prefix}/include
-	cp -av libtestsweeper.* ${DESTDIR}${prefix}/lib${LIB_SUFFIX}
+	mkdir -p ${DESTDIR}${abs_prefix}/include
+	mkdir -p ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}
+	cp ${headers}        ${DESTDIR}${abs_prefix}/include/
+	cp -av ${lib_name}*  ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/
 
 uninstall:
-	${RM} ${addprefix ${DESTDIR}${prefix}/include/, ${headers}}
-	${RM} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libtestsweeper.*
+	${RM} ${addprefix ${DESTDIR}${abs_prefix}/include/, ${headers}}
+	${RM} ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/${notdir ${lib_name}.*}
 
 #-------------------------------------------------------------------------------
 # if re-configured, recompile everything
 ${lib_obj} ${tester_obj}: make.inc
 
 #-------------------------------------------------------------------------------
+# Generic rule for shared libraries.
+# For libfoo.so version 4.5.6, this creates libfoo.so.4.5.6 and symlinks
+# libfoo.so.4 -> libfoo.so.4.5.6
+# libfoo.so   -> libfoo.so.4
+#
+# Needs [private] variables set (shown with example values):
+# LDFLAGS     = -L/path/to/lib
+# LIBS        = -lmylib
+# lib_obj     = src/foo.o src/bar.o
+# lib_so_abi  = libfoo.so.4.5.6
+# lib_soname  = libfoo.so.4
+# abi_version = 4.5.6
+# soversion   = 4
+%.${lib_ext}:
+	${LD} ${LDFLAGS} ${ldflags_shared} ${LIBS} ${lib_obj} -o ${lib_so_abi}
+	ln -fs ${notdir ${lib_so_abi}} ${lib_soname}
+	ln -fs ${notdir ${lib_soname}} $@
+
+# Generic rule for static libraries, creates libfoo.a.
+# The library should depend only on its objects.
+%.a:
+	${RM} $@
+	${AR} cr $@ $^
+	${RANLIB} $@
+
+#-------------------------------------------------------------------------------
 # TestSweeper library
-lib_name = libtestsweeper
-lib_a  = ${lib_name}.a
-lib_so = ${lib_name}.${so}
-lib    = ${lib_name}.${lib_ext}
+# so     is like libfoo.so       or libfoo.dylib
+# so_abi is like libfoo.so.4.5.6 or libfoo.4.5.6.dylib
+# soname is like libfoo.so.4     or libfoo.4.dylib
+lib_name   = libtestsweeper
+lib_a      = ${lib_name}.a
+lib_so     = ${lib_name}.${so}
+lib        = ${lib_name}.${lib_ext}
+lib_so_abi = ${lib_name}${so1}.${abi_version}${so2}
+lib_soname = ${lib_name}${so1}.${soversion}${so2}
 
-# libfoo.so.3 or libfoo.3.dylib
-lib_so_abi_version = ${lib_name}${so1}.${abi_version}${so2}
-lib_so_soversion   = ${lib_name}${so1}.${soversion}${so2}
-
-${lib_so_abi_version}: ${lib_obj}
-	${LD} ${LDFLAGS} -shared ${ldflags_shared} ${lib_obj} ${LIBS} -o $@
-
-${lib_so}: | ${lib_so_abi_version}
-	ln -fs ${lib_so_abi_version} ${lib_so}
-	ln -fs ${lib_so_abi_version} ${lib_so_soversion}
+${lib_so}: ${lib_obj}
 
 ${lib_a}: ${lib_obj}
-	${RM} $@
-	${AR} cr $@ ${lib_obj}
-	${RANLIB} $@
 
 lib: ${lib}
 
@@ -187,10 +212,11 @@ ${tester}: ${tester_obj} ${lib}
 		${TEST_LIBS} ${LIBS} -o $@
 
 # sub-directory rules
+# Note 'test' is sub-directory rule; 'tester' is CMake-compatible rule.
 test: ${tester}
 tester: ${tester}
 
-check:
+check: tester
 	cd test; ${python} run_tests.py
 
 #-------------------------------------------------------------------------------
@@ -220,7 +246,8 @@ docs-todo:
 #-------------------------------------------------------------------------------
 # general rules
 clean:
-	${RM} ${lib_a} ${lib_so} ${lib_obj} ${tester_obj} ${dep} ${headers_gch} ${tester}
+	${RM} ${lib_a} ${lib_so} ${lib_so_abi} ${lib_soname} \
+	      ${lib_obj} ${tester_obj} ${dep} ${headers_gch} ${tester}
 
 distclean: clean
 	${RM} make.inc
@@ -244,6 +271,7 @@ distclean: clean
 #-------------------------------------------------------------------------------
 # debugging
 echo:
+	@echo "ostype        = '${ostype}'"
 	@echo "static        = '${static}'"
 	@echo "id            = '${id}'"
 	@echo "last_id       = '${last_id}'"
@@ -254,8 +282,8 @@ echo:
 	@echo "lib_a         = ${lib_a}"
 	@echo "lib_so        = ${lib_so}"
 	@echo "lib           = ${lib}"
-	@echo "lib_so_abi_version = ${lib_so_abi_version}"
-	@echo "lib_so_soversion   = ${lib_so_soversion}"
+	@echo "lib_so_abi    = ${lib_so_abi}"
+	@echo "lib_soname    = ${lib_soname}"
 	@echo
 	@echo "lib_src       = ${lib_src}"
 	@echo

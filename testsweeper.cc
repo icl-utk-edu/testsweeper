@@ -436,7 +436,7 @@ bool ParamBase::next()
 // virtual
 void ParamInt::parse( const char *str )
 {
-    while( true ) {
+    while (true) {
         int64_t start, end, step;
         if (scan_range( &str, &start, &end, &step ) != 0) {
             throw_error( "invalid argument at '%s',"
