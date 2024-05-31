@@ -14,7 +14,7 @@ cmake_minimum_required( VERSION 3.15 )
 
 project(
     testsweeper
-    VERSION 2023.11.05
+    VERSION 2024.05.31
     LANGUAGES CXX
 )
 

@@ -1,3 +1,8 @@
+2024.05.31
+  - Added shared library version (ABI version 1.0.0)
+  - Updated enum parameters to have `to_string`, `from_string`;
+    deprecate `<enum>2str`, `str2<enum>`
+
 2023.11.05
   - Improve set_default to reset value
   - Add half precision
