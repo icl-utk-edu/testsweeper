@@ -502,6 +502,9 @@ public:
     virtual void print() const;
 };
 
+const int no_check = -1;
+const int skipped  = -2;
+
 // =============================================================================
 typedef struct { int64_t m, n, k; } int3_t;
 

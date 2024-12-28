@@ -504,7 +504,8 @@ void ParamOkay::print() const
         switch (values_[ index_ ]) {
             case  0: msg = "FAILED";   break;
             case  1: msg = "pass";     break;
-            case -1: msg = "no check"; break;
+            case no_check: msg = "no check"; break;
+            case skipped:  msg = "skipped";  break;
         }
         printf( "%-*s  ", width_, msg );
     }
