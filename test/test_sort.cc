@@ -140,16 +140,11 @@ void test_sort_work( Params &params, bool run )
     params.ref_time();
     params.ref_gflops();
 
-    // adjust header to msec
-    params.time.name( "SLATE\ntime (ms)" );
-    params.gflops.name( "gflop/s" );
-    params.ref_time.name( "LAPACK Reference\ntime (ms)" );
-    params.ref_gflops.name( "LAPACK\nreference gflop/s" );
-
-    assert( params.time.width()       == 9  );  // default width
-    assert( params.gflops.width()     == 12 );  // default width
-    assert( params.ref_time.width()   == 16 );  // LAPACK Reference  (1st line)
-    assert( params.ref_gflops.width() == 17 );  // reference gflop/s (2nd line)
+    // adjust header to msec, which should increase the field width to match.
+    params.time.name( "time (ms)" );
+    params.ref_time.name( "ref time (ms)" );
+    assert( params.time.width()     == 9  );  // default width from test.cc
+    assert( params.ref_time.width() == 13 );  // len( "ref time (ms)" )
 
     if (! run)
         return;

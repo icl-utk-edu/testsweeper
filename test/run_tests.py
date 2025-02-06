@@ -49,8 +49,12 @@ cmds = [
     # Defaults (--type d --dim 100:500:100).
     [ 5, './tester sort' ],
 
-    # Larger range; should elicit 2 failures (error = 1.23456e-17 * n).
+    # Larger range; should elicit 2 failures:
+    # error = 1.23456e-17 * n, which fails for n >= 900.
     [ 6, './tester --dim 100:1000:100 sort', 2 ],
+
+    # Repeat, to see min, max, avg, std.
+    [ 7, './tester --dim 1000:5000:1000 --repeat 4 sort', 20 ],
 
     #----------
     # Types (enum)
@@ -234,9 +238,15 @@ def run_test( num, cmd, expected_err=0 ):
         # Using ( +(?:\d+\.\d+|inf|NA)){4} captures only 1 group, the last,
         # hence repeating it 4 times to capture 4 groups.
         output2 = re.sub(
-            r'( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA)) +(pass|FAIL|no check)',
+              r'( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))'
+            + r'( +(?:\d+\.\d+|inf|NA))( +(?:\d+\.\d+|inf|NA))'
+            + r' +(pass|FAIL|no check)',
             strip_time_sub, output2 )
         # end
+        # Strip out min, max, avg, stddev data.
+        output2 = re.sub(
+            r'(min|max|avg|stddev) +\d+\.\d+(e[+-]\d\d)?',
+            r'\1 ---------', output2 )
         out = open( outfile, 'w' )
         out.write( output2 )
         out.close()

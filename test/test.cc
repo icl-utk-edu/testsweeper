@@ -140,10 +140,10 @@ Params::Params():
     error     ( "error",      8, 2, PT_Out, no_data, 0, 0, "numerical error" ),
     ortho     ( "orth.",      8, 2, PT_Out, no_data, 0, 0, "orthogonality error" ),
     time      ( "time (s)",   9, 3, PT_Out, no_data, 0, 0, "time to solution" ),
-    gflops    ( "gflop/s",   12, 3, PT_Out, no_data, 0, 0, "Gflop/s rate" ),
+    gflops    ( "Gflop/s",   12, 3, PT_Out, no_data, 0, 0, "Gflop/s rate" ),
 
     ref_time  ( "ref time (s)",  9, 3, PT_Out, no_data, 0, 0, "reference time to solution" ),
-    ref_gflops( "ref gflop/s",  12, 3, PT_Out, no_data, 0, 0, "reference Gflop/s rate" ),
+    ref_gflops( "ref Gflop/s",  12, 3, PT_Out, no_data, 0, 0, "reference Gflop/s rate" ),
 
     // default -1 means "no check"
     //          name,         w, type, default, min, max, help
@@ -233,6 +233,8 @@ int main( int argc, char** argv )
 
         // run tests
         int repeat = params.repeat();
+        std::vector<double> times( repeat ), ref_times( repeat ),
+                            gflops( repeat ), ref_gflops( repeat );
         testsweeper::DataType last = params.datatype();
         params.header();
         do {
@@ -250,11 +252,21 @@ int main( int argc, char** argv )
                     params.okay() = false;
                 }
 
+                // Collect stats.
+                times     [ iter ] = params.time();
+                gflops    [ iter ] = params.gflops();
+                ref_times [ iter ] = params.ref_time();
+                ref_gflops[ iter ] = params.ref_gflops();
+
                 params.print();
                 status += ! params.okay();
                 params.reset_output();
             }
             if (repeat > 1) {
+                testsweeper::print_stats( params.time,       times      );
+                testsweeper::print_stats( params.ref_time,   ref_times  );
+                testsweeper::print_stats( params.gflops,     gflops     );
+                testsweeper::print_stats( params.ref_gflops, ref_gflops );
                 printf( "\n" );
             }
         } while( params.next() );

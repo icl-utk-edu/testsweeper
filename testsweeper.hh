@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <complex>
 #include <type_traits>
+#include <numeric>
 
 // Version is updated by make_release.py; DO NOT EDIT.
 // Version 2024.05.31
@@ -262,6 +263,16 @@ inline int64_t roundup( int64_t x, int64_t y )
     return ceildiv( x, y ) * y;
 }
 
+//------------------------------------------------------------------------------
+/// @return square of a number.
+/// @ingroup sqr
+///
+template <typename T>
+T sqr( T x )
+{
+    return x*x;
+}
+
 // -----------------------------------------------------------------------------
 enum class ParamType
 {
@@ -370,6 +381,12 @@ public:
             option_ = "--" + std::string(in_option);
         else
             option_ = "--" + name_;
+    }
+
+    /// @return Parameter's name.
+    std::string const& name() const
+    {
+        return name_;
     }
 
     int  width() const { return width_; }
@@ -894,6 +911,32 @@ public:
     void reset_output();
     void help( const char* routine );
 };
+
+//------------------------------------------------------------------------------
+/// If paramater is used, print min, max, avg, stddev of data.
+/// If data has NaN, whether min and max are NaN is implementation defined.
+///
+/// @param[in] param  Paramater to summarize.
+/// @param[in] data   Data to summarize.
+///
+template <typename T>
+void print_stats( ParamBase const& param, std::vector<T> const& data )
+{
+    if (param.used()) {
+        T min = *std::min_element( data.begin(), data.end() );
+        T max = *std::max_element( data.begin(), data.end() );
+        T avg = std::accumulate( data.begin(), data.end(), 0.0 ) / data.size();
+
+        T ssq = 0;
+        for (double x : data) {
+            ssq += sqr( x - avg );
+        }
+        T stddev = sqrt( ssq / (data.size() - 1) );
+
+        printf( "%-16s min %#9.4g, max %#9.4g, avg %#9.4g, stddev %#9.4g\n",
+                param.name().c_str(), min, max, avg, stddev );
+    }
+}
 
 }  // namespace testsweeper
 
