@@ -18,9 +18,9 @@ target_link_libraries(
 add_custom_command(
     TARGET ${tester} POST_BUILD
     COMMAND
-        cp -a ${CMAKE_CURRENT_SOURCE_DIR}/run_tests.py
-              ${CMAKE_CURRENT_SOURCE_DIR}/ref
-              ${CMAKE_CURRENT_BINARY_DIR}/
+        cp -pPR ${CMAKE_CURRENT_SOURCE_DIR}/run_tests.py
+                ${CMAKE_CURRENT_SOURCE_DIR}/ref
+                ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
 if (testsweeper_is_project)
