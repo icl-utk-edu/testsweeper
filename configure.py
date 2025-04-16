@@ -36,7 +36,10 @@ See INSTALL.md for more details.
 
 #-------------------------------------------------------------------------------
 def main():
-    config.init( namespace='TestSweeper', prefix='/opt/slate' )
+    config.init( namespace='TestSweeper' )
+    config.environ.default_value( 'prefix', '/opt/slate' )
+    config.environ['version'] = '2024.05.31'
+
     config.prog_cxx()
 
     print_header( 'C++ compiler flags' )

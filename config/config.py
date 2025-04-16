@@ -15,6 +15,7 @@ import time
 import re
 import tarfile
 import argparse
+import shutil
 
 # This relative import syntax works in both python2 and 3.
 from .ansicodes import font
@@ -229,10 +230,11 @@ class Environments( object ):
     #----------------------------------------
     def __init__( self ):
         '''
-        Initializes the environment stack.
-        The bottom is os.environ. The top is an empty environment.
+        Initializes the environment stack. There are initially 3 environments:
+        an empty environment for default values, os.environ, then
+        another empty environment for user-defined values on top.
         '''
-        self.stack = [ os.environ, {} ]
+        self.stack = [ {}, os.environ, {} ]
 
     #----------------------------------------
     def push( self, env=None ):
@@ -256,8 +258,8 @@ class Environments( object ):
         '''
         Remove the top-most environment from the environment stack.
         '''
-        if (len(self.stack) == 2):
-            raise Error( "can't pop last 2 environments" )
+        if (len(self.stack) == 3):
+            raise Error( "can't pop last 3 environments" )
         return self.stack.pop()
 
     #----------------------------------------
@@ -289,6 +291,14 @@ class Environments( object ):
         in the top-most environment in the environment stack.
         '''
         self.stack[ -1 ][ key ] = value
+
+    #----------------------------------------
+    def default_value( self, key, value ):
+        '''
+        Sets the key's default value
+        in the bottom-most environment in the environment stack.
+        '''
+        self.stack[ 0 ][ key ] = value
 
     #----------------------------------------
     def append( self, key, val ):
@@ -819,7 +829,7 @@ def parse_args():
 
     # Parse name=value pairs.
     for arg in opts.options:
-        s = re.search( '^(\w+)=(.*)', arg )
+        s = re.search( r'^(\w+)=(.*)', arg )
         if (s):
             environ[ s.group(1) ] = s.group(2)
         else:
@@ -840,7 +850,7 @@ def parse_args():
 # end
 
 #-------------------------------------------------------------------------------
-def init( namespace, prefix='/usr/local' ):
+def init( namespace ):
     '''
     Initializes config.
     Opens the logfile and deals with OS-specific issues.
@@ -850,8 +860,7 @@ def init( namespace, prefix='/usr/local' ):
     namespace_ = namespace
 
     # Default prefix.
-    if (not environ['prefix']):
-        environ['prefix'] = prefix
+    environ.default_value( 'prefix', '/usr/local' )
 
     #--------------------
     logfile = 'config/log.txt'
