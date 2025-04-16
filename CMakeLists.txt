@@ -58,7 +58,8 @@ option( testsweeper_install "Add install target" "${testsweeper_is_project}" )
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
     AND testsweeper_is_project)
 
-    set( CMAKE_INSTALL_PREFIX "/opt/slate"
+    set( prefix "/opt/slate" CACHE PATH "Shorthand for CMAKE_INSTALL_PREFIX" )
+    set( CMAKE_INSTALL_PREFIX "${prefix}"
          CACHE PATH
          "Install path prefix, prepended onto install directories."
          FORCE
