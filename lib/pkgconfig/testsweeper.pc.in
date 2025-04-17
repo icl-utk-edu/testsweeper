@@ -1,0 +1,14 @@
+prefix=@abs_prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+CXX=@CXX@
+
+Name: TestSweeper
+Description: Framework for sweeping over combinations of tests.
+Version: @version@
+Cflags: @CXXFLAGS_clean@ -I${includedir}
+Libs: -L${libdir} -Wl,-rpath,${libdir} -ltestsweeper @LDFLAGS_clean@ @LIBS@
+Libs.private:
+Requires:
+Requires.private:

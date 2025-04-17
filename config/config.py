@@ -15,6 +15,7 @@ import time
 import re
 import tarfile
 import argparse
+import shutil
 
 # This relative import syntax works in both python2 and 3.
 from .ansicodes import font
@@ -52,7 +53,7 @@ def interactive( value=None ):
     return interactive_
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 debug_ = False
 
 def debug( value=None ):
@@ -62,7 +63,7 @@ def debug( value=None ):
     return debug_
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 namespace_ = None
 
 def namespace( value ):
@@ -74,11 +75,11 @@ def define( var, value=None ):
         txt += '=' + value
     return txt
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # variables to replace instead of appending/prepending
 replace_vars = ['CC', 'CXX', 'NVCC', 'FC', 'AR', 'RANLIB', 'prefix']
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # map file extensions to languages
 lang_map = {
     '.c':   'CC',
@@ -96,7 +97,7 @@ lang_map = {
     '.F77': 'FC',
 }
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # map languages to compiler flags
 flag_map = {
     'CC':   'CFLAGS',
@@ -105,7 +106,7 @@ flag_map = {
     'FC':   'FFLAGS',
 }
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 def flatten( data, ltypes=(list, tuple) ):
     '''
     Flattens nested list or tuple.
@@ -211,7 +212,7 @@ def print_result( label, rc, extra='' ):
             print( font.red( ' no' ), extra )
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Used for all errors.
 # Allows Python Exceptions to fall through, giving tracebacks.
 class Error( Exception ):
@@ -226,15 +227,16 @@ class Environments( object ):
     Manages stack of environments, which are dictionaries of name=value pairs.
     '''
 
-    # ----------------------------------------
+    #----------------------------------------
     def __init__( self ):
         '''
-        Initializes the environment stack.
-        The bottom is os.environ. The top is an empty environment.
+        Initializes the environment stack. There are initially 3 environments:
+        an empty environment for default values, os.environ, then
+        another empty environment for user-defined values on top.
         '''
-        self.stack = [ os.environ, {} ]
+        self.stack = [ {}, os.environ, {} ]
 
-    # ----------------------------------------
+    #----------------------------------------
     def push( self, env=None ):
         '''
         Push an empty enviroment on the environment stack.
@@ -244,23 +246,23 @@ class Environments( object ):
         if (env):
             self.merge( env )
 
-    # ----------------------------------------
+    #----------------------------------------
     def top( self ):
         '''
         Return top-most environment in the environment stack.
         '''
         return self.stack[-1]
 
-    # ----------------------------------------
+    #----------------------------------------
     def pop( self ):
         '''
         Remove the top-most environment from the environment stack.
         '''
-        if (len(self.stack) == 2):
-            raise Error( "can't pop last 2 environments" )
+        if (len(self.stack) == 3):
+            raise Error( "can't pop last 3 environments" )
         return self.stack.pop()
 
-    # ----------------------------------------
+    #----------------------------------------
     def __contains__( self, key ):
         '''
         Returns true if a key exists in the environment stack.
@@ -270,7 +272,7 @@ class Environments( object ):
                 return True
         return False
 
-    # ----------------------------------------
+    #----------------------------------------
     def __getitem__( self, key ):
         '''
         Returns the value of the key, searching from the top of the environment
@@ -282,7 +284,7 @@ class Environments( object ):
                 return env[ key ]
         return ''
 
-    # ----------------------------------------
+    #----------------------------------------
     def __setitem__( self, key, value ):
         '''
         Sets the key's value
@@ -290,7 +292,15 @@ class Environments( object ):
         '''
         self.stack[ -1 ][ key ] = value
 
-    # ----------------------------------------
+    #----------------------------------------
+    def default_value( self, key, value ):
+        '''
+        Sets the key's default value
+        in the bottom-most environment in the environment stack.
+        '''
+        self.stack[ 0 ][ key ] = value
+
+    #----------------------------------------
     def append( self, key, val ):
         '''
         Append val to key's value, saving the result
@@ -303,7 +313,7 @@ class Environments( object ):
             self[ key ] = val
         return orig
 
-    # ----------------------------------------
+    #----------------------------------------
     def prepend( self, key, val ):
         '''
         Prepend val to key's value, saving the result
@@ -316,7 +326,7 @@ class Environments( object ):
             self[ key ] = val
         return orig
 
-    # ----------------------------------------
+    #----------------------------------------
     def merge( self, env ):
         '''
         Merges env, a dictionary of environment variables, into the existing
@@ -819,7 +829,7 @@ def parse_args():
 
     # Parse name=value pairs.
     for arg in opts.options:
-        s = re.search( '^(\w+)=(.*)', arg )
+        s = re.search( r'^(\w+)=(.*)', arg )
         if (s):
             environ[ s.group(1) ] = s.group(2)
         else:
@@ -840,7 +850,7 @@ def parse_args():
 # end
 
 #-------------------------------------------------------------------------------
-def init( namespace, prefix='/usr/local' ):
+def init( namespace ):
     '''
     Initializes config.
     Opens the logfile and deals with OS-specific issues.
@@ -850,8 +860,7 @@ def init( namespace, prefix='/usr/local' ):
     namespace_ = namespace
 
     # Default prefix.
-    if (not environ['prefix']):
-        environ['prefix'] = prefix
+    environ.default_value( 'prefix', '/usr/local' )
 
     #--------------------
     logfile = 'config/log.txt'
@@ -891,7 +900,7 @@ directly (not via make), with a 3rd party python3 from python.org, Homebrew, etc
         exit(0)
 # end
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Initialize global variables here, rather than in init(),
 # so they are imported by __init__.py.
 environ = Environments()
