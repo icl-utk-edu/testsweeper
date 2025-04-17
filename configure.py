@@ -62,7 +62,8 @@ def main():
 
     config.openmp()
 
-    config.output_files( 'make.inc' )
+    config.output_files(
+        ['make.inc', 'lib/pkgconfig/testsweeper.pc'] )
     print( 'log in config/log.txt' )
 
     print( '-'*80 )

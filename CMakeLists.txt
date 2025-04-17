@@ -107,16 +107,16 @@ endif()
 # Build library.
 add_library(
     testsweeper
-    testsweeper.cc
-    version.cc
+    src/testsweeper.cc
+    src/version.cc
 )
 
 # Include directory.
-# During build it's {source}; after install it's {prefix}/include.
+# During build it's {source}/include; after install it's {prefix}/include.
 target_include_directories(
     testsweeper
     PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:include>"
 )
 
@@ -131,6 +131,7 @@ else()
 endif()
 
 # Get git commit id.
+message( "" )
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     execute_process( COMMAND git rev-parse --short HEAD
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -142,7 +143,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
 endif()
 
 # Use and export -std=c++17.
-# CMake inexplicably allows gnu++17 or "decay" to earlier c++; prohibit those.
+# CMake inexplicably allows gnu++17 or "decay" to c++11 or 14; prohibit those.
 target_compile_features( testsweeper PUBLIC cxx_std_17 )
 set_target_properties(
     testsweeper PROPERTIES
@@ -211,8 +212,10 @@ if (testsweeper_install)
 
     # Install header files
     install(
-        FILES "testsweeper.hh"
+        # / copies contents, not directory itself
+        DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        FILES_MATCHING REGEX "\\.(h|hh)$"
     )
 
     # Install <package>Targets.cmake

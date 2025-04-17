@@ -100,7 +100,7 @@ endif
 #-------------------------------------------------------------------------------
 # Files
 
-lib_src  = testsweeper.cc version.cc
+lib_src  = src/testsweeper.cc src/version.cc
 lib_obj  = ${addsuffix .o, ${basename ${lib_src}}}
 dep     += ${addsuffix .d, ${basename ${lib_src}}}
 
@@ -110,12 +110,14 @@ dep       += ${addsuffix .d, ${basename ${tester_src}}}
 
 tester = test/tester
 
+pkg = lib/pkgconfig/testsweeper.pc
+
 #-------------------------------------------------------------------------------
 # Get Mercurial id, and make version.o depend on it via .id file.
 
 ifneq (${wildcard .git},)
     id := ${shell git rev-parse --short HEAD}
-    version.o: CXXFLAGS += -DTESTSWEEPER_ID='"${id}"'
+    src/version.o: CXXFLAGS += -DTESTSWEEPER_ID='"${id}"'
 endif
 
 last_id := ${shell [ -e .id ] && cat .id || echo 'NA'}
@@ -126,17 +128,15 @@ endif
 .id:
 	echo ${id} > .id
 
-version.o: .id
+src/version.o: .id
 
 #-------------------------------------------------------------------------------
 # TestSweeper specific flags and libraries
+CXXFLAGS   += -I./include
 
 # additional flags and libraries for testers
-TEST_CXXFLAGS += -I.
-TEST_LDFLAGS += -L. -Wl,-rpath,${abspath .}
+TEST_LDFLAGS += -L./lib -Wl,-rpath,${abspath ./lib}
 TEST_LIBS    += -ltestsweeper
-
-${tester_obj}: CXXFLAGS += ${TEST_CXXFLAGS}
 
 #-------------------------------------------------------------------------------
 # Rules
@@ -149,13 +149,15 @@ all: lib tester hooks
 
 install: lib
 	mkdir -p ${DESTDIR}${abs_prefix}/include
-	mkdir -p ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}
+	mkdir -p ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/pkgconfig
 	cp ${headers}        ${DESTDIR}${abs_prefix}/include/
 	cp -av ${lib_name}*  ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/
+	cp ${pkg}            ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/pkgconfig/
 
 uninstall:
 	${RM} ${addprefix ${DESTDIR}${abs_prefix}/include/, ${headers}}
-	${RM} ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/${notdir ${lib_name}.*}
+	${RM} ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/${notdir ${lib_name}*}
+	${RM} ${DESTDIR}${abs_prefix}/lib${LIB_SUFFIX}/pkgconfig/testsweeper.pc
 
 #-------------------------------------------------------------------------------
 # if re-configured, recompile everything
@@ -176,6 +178,7 @@ ${lib_obj} ${tester_obj}: make.inc
 # abi_version = 4.5.6
 # soversion   = 4
 %.${lib_ext}:
+	mkdir -p lib
 	${LD} ${LDFLAGS} ${ldflags_shared} ${LIBS} ${lib_obj} -o ${lib_so_abi}
 	ln -fs ${notdir ${lib_so_abi}} ${lib_soname}
 	ln -fs ${notdir ${lib_soname}} $@
@@ -183,6 +186,7 @@ ${lib_obj} ${tester_obj}: make.inc
 # Generic rule for static libraries, creates libfoo.a.
 # The library should depend only on its objects.
 %.a:
+	mkdir -p lib
 	${RM} $@
 	${AR} cr $@ $^
 	${RANLIB} $@
@@ -192,7 +196,7 @@ ${lib_obj} ${tester_obj}: make.inc
 # so     is like libfoo.so       or libfoo.dylib
 # so_abi is like libfoo.so.4.5.6 or libfoo.4.5.6.dylib
 # soname is like libfoo.so.4     or libfoo.4.dylib
-lib_name   = libtestsweeper
+lib_name   = lib/libtestsweeper
 lib_a      = ${lib_name}.a
 lib_so     = ${lib_name}.${so}
 lib        = ${lib_name}.${lib_ext}
@@ -203,7 +207,11 @@ ${lib_so}: ${lib_obj}
 
 ${lib_a}: ${lib_obj}
 
-lib: ${lib}
+# sub-directory rules
+lib src: ${lib}
+
+lib/clean src/clean:
+	${RM} ${lib_a} ${lib_so} ${lib_so_abi} ${lib_soname} ${lib_obj}
 
 #-------------------------------------------------------------------------------
 # tester
@@ -216,19 +224,29 @@ ${tester}: ${tester_obj} ${lib}
 test: ${tester}
 tester: ${tester}
 
+test/clean:
+	${RM} ${tester} test/*.o
+
+test/check: check
+
 check: tester
 	cd test; ${python} run_tests.py
 
 #-------------------------------------------------------------------------------
 # headers
 # precompile headers to verify self-sufficiency
-headers     = testsweeper.hh
+headers     = include/testsweeper.hh
 headers_gch = ${addsuffix .gch, ${basename ${headers}}}
 
 headers: ${headers_gch}
 
 headers/clean:
 	${RM} ${headers_gch}
+
+# sub-directory rules
+include: headers
+
+include/clean: headers/clean
 
 #-------------------------------------------------------------------------------
 # documentation
@@ -245,9 +263,8 @@ docs-todo:
 
 #-------------------------------------------------------------------------------
 # general rules
-clean:
-	${RM} ${lib_a} ${lib_so} ${lib_so_abi} ${lib_soname} \
-	      ${lib_obj} ${tester_obj} ${dep} ${headers_gch} ${tester}
+clean: lib/clean test/clean headers/clean
+	${RM} ${dep}
 
 distclean: clean
 	${RM} make.inc
@@ -291,6 +308,8 @@ echo:
 	@echo "lib           = ${lib}"
 	@echo "lib_so_abi    = ${lib_so_abi}"
 	@echo "lib_soname    = ${lib_soname}"
+	@echo
+	@echo "pkg           = ${pkg}"
 	@echo
 	@echo "lib_src       = ${lib_src}"
 	@echo
