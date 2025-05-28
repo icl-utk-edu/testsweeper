@@ -1,5 +1,10 @@
-2024.05.31
-  - Added shared library version (ABI version 1.0.0)
+2025.05.28 (ABI 2.0.0)
+  - Added print_stats for --repeat
+  - Added "skipped" status
+  - Removed deprecated enum functions
+
+2024.05.31 (ABI 1.0.0)
+  - Added shared library ABI version
   - Updated enum parameters to have `to_string`, `from_string`;
     deprecate `<enum>2str`, `str2<enum>`
 
