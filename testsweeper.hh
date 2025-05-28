@@ -122,26 +122,6 @@ inline void from_string( std::string const& str, DataType* val )
         throw_error( "invalid datatype '%s'", str.c_str() );
 }
 
-//--------------------
-[[deprecated("Use from_string. To be removed 2025-05.")]]
-inline DataType char2datatype( char ch )
-{
-    ch = tolower( ch );
-    if (ch != 'i' && ch != 's' && ch != 'd' && ch != 'c' && ch != 'z') {
-        throw_error( "invalid datatype '%c'", ch );
-    }
-    return DataType( ch );
-}
-
-//--------------------
-[[deprecated("Use from_string. To be removed 2025-05.")]]
-inline DataType str2datatype( const char* str )
-{
-    DataType val;
-    from_string( str, &val );
-    return val;
-}
-
 //----------------------------------------
 /// Convert DataType enum to C-style string representation.
 /// Temporary common low-level implementation for to_string and datatype2str.
@@ -166,22 +146,6 @@ inline const char* to_c_string( DataType value )
 inline std::string to_string( DataType value )
 {
     return std::string( to_c_string( value ) );
-}
-
-//--------------------
-[[deprecated("Use to_string. To be removed 2025-05.")]]
-inline const char* datatype2str( DataType value )
-{
-    // Can't write datatype2str using return to_string( value ).c_str()
-    // since string is on stack.
-    return to_c_string( value );
-}
-
-//--------------------
-[[deprecated("Use to_string. To be removed 2025-05.")]]
-inline char datatype2char( DataType value )
-{
-    return to_c_string( value )[ 0 ];
 }
 
 
@@ -764,59 +728,16 @@ template <typename ENUM>
 class ParamEnum : public TParamBase< ENUM >
 {
 public:
-    typedef ENUM (*char2enum)( char ch );
-    typedef char (*enum2char)( ENUM en );
-    typedef ENUM (*str2enum)( const char* str );
-    typedef const char* (*enum2str)( ENUM en );
-
     /// Constructor for enums that have to_string and from_string.
     ParamEnum( const char* name, int width, ParamType type,
                ENUM default_value,
                const char* help ):
-        TParamBase<ENUM>( name, width, type, default_value, help ),
-        char2enum_( nullptr ),
-        enum2char_( nullptr ),
-        str2enum_ ( nullptr ),
-        enum2str_ ( nullptr )
-    {}
-
-    /// Deprecated constructor taking char2enum, enum2char, enum2str.
-    [[deprecated("Use constructor without char2enum, etc. To be removed 2025-05.")]]
-    ParamEnum( const char* name, int width, ParamType type,
-               ENUM default_value,
-               char2enum in_char2enum, enum2char in_enum2char,
-               enum2str in_enum2str,
-               const char* help ):
-        TParamBase<ENUM>( name, width, type, default_value, help ),
-        char2enum_( in_char2enum ),
-        enum2char_( in_enum2char ),
-        str2enum_( nullptr     ),
-        enum2str_( in_enum2str )
-    {}
-
-    /// Deprecated constructor taking str2enum, enum2str.
-    [[deprecated("Use constructor without char2enum, etc. To be removed 2025-05.")]]
-    ParamEnum( const char* name, int width, ParamType type,
-               ENUM default_value,
-               str2enum in_str2enum, enum2str in_enum2str,
-               const char* help ):
-        TParamBase<ENUM>( name, width, type, default_value, help ),
-        char2enum_( nullptr ),
-        enum2char_( nullptr ),
-        str2enum_( in_str2enum ),
-        enum2str_( in_enum2str )
+        TParamBase<ENUM>( name, width, type, default_value, help )
     {}
 
     virtual void parse( const char* str );
     virtual void print() const;
     virtual void help() const;
-
-protected:
-    // Deprecated: char2enum_, etc.
-    char2enum char2enum_;
-    enum2char enum2char_;
-    str2enum  str2enum_;
-    enum2str  enum2str_;
 };
 
 // -----------------------------------------------------------------------------
@@ -833,18 +754,9 @@ void ParamEnum<ENUM>::parse( const char *str )
             throw_error( "invalid argument at '%s'", str );
         }
         str += len;
-        // Parse word into enum. str2enum_ & char2enum_ throw errors.
+        // Parse word into enum.
         ENUM val{};
-        if constexpr (has_from_string<ENUM>::value) {
-            from_string( buf, &val );
-        }
-        else if (str2enum_) {
-            val = str2enum_( buf );
-        }
-        else {
-            assert( char2enum_ != nullptr );
-            val = char2enum_( buf[0] );
-        }
+        from_string( buf, &val );
         this->push_back( val );
         if (*str == '\0') {
             break;
@@ -862,17 +774,8 @@ template <typename ENUM>
 void ParamEnum<ENUM>::print() const
 {
     if (this->used_ && this->width_ > 0) {
-        if constexpr (has_to_string<ENUM>::value) {
-            printf( "%*s  ", this->width_,
-                    to_string( this->values_[ this->index_ ] ).c_str() );
-        }
-        else if (enum2str_) {
-            printf( "%*s  ", this->width_,
-                    this->enum2str_( this->values_[ this->index_ ] ));
-        }
-        else {
-            throw_error( "no to_string method available" );
-        }
+        printf( "%*s  ", this->width_,
+                to_string( this->values_[ this->index_ ] ).c_str() );
     }
 }
 
@@ -882,19 +785,9 @@ template <typename ENUM>
 void ParamEnum<ENUM>::help() const
 {
     if (this->type_ == ParamType::Value || this->type_ == ParamType::List) {
-        if constexpr (has_to_string<ENUM>::value) {
-            printf( "    %-16s %s; default %s\n",
-                    this->option_.c_str(), this->help_.c_str(),
-                    to_string( this->default_value_ ).c_str() );
-        }
-        else if (enum2str_) {
-            printf( "    %-16s %s; default %s\n",
-                    this->option_.c_str(), this->help_.c_str(),
-                    this->enum2str_( this->default_value_ ));
-        }
-        else {
-            throw_error( "no to_string method available" );
-        }
+        printf( "    %-16s %s; default %s\n",
+                this->option_.c_str(), this->help_.c_str(),
+                to_string( this->default_value_ ).c_str() );
     }
 }
 
