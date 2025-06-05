@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include <vector>
 #include <string>
@@ -17,7 +18,6 @@
 #include <complex>
 #include <type_traits>
 #include <numeric>
-#include <stdint.h>
 
 // Version is updated by make_release.py; DO NOT EDIT.
 // Version 2025.05.28
