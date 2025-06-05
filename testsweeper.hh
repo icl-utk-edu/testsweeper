@@ -17,6 +17,7 @@
 #include <complex>
 #include <type_traits>
 #include <numeric>
+#include <stdint.h>
 
 // Version is updated by make_release.py; DO NOT EDIT.
 // Version 2025.05.28
