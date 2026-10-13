@@ -168,7 +168,7 @@ endif()
 # Avoid annoying icpx warning: 'linker' input unused
 check_cxx_compiler_flag( "-Wno-unused-command-line-argument" warn_unused )
 if (warn_unused)
-    target_compile_options( testsweeper PUBLIC -Wno-unused-command-line-argument )
+    target_compile_options( testsweeper PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>" )
 endif()
 
 if (NOT color)

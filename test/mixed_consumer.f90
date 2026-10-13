@@ -1,0 +1,2 @@
+subroutine mixed_consumer_fortran
+end subroutine mixed_consumer_fortran

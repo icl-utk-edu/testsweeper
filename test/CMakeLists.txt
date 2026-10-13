@@ -31,3 +31,20 @@ if (testsweeper_is_project)
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 endif()
+
+# Check that C++-only compiler options do not reach Fortran consumers.
+# Keep this optional because TestSweeper itself only requires a C++ compiler.
+include( CheckLanguage )
+check_language( Fortran )
+if (CMAKE_Fortran_COMPILER)
+    enable_language( Fortran )
+    add_library(
+        ${testsweeper_}mixed_consumer OBJECT
+        mixed_consumer.cc
+        mixed_consumer.f90
+    )
+    target_link_libraries(
+        ${testsweeper_}mixed_consumer
+        PRIVATE testsweeper
+    )
+endif()
