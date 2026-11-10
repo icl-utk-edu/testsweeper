@@ -354,8 +354,10 @@ void flush_cache( size_t cache_size )
     unsigned char *buf = (unsigned char*) malloc( len );
 
     int nthread = 1;
+    #ifdef _OPENMP
     #pragma omp parallel
     #pragma omp master
+    #endif
     {
         #ifdef _OPENMP
         nthread = omp_get_num_threads();
@@ -364,7 +366,9 @@ void flush_cache( size_t cache_size )
 
     size_t per_core = len / nthread;
 
+    #ifdef _OPENMP
     #pragma omp parallel
+    #endif
     {
         int tid = 0;
         #ifdef _OPENMP
