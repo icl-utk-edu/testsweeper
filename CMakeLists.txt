@@ -53,6 +53,7 @@ option( build_tests "Build test suite" "${testsweeper_is_project}" )
 option( color "Use ANSI color output" true )
 option( use_openmp "Use OpenMP, if available" true )
 option( testsweeper_install "Add install target" "${testsweeper_is_project}" )
+option( test_fortran "Test compiling and linking with Fortran" false )
 
 # Default prefix=/opt/slate
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
@@ -168,7 +169,7 @@ endif()
 # Avoid annoying icpx warning: 'linker' input unused
 check_cxx_compiler_flag( "-Wno-unused-command-line-argument" warn_unused )
 if (warn_unused)
-    target_compile_options( testsweeper PUBLIC -Wno-unused-command-line-argument )
+    target_compile_options( testsweeper PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>" )
 endif()
 
 if (NOT color)
