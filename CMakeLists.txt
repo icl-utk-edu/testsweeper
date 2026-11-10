@@ -53,6 +53,7 @@ option( build_tests "Build test suite" "${testsweeper_is_project}" )
 option( color "Use ANSI color output" true )
 option( use_openmp "Use OpenMP, if available" true )
 option( testsweeper_install "Add install target" "${testsweeper_is_project}" )
+option( test_fortran "Test compiling and linking with Fortran" false )
 
 # Default prefix=/opt/slate
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
