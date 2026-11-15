@@ -209,25 +209,6 @@ int scan_range( const char **strp, double  *start, double  *end, double  *step )
 
 void flush_cache( size_t cache_size );
 
-// -----------------------------------------------------------------------------
-/// For integers x >= 0, y > 0, returns ceil( x/y ).
-/// For x == 0, this is 0.
-/// @ingroup ceildiv
-inline int64_t ceildiv( int64_t x, int64_t y )
-{
-    return (x + y - 1)/y;
-}
-
-/// For integers x >= 0, y > 0, returns x rounded up to multiple of y.
-/// That is, ceil(x/y)*y.
-/// For x == 0, this is 0.
-/// This implementation does not assume y is a power of 2.
-/// @ingroup ceildiv
-inline int64_t roundup( int64_t x, int64_t y )
-{
-    return ceildiv( x, y ) * y;
-}
-
 //------------------------------------------------------------------------------
 /// @return square of a number.
 /// @ingroup sqr
